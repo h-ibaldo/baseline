@@ -43,8 +43,8 @@
 		}
 	];
 
-	// Selection state
-	let selectedElementId: string | null = null;
+	// Selection state - now supports multiple selections
+	let selectedElementIds: string[] = [];
 
 	// Sample elements for testing
 	let elements: CanvasElement[] = [
@@ -104,6 +104,30 @@
 		};
 		artboards = [...artboards, newArtboard];
 	}
+
+	/**
+	 * Handle element selection with multi-select support
+	 */
+	function handleElementSelect(elementId: string, shiftKey: boolean) {
+		if (shiftKey) {
+			// Shift+click: toggle element in selection
+			if (selectedElementIds.includes(elementId)) {
+				selectedElementIds = selectedElementIds.filter(id => id !== elementId);
+			} else {
+				selectedElementIds = [...selectedElementIds, elementId];
+			}
+		} else {
+			// Regular click: select only this element
+			selectedElementIds = [elementId];
+		}
+	}
+
+	/**
+	 * Clear all selections
+	 */
+	function clearSelection() {
+		selectedElementIds = [];
+	}
 </script>
 
 <svelte:head>
@@ -127,17 +151,17 @@
 		</button>
 
 		<div class="selection-info">
-			{#if selectedElementId}
-				<span>Selected: {selectedElementId}</span>
+			{#if selectedElementIds.length > 0}
+				<span>Selected: {selectedElementIds.length} element{selectedElementIds.length > 1 ? 's' : ''}</span>
 			{:else}
-				<span>No selection</span>
+				<span>No selection (Shift+click for multi-select)</span>
 			{/if}
 		</div>
 	</div>
 
 	<div 
 		class="canvas-wrapper"
-		on:mousedown={() => selectedElementId = null}
+		on:mousedown={clearSelection}
 		role="button"
 		tabindex="0"
 	>
@@ -148,8 +172,8 @@
 					{#each elements.filter(el => el.artboardId === artboard.id) as element (element.id)}
 						<Element 
 							{element} 
-							isSelected={selectedElementId === element.id}
-							onSelect={() => selectedElementId = element.id}
+							isSelected={selectedElementIds.includes(element.id)}
+							onSelect={(shiftKey) => handleElementSelect(element.id, shiftKey)}
 							onUpdate={() => elements = elements}
 						/>
 					{/each}

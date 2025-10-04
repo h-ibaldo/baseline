@@ -9,7 +9,7 @@
 	export let element: CanvasElement;
 	export let onUpdate: ((element: CanvasElement) => void) | undefined = undefined;
 	export let isSelected = false;
-	export let onSelect: (() => void) | undefined = undefined;
+	export let onSelect: ((shiftKey: boolean) => void) | undefined = undefined;
 
 	let isDragging = false;
 	let isResizing = false;
@@ -25,9 +25,9 @@
 	 * Start dragging - capture initial positions
 	 */
 	function handleMouseDown(e: MouseEvent) {
-		// Select element on click
+		// Select element on click (pass shift key for multi-select)
 		if (onSelect) {
-			onSelect();
+			onSelect(e.shiftKey);
 		}
 
 		isDragging = true;

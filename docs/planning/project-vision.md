@@ -47,8 +47,8 @@ Baseline is an open-source project with the ambitious goal of revolutionizing th
 - 100% free and open-source
 - Potential paid hosted options in the future
 
-### AI-Powered Development
-- **Highly vibe-coded project** that embraces AI contributions
+### Future AI-Powered Development
+- **Highly vibe-coded project** that will embrace AI contributions
 - AI-assisted code generation and optimization
 - Human-AI collaborative development workflows
 - AI tools for documentation, testing, and code review
@@ -85,3 +85,5 @@ Baseline aims to become the standard for web design and development, creating a 
 - Developers can design beautiful interfaces without specialized design tools
 - The gap between design and development is eliminated
 - Web creation becomes more accessible and efficient for everyone
+- AI and human collaboration creates unprecedented development efficiency
+- Open-source community drives innovation and accessibility

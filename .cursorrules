@@ -1,0 +1,212 @@
+# Baseline Project - Cursor AI Guidelines
+
+## Project Identity
+
+Baseline is a **highly vibe-coded, AI-friendly project** that embraces AI contributions while maintaining human authorship and accountability.
+
+## Core Principles
+
+1. **Human Authorship Required**: All commits must be authored by humans, even if AI-generated
+2. **AI Contributions Welcome**: Use AI for code generation, documentation, and problem-solving
+3. **Transparency**: Document AI assistance in commit messages
+4. **Quality First**: Human review and refinement of all AI-generated code
+
+## Project Status
+
+**NOT accepting external contributions** - Early development phase. Focus on core foundation.
+
+## Technology Stack
+
+- **Framework**: SvelteKit
+- **Language**: TypeScript (strict mode)
+- **Styling**: CSS with CSS Variables
+- **Build Tool**: Vite
+- **Package Manager**: npm
+
+## Code Style Guidelines
+
+### TypeScript
+- Use TypeScript for ALL new code
+- Define proper types for all functions and variables
+- Avoid `any` type - use `unknown` or proper types
+- Use interfaces for object shapes, types for unions/intersections
+
+### Svelte Components
+- Component names: PascalCase (`MyComponent`)
+- File names: kebab-case (`my-component.svelte`)
+- Props: Use TypeScript interfaces
+- Reactive statements: Use `$:` for derived values
+
+### Naming Conventions
+- **Files**: kebab-case (`user-service.ts`)
+- **Components**: PascalCase (`UserProfile.svelte`)
+- **Functions**: camelCase (`getUserData`)
+- **Variables**: camelCase (`userData`)
+- **Constants**: UPPER_SNAKE_CASE (`API_BASE_URL`)
+- **Types/Interfaces**: PascalCase (`UserData`, `ApiResponse`)
+
+### File Organization
+```
+src/
+├── routes/           # SvelteKit routes (pages)
+├── lib/
+│   ├── components/   # Reusable UI components
+│   ├── stores/       # Svelte stores (state management)
+│   ├── utils/        # Utility functions
+│   ├── types/        # TypeScript type definitions
+│   └── index.ts      # Public API exports
+```
+
+## Commit Message Format
+
+```
+type(scope): description
+
+[optional body with AI assistance details]
+
+[optional footer]
+```
+
+### Commit Types
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, no logic change)
+- `refactor`: Code refactoring (no feature change)
+- `test`: Test additions or changes
+- `chore`: Build process or tooling changes
+- `ai`: AI-assisted changes (document AI tool used)
+
+### AI Contribution Commit Examples
+```
+ai(components): generate button component with Claude
+
+- AI generated base component structure
+- Human added TypeScript types and accessibility
+- Human optimized for performance
+- Tested across multiple browsers
+```
+
+```
+feat(api): implement user authentication (AI-assisted)
+
+AI generated initial implementation, human refined:
+- Added proper error handling and validation
+- Implemented security best practices
+- Added comprehensive test coverage
+```
+
+## AI Contribution Workflow
+
+1. **AI Generation**: Use AI to generate initial code/documentation
+2. **Human Review**: Review, understand, and test AI output
+3. **Human Refinement**: Optimize, add types, improve logic
+4. **Human Commit**: Commit with human authorship, document AI assistance
+5. **Documentation**: Update relevant docs
+
+## Code Quality Standards
+
+### Always Include
+- TypeScript types for all functions and variables
+- Error handling (try-catch, error boundaries)
+- Input validation for user-facing functions
+- JSDoc comments for public APIs
+- Unit tests for utilities and business logic
+
+### Performance Considerations
+- Lazy load components when possible
+- Optimize images and assets
+- Use Svelte's reactivity efficiently
+- Avoid unnecessary re-renders
+
+### Accessibility
+- Semantic HTML elements
+- ARIA labels where needed
+- Keyboard navigation support
+- Color contrast compliance
+
+## Project-Specific Guidelines
+
+### Design Philosophy
+- **Baseline alignment**: Text should align to baseline grid (like InDesign) (Optional)
+- **Designer-first**: Prioritize designer experience
+- **Code output**: Design directly generates production code
+- **Component-based**: Everything is a reusable component
+
+### Development Priorities
+1. Core design canvas functionality
+2. Component library foundation
+3. Code generation system
+4. Theme and styling system
+5. Plugin architecture (future)
+
+### What NOT to Do
+- Don't accept external contributions (yet)
+- Don't commit without human review
+- Don't use `any` type in TypeScript
+- Don't create components without TypeScript types
+- Don't skip error handling
+- Don't commit untested code
+
+## Testing Guidelines
+
+- Write tests for all utility functions
+- Test component behavior and edge cases
+- Use descriptive test names: `it('should validate email format correctly')`
+- Mock external dependencies
+- Aim for high coverage on critical paths
+
+## Documentation Standards
+
+- Update README when adding major features
+- Document all public APIs with JSDoc
+- Keep docs/ folder updated with planning and architecture
+- Explain complex logic with inline comments
+- Document AI assistance in commit messages
+
+## AI Tool Usage
+
+### Recommended for
+- Initial code structure generation
+- Boilerplate and repetitive code
+- Documentation writing
+- Test case generation
+- Code optimization suggestions
+
+### Human Oversight Required for
+- Architecture decisions
+- Security implementations
+- Performance-critical code
+- User-facing features
+- API design
+
+## Project Vision Alignment
+
+Every contribution should align with:
+- Replacing WordPress, Figma (for web), and Webflow
+- Designer-focused experience
+- Code ownership and customization
+- Open-source and free
+- Professional design tools with code output
+- Baseline grid alignment for typography
+
+## When in Doubt
+
+1. Prioritize code quality over speed
+2. Ask for clarification rather than assume
+3. Document AI assistance transparently
+4. Follow existing patterns in the codebase
+5. Keep it simple and maintainable
+
+## Current Focus Areas
+
+- [ ] Core project foundation
+- [ ] Basic design tool functionality
+- [ ] Initial component library
+- [ ] Development environment setup
+- [ ] Testing framework
+- [ ] Documentation structure
+
+---
+
+Remember: This is a highly vibe-coded project. Embrace AI assistance, but maintain human accountability and quality standards.

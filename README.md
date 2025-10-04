@@ -16,7 +16,7 @@ An open source project with huge ambition and expectations. The goal of this pro
 
 You own the code and your platform. Developers or curious designers can change anything. Incentive to build plugins (must have plugin system), themes and libraries.
 
-100% free and open-source. Don't accept contributions in the beginning. Might offer paid hosted options in the future.
+100% free and open-source. **Currently in early development - not accepting contributions yet.** Will open contributions once the core foundation is established. Might offer paid hosted options in the future.
 
 ## Development
 
@@ -40,3 +40,17 @@ npm run build
 - `src/routes/` - Application pages and routes
 - `src/lib/` - Reusable components and utilities
 - `static/` - Static assets
+- `docs/` - Project documentation and planning
+
+### Current Status
+
+**⚠️ Early Development Phase**
+
+Baseline is currently in early development and is **NOT accepting external contributions** at this time. We're focusing on:
+
+- Core project foundation
+- Basic design tool functionality
+- Initial component library
+- Development environment setup
+
+Contributions will open once we have a stable foundation. Watch the repository for updates!

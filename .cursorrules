@@ -200,12 +200,22 @@ Every contribution should align with:
 
 ## Current Focus Areas
 
-- [ ] Core project foundation
-- [ ] Basic design tool functionality
-- [ ] Initial component library
-- [ ] Development environment setup
-- [ ] Testing framework
-- [ ] Documentation structure
+### Phase 1 Priorities (Months 1-3)
+- [ ] DOM-based canvas component
+- [ ] Baseline grid system implementation
+- [ ] Event sourcing for state management
+- [ ] AST-based code generation
+- [ ] IndexedDB persistence layer
+- [ ] Core component library (baseline-aware)
+- [ ] Undo/redo functionality
+- [ ] Testing framework (Vitest)
+
+### Immediate Next Steps
+1. Set up Vitest testing framework
+2. Create DOM-based canvas component
+3. Implement baseline grid calculation engine
+4. Build event sourcing structure
+5. Create IndexedDB wrapper utilities
 
 ---
 

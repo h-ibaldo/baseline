@@ -6,207 +6,289 @@
 - [x] Project setup with SvelteKit and TypeScript
 - [x] Git repository and GitHub integration
 - [x] Basic project structure and documentation
-- [ ] Development environment setup
+- [x] Architecture documentation
+- [x] Cursor AI guidelines (.cursorrules)
+- [ ] Testing framework setup (Vitest)
 - [ ] CI/CD pipeline configuration
-- [ ] Testing framework setup
 
-### Basic Design Tool
-- [ ] Canvas component with basic drawing capabilities
-- [ ] Component library foundation
-- [ ] Basic drag-and-drop functionality
-- [ ] Simple text and shape tools
-- [ ] Local storage for design persistence
+### DOM-Based Canvas
+- [ ] Canvas component using actual DOM elements (not Canvas API)
+- [ ] Direct manipulation of HTML/CSS elements
+- [ ] Real-time editing of live components
+- [ ] Component selection and highlighting
+- [ ] Basic drag-and-drop with CSS positioning
 
-### Code Generation
-- [ ] Basic HTML/CSS code generation
-- [ ] Component-to-code conversion
-- [ ] Code preview functionality
-- [ ] Export capabilities
+### Baseline Grid System
+- [ ] Baseline grid calculation engine
+- [ ] User-defined baseline height configuration
+- [ ] Visual grid overlay (toggleable, customizable color/opacity)
+- [ ] Global snap-to-baseline toggle
+- [ ] Per-component baseline override
+- [ ] Fractional spacing system (heights, paddings, margins)
+- [ ] Snap indicators during drag operations
+- [ ] Baseline alignment validation
+
+### State Management (Event Sourcing)
+- [ ] Event sourcing architecture implementation
+- [ ] Design event types (add, update, delete, move)
+- [ ] Event store with Svelte stores
+- [ ] Undo/redo functionality via event history
+- [ ] IndexedDB persistence layer
+- [ ] Event replay for state reconstruction
+
+### Component Library Foundation
+- [ ] Basic component structure
+- [ ] Typography components (baseline-aware)
+- [ ] Layout components (container, grid, flex)
+- [ ] Form components (input, button, select)
+- [ ] Component property system
+- [ ] TypeScript interfaces for all components
+
+### AST-Based Code Generation
+- [ ] AST parser for design tree
+- [ ] HTML generation from AST
+- [ ] CSS generation with optimization
+- [ ] TypeScript type generation
+- [ ] Web Worker for code generation
+- [ ] Multiple output formats (HTML/CSS, Svelte)
+- [ ] Code preview panel
+- [ ] Export functionality
 
 ## Phase 2: Core Features (Months 4-6)
 
 ### Advanced Design Tools
-- [ ] Advanced component library
-- [ ] Typography system with baseline alignment
+- [ ] Advanced component library (50+ components)
+- [ ] Typography system with advanced baseline features
 - [ ] Color palette and theme management
-- [ ] Grid and layout system
-- [ ] Responsive design tools
+- [ ] Responsive design tools (breakpoints)
+- [ ] Layout constraints and auto-layout
+- [ ] Component variants and states
 
 ### User Experience
-- [ ] Intuitive user interface
-- [ ] Keyboard shortcuts
-- [ ] Undo/redo functionality
+- [ ] Intuitive user interface design
+- [ ] Keyboard shortcuts system
+- [ ] Context menus and toolbars
 - [ ] Design templates and presets
-- [ ] Import/export functionality
+- [ ] Import/export (JSON, HTML, Figma)
+- [ ] Search and command palette
 
 ### Code Quality
-- [ ] Advanced code generation
-- [ ] Code optimization
-- [ ] Multiple output formats (HTML, CSS, JS)
-- [ ] Code validation and linting
-- [ ] Performance optimization
+- [ ] Advanced AST optimization
+- [ ] Multiple framework outputs (React, Vue, Svelte)
+- [ ] Code style customization
+- [ ] Semantic HTML generation
+- [ ] CSS optimization (deduplication, minification)
+- [ ] Accessibility attributes generation
 
-## Phase 3: Collaboration (Months 7-9)
+### Performance Optimization
+- [ ] Performance monitoring system
+- [ ] Render time tracking
+- [ ] Memory usage optimization
+- [ ] Code splitting for large designs
 
-### User Management
-- [ ] User authentication system
-- [ ] User profiles and preferences
-- [ ] Project sharing capabilities
-- [ ] Version control for designs
-- [ ] Comment and feedback system
-
-### Cloud Integration
-- [ ] Cloud storage for projects
-- [ ] Real-time collaboration
-- [ ] Project templates marketplace
-- [ ] Design asset library
-- [ ] Backup and sync functionality
+## Phase 3: Polish & Refinement (Months 7-9)
 
 ### Advanced Features
-- [ ] Animation system
-- [ ] Advanced layout tools
+- [ ] Animation system (CSS animations, transitions)
+- [ ] Advanced layout tools (absolute positioning, z-index)
 - [ ] Custom component creation
 - [ ] Design system management
-- [ ] Accessibility tools
+- [ ] Accessibility tools and validation
+- [ ] Component documentation generation
 
-## Phase 4: Ecosystem (Months 10-12)
+### Developer Experience
+- [ ] API documentation
+- [ ] Developer SDK (if needed)
+- [ ] Plugin architecture (trusted plugins only)
+- [ ] Custom export templates
+- [ ] Batch operations
 
-### Plugin System
-- [ ] Plugin architecture
-- [ ] Plugin marketplace
+### Local-First Enhancements
+- [ ] Advanced IndexedDB features
+- [ ] Design versioning (local)
+- [ ] Project templates
+- [ ] Asset library (local)
+- [ ] Backup and restore
+
+## Phase 4: Optional Cloud Sync (Months 10-12)
+
+**Note**: Cloud features are optional. Baseline works fully offline.
+
+### Cloud Sync (Optional)
+- [ ] Event-based sync protocol
+- [ ] CRDT implementation for conflict resolution
+- [ ] Optional user authentication
+- [ ] Cloud storage integration
+- [ ] Multi-device sync
+
+### Collaboration (Optional)
+- [ ] Real-time collaboration (if using cloud)
+- [ ] Project sharing
+- [ ] Comment and feedback system
+- [ ] Version history (cloud-based)
+
+### Plugin Ecosystem
+- [ ] Plugin marketplace (if contributions open)
+- [ ] Plugin sandboxing (Web Workers/iframes)
 - [ ] Third-party integrations
-- [ ] Custom component marketplace
 - [ ] Theme marketplace
 
-### Developer Tools
-- [ ] API documentation
-- [ ] Developer SDK
-- [ ] Custom integrations
-- [ ] Webhook system
-- [ ] Advanced export options
+## Phase 5: Scale & Ecosystem (Months 13-18)
 
-### Community Features
+### Performance at Scale
+- [ ] Virtual canvas (100+ components)
+- [ ] Layer culling
+- [ ] Incremental rendering
+- [ ] Web Workers for heavy operations
+- [ ] Performance optimization based on metrics
+
+### Advanced Features
+- [ ] Mobile app (PWA)
+- [ ] Desktop application (Tauri/Electron)
+- [ ] Browser extensions
+- [ ] Advanced export options
+- [ ] Integration APIs
+
+### Community (When Contributions Open)
+- [ ] Open external contributions
 - [ ] Community forum
 - [ ] Tutorial system
 - [ ] Design showcase
-- [ ] Contributor guidelines
-- [ ] Open source governance
-
-## Phase 5: Scale (Months 13-18)
-
-### Enterprise Features
-- [ ] Team management
-- [ ] Advanced permissions
-- [ ] Enterprise integrations
-- [ ] Custom branding
-- [ ] Advanced analytics
-
-### Performance & Reliability
-- [ ] Performance optimization
-- [ ] Scalability improvements
-- [ ] Monitoring and analytics
-- [ ] Error tracking and reporting
-- [ ] Backup and disaster recovery
-
-### Market Expansion
-- [ ] Mobile app development
-- [ ] Desktop application
-- [ ] Browser extensions
-- [ ] Third-party integrations
-- [ ] Partnership programs
+- [ ] Contributor guidelines refinement
 
 ## Long-term Vision (Years 2-5)
 
 ### Technology Evolution
 - [ ] AI-powered design assistance
-- [ ] Voice and gesture controls
-- [ ] AR/VR design capabilities
+- [ ] Natural language to design
 - [ ] Advanced automation
-- [ ] Machine learning integration
+- [ ] Machine learning for optimization
+- [ ] WebAssembly for performance
 
 ### Market Leadership
 - [ ] Industry partnerships
 - [ ] Educational programs
-- [ ] Certification system
-- [ ] Conference and events
+- [ ] Design community building
+- [ ] Conference presence
 - [ ] Thought leadership
 
 ### Global Impact
-- [ ] Internationalization
-- [ ] Accessibility improvements
-- [ ] Open source contributions
-- [ ] Community building
+- [ ] Internationalization (i18n)
+- [ ] Advanced accessibility features
+- [ ] Open source ecosystem growth
 - [ ] Social impact initiatives
 
 ## Success Metrics
 
 ### Phase 1-2 (Months 1-6)
-- 1,000+ active users
+- Working MVP with core features
 - 100+ GitHub stars
-- 50+ contributors
 - Basic design tool functionality
+- Positive user feedback from early adopters
 
 ### Phase 3-4 (Months 7-12)
-- 10,000+ active users
+- 1,000+ active users
 - 1,000+ GitHub stars
-- 200+ contributors
-- Full collaboration features
+- Full local-first functionality
+- Optional cloud sync working
 
 ### Phase 5+ (Months 13+)
-- 100,000+ active users
-- 10,000+ GitHub stars
-- 1,000+ contributors
-- Market leadership position
+- 10,000+ active users
+- 5,000+ GitHub stars
+- Open to external contributions
+- Market recognition
 
-## Risk Mitigation
+## Current Status
 
-### Technical Risks
-- **Performance Issues**: Regular performance testing and optimization
-- **Scalability Challenges**: Cloud-native architecture and microservices
-- **Security Vulnerabilities**: Regular security audits and updates
+### Completed ✅
+- [x] Project initialization
+- [x] SvelteKit + TypeScript setup
+- [x] Git repository and GitHub
+- [x] Documentation structure
+- [x] Architecture documentation
+- [x] Cursor AI guidelines
+- [x] Contributing guidelines
+- [x] Project vision document
 
-### Market Risks
-- **Competition**: Focus on unique value proposition and community
-- **Technology Changes**: Agile development and technology adoption
-- **User Adoption**: User feedback integration and iterative improvement
+### In Progress 🚧
+- [ ] Development environment setup
+- [ ] Testing framework
+- [ ] Core canvas implementation
 
-### Resource Risks
-- **Funding**: Open source model and community support
-- **Talent**: Competitive compensation and remote work options
-- **Timeline**: Realistic planning and milestone tracking
+### Next Immediate Steps (Week 1-2)
 
-## Dependencies
+1. **Development Environment**
+   - Set up Vitest for testing
+   - Configure ESLint and Prettier
+   - Set up development workflow
 
-### External Dependencies
-- SvelteKit framework stability
-- Browser compatibility
-- Third-party service availability
-- Community contributions
+2. **Core Canvas Component**
+   - Create basic DOM-based canvas
+   - Implement element selection
+   - Basic drag-and-drop
 
-### Internal Dependencies
-- Team growth and expertise
-- Infrastructure scaling
-- Documentation quality
-- Testing coverage
+3. **Baseline Grid Foundation**
+   - Implement baseline calculation utilities
+   - Create visual grid overlay
+   - Basic snap-to-baseline functionality
 
-## Next Steps
+4. **State Management**
+   - Set up event sourcing structure
+   - Implement basic event types
+   - IndexedDB wrapper
 
-1. **Immediate (Week 1-2)**
-   - Set up development environment
-   - Create basic canvas component
-   - Implement simple drawing tools
+## Dependencies & Risks
 
-2. **Short-term (Month 1)**
-   - Complete Phase 1 foundation
-   - Basic design tool functionality
-   - Initial user testing
+### Technical Dependencies
+- SvelteKit stability (mature)
+- Browser IndexedDB support (excellent)
+- Web Workers support (excellent)
+- Modern browser features (CSS Grid, Flexbox)
 
-3. **Medium-term (Months 2-3)**
-   - Advanced design features
-   - Code generation improvements
-   - User feedback integration
+### Risks & Mitigation
 
-4. **Long-term (Months 4-6)**
-   - Collaboration features
-   - Cloud integration
-   - Community building
+**Performance Risks**
+- Risk: Large designs may be slow
+- Mitigation: Architected for virtual canvas, performance monitoring
+
+**Complexity Risks**
+- Risk: Event sourcing adds complexity
+- Mitigation: Start simple, iterate based on needs
+
+**Adoption Risks**
+- Risk: Users prefer familiar tools
+- Mitigation: Focus on unique value (baseline grid, code ownership)
+
+**Technical Risks**
+- Risk: DOM-based approach may have limitations
+- Mitigation: Prototype early, validate approach
+
+## Milestone Tracking
+
+### Month 1
+- [ ] Development environment complete
+- [ ] Basic canvas working
+- [ ] Element selection working
+- [ ] Basic baseline grid visible
+
+### Month 2
+- [ ] Drag-and-drop working
+- [ ] Event sourcing implemented
+- [ ] Undo/redo working
+- [ ] IndexedDB persistence
+
+### Month 3
+- [ ] Basic components library
+- [ ] Code generation working
+- [ ] Export functionality
+- [ ] MVP feature-complete
+
+### Month 4-6
+- [ ] Advanced components
+- [ ] Multiple output formats
+- [ ] Responsive design tools
+- [ ] Polish and refinement
+
+---
+
+**Note**: This roadmap is flexible and will be adjusted based on user feedback, technical discoveries, and market conditions. The focus is on building a solid foundation before adding advanced features.

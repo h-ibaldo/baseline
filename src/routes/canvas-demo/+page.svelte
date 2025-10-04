@@ -43,6 +43,9 @@
 		}
 	];
 
+	// Selection state
+	let selectedElementId: string | null = null;
+
 	// Sample elements for testing
 	let elements: CanvasElement[] = [
 		{
@@ -122,9 +125,22 @@
 		<button on:click={addArtboard}>
 			+ Add Artboard ({artboards.length}/{canvasConfig.maxArtboards})
 		</button>
+
+		<div class="selection-info">
+			{#if selectedElementId}
+				<span>Selected: {selectedElementId}</span>
+			{:else}
+				<span>No selection</span>
+			{/if}
+		</div>
 	</div>
 
-	<div class="canvas-wrapper">
+	<div 
+		class="canvas-wrapper"
+		on:mousedown={() => selectedElementId = null}
+		role="button"
+		tabindex="0"
+	>
 		<Canvas config={canvasConfig}>
 			{#each artboards as artboard (artboard.id)}
 				<Artboard {artboard}>
@@ -132,6 +148,8 @@
 					{#each elements.filter(el => el.artboardId === artboard.id) as element (element.id)}
 						<Element 
 							{element} 
+							isSelected={selectedElementId === element.id}
+							onSelect={() => selectedElementId = element.id}
 							onUpdate={() => elements = elements}
 						/>
 					{/each}
@@ -196,5 +214,14 @@
 
 	button:hover {
 		background: #0056b3;
+	}
+
+	.selection-info {
+		padding: 0.5rem 1rem;
+		background: #fff;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		font-size: 0.85rem;
+		color: #666;
 	}
 </style>

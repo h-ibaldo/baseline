@@ -8,6 +8,8 @@
 
 	export let element: CanvasElement;
 	export let onUpdate: ((element: CanvasElement) => void) | undefined = undefined;
+	export let isSelected = false;
+	export let onSelect: (() => void) | undefined = undefined;
 
 	let isDragging = false;
 	let dragStartX = 0;
@@ -19,6 +21,11 @@
 	 * Start dragging - capture initial positions
 	 */
 	function handleMouseDown(e: MouseEvent) {
+		// Select element on click
+		if (onSelect) {
+			onSelect();
+		}
+
 		isDragging = true;
 		dragStartX = e.clientX;
 		dragStartY = e.clientY;
@@ -27,6 +34,8 @@
 		
 		// Prevent text selection while dragging
 		e.preventDefault();
+		// Stop event from reaching canvas (prevent deselection)
+		e.stopPropagation();
 	}
 
 	/**
@@ -68,6 +77,7 @@
 	class="element"
 	class:box={element.type === 'box'}
 	class:dragging={isDragging}
+	class:selected={isSelected}
 	style="
 		left: {element.x}px;
 		top: {element.y}px;
@@ -122,6 +132,19 @@
 
 	.element.box:hover .box-content {
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Selection border */
+	.element.selected::before {
+		content: '';
+		position: absolute;
+		top: -4px;
+		left: -4px;
+		right: -4px;
+		bottom: -4px;
+		border: 2px solid #007bff;
+		border-radius: 6px;
+		pointer-events: none;
 	}
 
 	/* Coordinate display while dragging */

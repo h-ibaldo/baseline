@@ -154,6 +154,13 @@ AI generated initial implementation, human refined:
   - **Claude 3.5 Sonnet with Extended Thinking** - For complex problem-solving
 - Current version: Claude 3.5 Sonnet (October 2024)
 
+### Documentation Updates
+- **When a roadmap ITEM (group of tasks) is completed**, update documentation:
+  - Mark item as complete in `docs/planning/roadmap.md`
+  - Update `docs/planning/architecture.md` if architecture changed
+  - Update `README.md` with new capabilities
+- **Do NOT update docs for individual sub-tasks**, only for major roadmap items
+
 ## Development Priorities
 1. Core design canvas functionality
 2. Component library foundation

@@ -46,9 +46,13 @@ npm run build
 
 **⚠️ Early Development Phase**
 
-Baseline is currently in early development and is **NOT accepting external contributions** at this time. We're focusing on:
+Baseline is currently in early development and is **NOT accepting external contributions** at this time.
 
-- DOM-based canvas with actual web elements
+**✅ Completed:**
+- ✅ **DOM-based Canvas** - Infinite canvas with multiple artboards, drag-and-drop, selection, resize handles, multi-select
+- ✅ **Testing Framework** - Vitest setup with test utilities
+
+**🚧 In Progress:**
 - Baseline grid system implementation
 - Event sourcing for state management
 - AST-based code generation

@@ -8,15 +8,27 @@
 - [x] Basic project structure and documentation
 - [x] Architecture documentation
 - [x] Cursor AI guidelines (.cursorrules)
-- [ ] Testing framework setup (Vitest)
+- [x] Testing framework setup (Vitest)
 - [ ] CI/CD pipeline configuration
 
-### DOM-Based Canvas
-- [ ] Canvas component using actual DOM elements (not Canvas API)
-- [ ] Direct manipulation of HTML/CSS elements
-- [ ] Real-time editing of live components
-- [ ] Component selection and highlighting
-- [ ] Basic drag-and-drop with CSS positioning
+### DOM-Based Canvas ✅ **COMPLETED**
+- [x] Infinite canvas with multiple artboards (Figma/Illustrator style)
+- [x] Artboard component with per-artboard grid settings
+- [x] Element component (box) using actual DOM elements
+- [x] Drag-and-drop functionality with live coordinates
+- [x] Selection state with visual feedback
+- [x] Resize handles (4 corners with live dimensions)
+- [x] Multi-select capability (Shift+click)
+- [x] Real-time editing of live components
+- [x] Performance monitoring (10 artboard limit with warning)
+
+**Future Enhancements:**
+- [ ] Click-and-drag selection box (marquee select)
+- [ ] Group drag/resize for multiple selected elements
+- [ ] Move elements between artboards
+- [ ] Keyboard shortcuts (Delete, Arrow keys, etc.)
+- [ ] Copy/paste functionality
+- [ ] Alignment guides and snapping
 
 ### Baseline Grid System
 - [ ] Baseline grid calculation engine

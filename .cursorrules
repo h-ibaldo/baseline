@@ -133,7 +133,22 @@ AI generated initial implementation, human refined:
 - **Code output**: Design directly generates production code
 - **Component-based**: Everything is a reusable component
 
-### Development Priorities
+### Development Workflow
+
+### Branch Strategy
+- **Each roadmap task gets its own branch**
+- Branch naming: `feat/task-name` or `fix/task-name`
+- Example: `feat/setup-vitest`, `feat/dom-canvas-component`
+- Merge to main only when task is complete and tested
+- Keep branches focused on single roadmap items
+
+### Task Planning
+- Before starting each task, AI should suggest:
+  - **Claude 3.5 Sonnet (Standard)** - For straightforward implementation
+  - **Claude 3.5 Sonnet with Extended Thinking** - For complex problem-solving
+- Current version: Claude 3.5 Sonnet (October 2024)
+
+## Development Priorities
 1. Core design canvas functionality
 2. Component library foundation
 3. Code generation system

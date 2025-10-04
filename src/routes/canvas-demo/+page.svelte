@@ -5,7 +5,8 @@
 	 */
 	import Canvas from '$lib/components/canvas/Canvas.svelte';
 	import Artboard from '$lib/components/canvas/Artboard.svelte';
-	import type { CanvasConfig, Artboard as ArtboardType } from '$lib/types/canvas';
+	import Element from '$lib/components/canvas/Element.svelte';
+	import type { CanvasConfig, Artboard as ArtboardType, CanvasElement } from '$lib/types/canvas';
 
 	// Canvas configuration
 	let canvasConfig: CanvasConfig = {
@@ -39,6 +40,43 @@
 			showGrid: true,
 			gridSize: 10,
 			isPublishTarget: false
+		}
+	];
+
+	// Sample elements for testing
+	let elements: CanvasElement[] = [
+		{
+			id: 'element-1',
+			type: 'box',
+			artboardId: 'artboard-1',
+			x: 100,
+			y: 100,
+			width: 200,
+			height: 150,
+			opacity: 1,
+			rotation: 0
+		},
+		{
+			id: 'element-2',
+			type: 'box',
+			artboardId: 'artboard-1',
+			x: 400,
+			y: 200,
+			width: 150,
+			height: 150,
+			opacity: 0.8,
+			rotation: 15
+		},
+		{
+			id: 'element-3',
+			type: 'box',
+			artboardId: 'artboard-2',
+			x: 50,
+			y: 100,
+			width: 120,
+			height: 100,
+			opacity: 1,
+			rotation: 0
 		}
 	];
 
@@ -89,7 +127,12 @@
 	<div class="canvas-wrapper">
 		<Canvas config={canvasConfig}>
 			{#each artboards as artboard (artboard.id)}
-				<Artboard {artboard} />
+				<Artboard {artboard}>
+					<!-- Render elements that belong to this artboard -->
+					{#each elements.filter(el => el.artboardId === artboard.id) as element (element.id)}
+						<Element {element} />
+					{/each}
+				</Artboard>
 			{/each}
 		</Canvas>
 	</div>

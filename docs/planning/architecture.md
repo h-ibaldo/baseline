@@ -78,14 +78,27 @@ baseline/
 ### 1. Design Canvas
 - **Purpose**: Main design interface where you design with actual web code
 - **Technology**: DOM-based approach using Svelte components (not Canvas API)
-- **Architecture**: Real HTML/CSS elements that are directly editable
+- **Architecture**: Infinite canvas with multiple artboards (Figma/Illustrator style)
 - **Rationale**: What you see IS the code - eliminates design-to-code abstraction
-- **Features**: 
-  - Direct manipulation of actual DOM elements
-  - Real-time preview (it's already real HTML/CSS)
-  - Component library integration
-  - Drag-and-drop with actual CSS positioning
-  - Live code output (no conversion needed)
+
+#### Canvas Hierarchy
+```
+Canvas (Infinite Viewport)
+  ├─ Artboard 1 (e.g., Desktop 1920×1080)
+  │   └─ Elements (boxes, text, images)
+  ├─ Artboard 2 (e.g., Mobile 375×812)
+  │   └─ Elements
+  └─ Loose Elements (outside artboards)
+```
+
+#### Features
+- **Infinite Canvas**: Pan and zoom around unlimited workspace
+- **Multiple Artboards**: Up to 10 artboards per canvas (performance monitored)
+- **Flexible Layout**: Elements can exist inside or outside artboards
+- **Per-Artboard Grid**: Each artboard has independent grid settings
+- **Direct Manipulation**: Real HTML/CSS elements, not rendered graphics
+- **Multi-Export**: Export selected artboards individually or in batch
+- **Real-time Preview**: It's already real HTML/CSS, no conversion needed
 
 ### 2. Component Library
 - **Purpose**: Reusable UI components

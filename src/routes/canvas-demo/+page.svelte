@@ -130,7 +130,10 @@
 				<Artboard {artboard}>
 					<!-- Render elements that belong to this artboard -->
 					{#each elements.filter(el => el.artboardId === artboard.id) as element (element.id)}
-						<Element {element} />
+						<Element 
+							{element} 
+							onUpdate={() => elements = elements}
+						/>
 					{/each}
 				</Artboard>
 			{/each}

@@ -25,6 +25,12 @@ Baseline is a **highly vibe-coded, AI-friendly project** that embraces AI contri
 
 ## Code Style Guidelines
 
+### Code Philosophy
+- **Minimal Code**: Write the shortest, most concise code possible
+- **Well Documented**: Every function, component, and complex logic must have clear comments
+- **Testable**: User should be able to test and give feedback on frontend immediately
+- **Incremental**: Break large tasks into small, reviewable chunks
+
 ### TypeScript
 - Use TypeScript for ALL new code
 - Define proper types for all functions and variables

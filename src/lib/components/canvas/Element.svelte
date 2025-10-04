@@ -12,10 +12,14 @@
 	export let onSelect: (() => void) | undefined = undefined;
 
 	let isDragging = false;
+	let isResizing = false;
+	let resizeHandle: string | null = null; // 'nw', 'ne', 'sw', 'se'
 	let dragStartX = 0;
 	let dragStartY = 0;
 	let elementStartX = 0;
 	let elementStartY = 0;
+	let elementStartWidth = 0;
+	let elementStartHeight = 0;
 
 	/**
 	 * Start dragging - capture initial positions
@@ -39,30 +43,91 @@
 	}
 
 	/**
-	 * Handle mouse move - update element position
+	 * Start resizing from a handle
+	 */
+	function handleResizeMouseDown(e: MouseEvent, handle: string) {
+		isResizing = true;
+		resizeHandle = handle;
+		dragStartX = e.clientX;
+		dragStartY = e.clientY;
+		elementStartX = element.x;
+		elementStartY = element.y;
+		elementStartWidth = element.width;
+		elementStartHeight = element.height;
+		
+		e.preventDefault();
+		e.stopPropagation();
+	}
+
+	/**
+	 * Handle mouse move - update element position or size
 	 */
 	function handleMouseMove(e: MouseEvent) {
-		if (!isDragging) return;
+		if (isResizing) {
+			handleResize(e);
+		} else if (isDragging) {
+			handleDrag(e);
+		}
+	}
 
-		// Calculate delta from drag start
+	/**
+	 * Handle dragging
+	 */
+	function handleDrag(e: MouseEvent) {
 		const deltaX = e.clientX - dragStartX;
 		const deltaY = e.clientY - dragStartY;
 
-		// Update element position
 		element.x = elementStartX + deltaX;
 		element.y = elementStartY + deltaY;
 
-		// Notify parent of update
 		if (onUpdate) {
 			onUpdate(element);
 		}
 	}
 
 	/**
-	 * Stop dragging
+	 * Handle resizing from corner handles
+	 */
+	function handleResize(e: MouseEvent) {
+		const deltaX = e.clientX - dragStartX;
+		const deltaY = e.clientY - dragStartY;
+
+		// Apply resize based on which handle is being dragged
+		switch (resizeHandle) {
+			case 'se': // Southeast (bottom-right)
+				element.width = Math.max(50, elementStartWidth + deltaX);
+				element.height = Math.max(50, elementStartHeight + deltaY);
+				break;
+			case 'sw': // Southwest (bottom-left)
+				element.width = Math.max(50, elementStartWidth - deltaX);
+				element.height = Math.max(50, elementStartHeight + deltaY);
+				element.x = elementStartX + (elementStartWidth - element.width);
+				break;
+			case 'ne': // Northeast (top-right)
+				element.width = Math.max(50, elementStartWidth + deltaX);
+				element.height = Math.max(50, elementStartHeight - deltaY);
+				element.y = elementStartY + (elementStartHeight - element.height);
+				break;
+			case 'nw': // Northwest (top-left)
+				element.width = Math.max(50, elementStartWidth - deltaX);
+				element.height = Math.max(50, elementStartHeight - deltaY);
+				element.x = elementStartX + (elementStartWidth - element.width);
+				element.y = elementStartY + (elementStartHeight - element.height);
+				break;
+		}
+
+		if (onUpdate) {
+			onUpdate(element);
+		}
+	}
+
+	/**
+	 * Stop dragging or resizing
 	 */
 	function handleMouseUp() {
 		isDragging = false;
+		isResizing = false;
+		resizeHandle = null;
 	}
 </script>
 
@@ -102,6 +167,21 @@
 		<div class="coordinates">
 			x: {Math.round(element.x)}, y: {Math.round(element.y)}
 		</div>
+	{/if}
+
+	<!-- Show dimensions while resizing -->
+	{#if isResizing}
+		<div class="coordinates">
+			{Math.round(element.width)} × {Math.round(element.height)}
+		</div>
+	{/if}
+
+	<!-- Resize handles (only show when selected) -->
+	{#if isSelected}
+		<div class="resize-handle nw" on:mousedown={(e) => handleResizeMouseDown(e, 'nw')} role="button" tabindex="0"></div>
+		<div class="resize-handle ne" on:mousedown={(e) => handleResizeMouseDown(e, 'ne')} role="button" tabindex="0"></div>
+		<div class="resize-handle sw" on:mousedown={(e) => handleResizeMouseDown(e, 'sw')} role="button" tabindex="0"></div>
+		<div class="resize-handle se" on:mousedown={(e) => handleResizeMouseDown(e, 'se')} role="button" tabindex="0"></div>
 	{/if}
 </div>
 
@@ -160,5 +240,45 @@
 		font-family: monospace;
 		white-space: nowrap;
 		pointer-events: none;
+	}
+
+	/* Resize handles */
+	.resize-handle {
+		position: absolute;
+		width: 10px;
+		height: 10px;
+		background: white;
+		border: 2px solid #007bff;
+		border-radius: 50%;
+		pointer-events: auto;
+	}
+
+	.resize-handle:hover {
+		background: #007bff;
+	}
+
+	/* Position each handle at corners */
+	.resize-handle.nw {
+		top: -5px;
+		left: -5px;
+		cursor: nw-resize;
+	}
+
+	.resize-handle.ne {
+		top: -5px;
+		right: -5px;
+		cursor: ne-resize;
+	}
+
+	.resize-handle.sw {
+		bottom: -5px;
+		left: -5px;
+		cursor: sw-resize;
+	}
+
+	.resize-handle.se {
+		bottom: -5px;
+		right: -5px;
+		cursor: se-resize;
 	}
 </style>

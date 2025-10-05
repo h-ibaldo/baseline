@@ -24,9 +24,15 @@
 				<span class="status completed">✅ Completed</span>
 			</a>
 
-			<a href="/persistence-demo" class="demo-card featured">
+			<a href="/persistence-demo" class="demo-card">
 				<h3>💾 Persistence Demo</h3>
 				<p>IndexedDB local storage with auto-save and project management</p>
+				<span class="status completed">✅ Completed</span>
+			</a>
+
+			<a href="/components-demo" class="demo-card featured">
+				<h3>🎨 Components Demo</h3>
+				<p>Baseline-aware design components with typography, layout, and form elements</p>
 				<span class="status new">🆕 New!</span>
 			</a>
 		</div>

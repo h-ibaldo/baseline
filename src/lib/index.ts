@@ -19,6 +19,21 @@ export { default as BaselineGrid } from './components/baseline/BaselineGrid.svel
 export { default as HistoryPanel } from './components/ui/HistoryPanel.svelte';
 export { default as ProjectManager } from './components/ui/ProjectManager.svelte';
 
+// Design Components - Typography
+export { default as Heading } from './components/design/Heading.svelte';
+export { default as Paragraph } from './components/design/Paragraph.svelte';
+export { default as Text } from './components/design/Text.svelte';
+
+// Design Components - Layout
+export { default as Container } from './components/design/Container.svelte';
+export { default as Grid } from './components/design/Grid.svelte';
+export { default as Flex } from './components/design/Flex.svelte';
+
+// Design Components - Form
+export { default as Button } from './components/design/Button.svelte';
+export { default as Input } from './components/design/Input.svelte';
+export { default as Select } from './components/design/Select.svelte';
+
 // ============================================================================
 // Stores
 // ============================================================================
@@ -125,6 +140,17 @@ export {
 	importProjectFromJSON
 } from './utils/storage';
 
+// Component Registry
+export {
+	registerComponent,
+	getComponentMetadata,
+	getAllComponents,
+	getComponentsByCategory,
+	isComponentRegistered,
+	registerPropertyDefinitions,
+	getPropertyDefinitions
+} from './utils/component-registry';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -181,3 +207,32 @@ export {
 	PROJECTS_STORE,
 	DEFAULT_AUTOSAVE_CONFIG
 } from './types/project';
+
+// Component Types
+export type {
+	BaseComponentProps,
+	SpacingValue,
+	HeadingProps,
+	ParagraphProps,
+	TextProps,
+	ContainerProps,
+	GridProps,
+	FlexProps,
+	ButtonProps,
+	InputProps,
+	SelectProps,
+	ComponentProps,
+	ComponentType,
+	TypographyComponent,
+	LayoutComponent,
+	FormComponent,
+	ComponentCategory,
+	ComponentMetadata,
+	PropertyDefinition,
+	ComponentInstance,
+	BaselineTypographySettings
+} from './types/components';
+
+export {
+	DEFAULT_BASELINE_TYPOGRAPHY
+} from './types/components';

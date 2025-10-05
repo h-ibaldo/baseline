@@ -1,0 +1,127 @@
+// Baseline CMS Database Schema
+// SQLite for simplicity, can be switched to PostgreSQL for scale
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Pages - The heart of the CMS
+model Page {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  title     String
+  description String?
+
+  // Design data (event sourcing)
+  designEvents String  // JSON string of design events array
+  designState  String? // JSON string of current state (derived from events)
+
+  // Published output (generated via AST)
+  publishedHtml String?
+  publishedCss  String?
+  publishedJs   String?
+
+  // Status and metadata
+  status    String   @default("draft") // draft, published, archived
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaImage       String?
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  // Relations
+  revisions PageRevision[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([authorId])
+}
+
+// Page Revisions - Version history
+model PageRevision {
+  id           String   @id @default(uuid())
+  pageId       String
+  page         Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  designEvents String   // JSON string of events at this revision
+  createdBy    String
+  creator      User     @relation(fields: [createdBy], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@index([pageId])
+  @@index([createdBy])
+}
+
+// Media Library
+model Media {
+  id         String   @id @default(uuid())
+  filename   String
+  path       String
+  url        String
+  mimeType   String
+  size       Int
+  width      Int?
+  height     Int?
+  altText    String?
+  caption    String?
+  uploadedBy String
+  uploader   User     @relation(fields: [uploadedBy], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@index([uploadedBy])
+  @@index([mimeType])
+}
+
+// Users and Authentication
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("author") // admin, editor, author, subscriber
+  avatarUrl    String?
+  status       String   @default("active") // active, suspended
+  createdAt    DateTime @default(now())
+  lastLoginAt  DateTime?
+
+  // Relations
+  pages         Page[]
+  pageRevisions PageRevision[]
+  media         Media[]
+  sessions      Session[]
+
+  @@index([email])
+  @@index([role])
+}
+
+// Sessions - For JWT refresh tokens
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+}
+
+// Site Settings - Global configuration
+model Setting {
+  key       String   @id
+  value     String
+  type      String   @default("string") // string, number, boolean, json
+  updatedAt DateTime @updatedAt
+}

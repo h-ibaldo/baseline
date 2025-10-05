@@ -42,9 +42,15 @@
 				<span class="status completed">✅ Completed</span>
 			</a>
 
-			<a href="/export-demo" class="demo-card featured">
+			<a href="/export-demo" class="demo-card">
 				<h3>📦 Export Demo</h3>
 				<p>Export designs as production-ready HTML/CSS (ZIP download)</p>
+				<span class="status completed">✅ Completed</span>
+			</a>
+
+			<a href="/publishing-demo" class="demo-card featured">
+				<h3>🚀 Publishing Demo</h3>
+				<p>Full CMS publishing flow: Design → Database → Live Pages</p>
 				<span class="status new">🆕 New!</span>
 			</a>
 		</div>

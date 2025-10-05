@@ -13,4 +13,5 @@ export * from './services/pages';
 export * from './services/users';
 export * from './services/media';
 export * from './services/settings';
+export * from './services/publishing';
 

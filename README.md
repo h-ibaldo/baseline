@@ -112,3 +112,4 @@ Contributions will open once we have a stable foundation. Watch the repository f
 - **WordPress replacement**: All the features, modern technology
 - **Multi-user**: Role-based permissions (Admin, Editor, Author)
 - **You own everything**: Code, data, platform - no vendor lock-in
+test

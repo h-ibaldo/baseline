@@ -36,9 +36,15 @@
 				<span class="status completed">✅ Completed</span>
 			</a>
 
-			<a href="/code-generation-demo" class="demo-card featured">
+			<a href="/code-generation-demo" class="demo-card">
 				<h3>⚙️ Code Generation Demo</h3>
 				<p>AST-based HTML/CSS generation from design state</p>
+				<span class="status completed">✅ Completed</span>
+			</a>
+
+			<a href="/export-demo" class="demo-card featured">
+				<h3>📦 Export Demo</h3>
+				<p>Export designs as production-ready HTML/CSS (ZIP download)</p>
 				<span class="status new">🆕 New!</span>
 			</a>
 		</div>

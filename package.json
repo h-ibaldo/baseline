@@ -20,6 +20,7 @@
 		"@sveltejs/vite-plugin-svelte": "^2.0.0",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/svelte": "^5.2.8",
+		"@types/jszip": "^3.4.0",
 		"@vitest/ui": "^3.2.4",
 		"jsdom": "^27.0.0",
 		"svelte": "^4.0.0",
@@ -29,6 +30,7 @@
 		"vitest": "^3.2.4"
 	},
 	"dependencies": {
+		"jszip": "^3.10.1",
 		"nanoid": "^5.1.6"
 	}
 }

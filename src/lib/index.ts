@@ -18,6 +18,7 @@ export { default as BaselineGrid } from './components/baseline/BaselineGrid.svel
 // UI Components
 export { default as HistoryPanel } from './components/ui/HistoryPanel.svelte';
 export { default as ProjectManager } from './components/ui/ProjectManager.svelte';
+export { default as ExportConfig } from './components/ui/ExportConfig.svelte';
 
 // Design Components - Typography
 export { default as Heading } from './components/design/Heading.svelte';
@@ -241,6 +242,16 @@ export {
 export { parseDesignToAST, validateAST, optimizeAST, printAST } from './utils/ast-parser';
 export { generateHTML } from './utils/html-generator';
 export { generateCSS, addVendorPrefixes, optimizeCSS } from './utils/css-generator';
+export {
+	exportAsZip,
+	exportAsHTML,
+	exportAsCSS,
+	downloadBlob,
+	downloadText,
+	createDefaultExportConfig,
+	estimateExportSize,
+	validateExportConfig
+} from './utils/export-service';
 
 // AST Types
 export type {

@@ -77,14 +77,19 @@ Baseline is currently in early development and is **NOT accepting external contr
 
 **Phase 1 is complete!** You can now design in Baseline and export production-ready HTML/CSS.
 
-**📋 Phase 2 - CMS Mode (Planned):**
-- Database integration (SQLite/PostgreSQL)
-- Publishing system (design → live pages)
-- Admin panel with page manager
-- Media library
-- User authentication & roles
+**🚧 Phase 1.5 - CMS Foundation (In Progress):**
+- ✅ **Database Layer** - Complete Prisma ORM setup with SQLite, CRUD services for pages, users, media, and settings
+- 📋 Publishing system (design → live pages)
+- 📋 Authentication & JWT
+- 📋 Media upload
+- 📋 Admin panel
+
+**📋 Phase 2 - CMS Core Features (Planned):**
+- Advanced page management
 - Multi-page website management
-- SEO tools
+- SEO tools and optimization
+- Blog system
+- Custom post types
 
 Contributions will open once we have a stable foundation. Watch the repository for updates!
 

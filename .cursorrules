@@ -159,7 +159,9 @@ AI generated initial implementation, human refined:
   - Mark item as complete in `docs/planning/roadmap.md`
   - Update `docs/planning/architecture.md` if architecture changed
   - Update `README.md` with new capabilities
+  - Commit changes with descriptive commit message
 - **Do NOT update docs for individual sub-tasks**, only for major roadmap items
+- **Commit format**: `feat(scope): complete [item name]` with details in body
 
 ## Development Priorities
 1. Core design canvas functionality

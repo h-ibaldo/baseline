@@ -223,7 +223,12 @@ const currentState = events.reduce(applyEvent, initialState);
 - **Local State**: Component-level state using Svelte stores
 - **Global State**: Event store for entire design history
 - **Undo/Redo**: Navigate through event history
-- **Persistence**: Events stored in IndexedDB (local-first)
+- **Persistence**: Events stored in IndexedDB (local-first) ✅ **IMPLEMENTED**
+  - Projects stored as event histories
+  - Auto-save with debounce (1s) and interval (30s)
+  - Project management (create, save, load, delete)
+  - Event replay reconstructs state on load
+  - Export/import as JSON for backup
 - **Cloud Sync** (Future): Sync events, not full state
 
 ## Security Considerations

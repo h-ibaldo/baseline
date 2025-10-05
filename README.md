@@ -51,13 +51,14 @@ Baseline is currently in early development and is **NOT accepting external contr
 **✅ Completed:**
 - ✅ **DOM-based Canvas** - Infinite canvas with multiple artboards, drag-and-drop, selection, resize handles, multi-select
 - ✅ **Baseline Grid System** - InDesign-style baseline alignment with snap-to-grid, visual overlay, per-component overrides
-- ✅ **Testing Framework** - Vitest setup with comprehensive test coverage
+- ✅ **Event Sourcing** - Perfect undo/redo with complete event history and time-travel debugging
+- ✅ **IndexedDB Persistence** - Local-first architecture with auto-save, project management, and offline support
+- ✅ **Testing Framework** - Vitest setup with 40+ comprehensive tests
 
 **🚧 In Progress:**
-- Event sourcing for state management
+- Component library foundation
 - AST-based code generation
-- Local-first architecture (IndexedDB)
-- Core component library
+- Code export functionality
 
 Contributions will open once we have a stable foundation. Watch the repository for updates!
 
@@ -65,7 +66,9 @@ Contributions will open once we have a stable foundation. Watch the repository f
 
 - **Design with actual code**: DOM-based canvas, not Canvas API abstraction
 - **Baseline grid alignment**: Like InDesign, for demanding designers
-- **Local-first**: Your designs live in your browser (IndexedDB)
+- **Local-first**: Your designs live in your browser (IndexedDB) with auto-save
 - **Event sourcing**: Perfect undo/redo and time-travel debugging
-- **AST code generation**: Clean, optimized code output
+- **Project management**: Create, save, load, and manage multiple design projects
+- **Auto-save**: Never lose work with automatic debounced saving
+- **AST code generation**: Clean, optimized code output (coming soon)
 - **You own everything**: Code, data, and platform

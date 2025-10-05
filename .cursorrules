@@ -4,16 +4,9 @@
 
 Baseline is a **highly vibe-coded, AI-friendly project** that embraces AI contributions while maintaining human authorship and accountability.
 
-## Core Principles
+**Status**: Early development - NOT accepting external contributions yet.
 
-1. **Human Authorship Required**: All commits must be authored by humans, even if AI-generated
-2. **AI Contributions Welcome**: Use AI for code generation, documentation, and problem-solving
-3. **Transparency**: Document AI assistance in commit messages
-4. **Quality First**: Human review and refinement of all AI-generated code
-
-## Project Status
-
-**NOT accepting external contributions** - Early development phase. Focus on core foundation.
+**Vision**: Replace WordPress, Figma (for web), and Webflow with an open-source, designer-first tool.
 
 ## Technology Stack
 
@@ -22,34 +15,83 @@ Baseline is a **highly vibe-coded, AI-friendly project** that embraces AI contri
 - **Styling**: CSS with CSS Variables
 - **Build Tool**: Vite
 - **Package Manager**: npm
+- **Testing**: Vitest
 
 ## Code Style Guidelines
 
 ### Code Philosophy
-- **Minimal Code**: Write the shortest, most concise code possible
-- **Well Documented**: Every function, component, and complex logic must have clear comments
-- **Testable**: User should be able to test and give feedback on frontend immediately
-- **Incremental**: Break large tasks into small, reviewable chunks
-
-### TypeScript
-- Use TypeScript for ALL new code
-- Define proper types for all functions and variables
-- Avoid `any` type - use `unknown` or proper types
-- Use interfaces for object shapes, types for unions/intersections
-
-### Svelte Components
-- Component names: PascalCase (`MyComponent`)
-- File names: kebab-case (`my-component.svelte`)
-- Props: Use TypeScript interfaces
-- Reactive statements: Use `$:` for derived values
+- **Minimal Code**: Write concise, clear code
+- **Well Documented**: JSDoc for public APIs, comments for complex logic
+- **Testable**: Write tests for utilities and business logic
+- **Incremental**: Break large tasks into reviewable chunks
 
 ### Naming Conventions
 - **Files**: kebab-case (`user-service.ts`)
 - **Components**: PascalCase (`UserProfile.svelte`)
-- **Functions**: camelCase (`getUserData`)
-- **Variables**: camelCase (`userData`)
+- **Functions/Variables**: camelCase (`getUserData`)
 - **Constants**: UPPER_SNAKE_CASE (`API_BASE_URL`)
-- **Types/Interfaces**: PascalCase (`UserData`, `ApiResponse`)
+- **Types/Interfaces**: PascalCase (`UserData`)
+
+### TypeScript
+- Use TypeScript for ALL new code
+- Avoid `any` - use `unknown` or proper types
+- Define types for all functions and variables
+
+### Quality Standards
+- ✅ TypeScript types everywhere
+- ✅ Error handling (try-catch, validation)
+- ✅ Unit tests for utilities
+- ✅ Semantic HTML with ARIA labels
+- ✅ Performance optimizations (lazy loading, efficient reactivity)
+- ❌ Don't commit untested code
+- ❌ Don't skip error handling
+- ❌ Don't use `any` type
+
+## Git Workflow
+
+### Branch Strategy (MANDATORY)
+- **Each roadmap task gets its own branch**
+- Branch naming: `feat/task-name` or `fix/task-name`
+- Examples: `feat/cms-database-layer`, `feat/media-library`, `fix/baseline-snap`
+- **AI MUST create branch before starting any roadmap task**
+- **AI MUST NOT work directly on main**
+
+### AI Workflow for Roadmap Tasks
+1. Say: "Let me create a branch for this roadmap task"
+2. Create branch: `git checkout -b feat/task-name`
+3. Implement with proper commits
+4. Test thoroughly (all tests passing)
+5. **Update documentation** before merging:
+   - Update `docs/planning/roadmap.md` (mark tasks complete)
+   - Update `README.md` (add new features)
+   - Update `docs/planning/architecture.md` (if architecture changed)
+6. Merge to main when complete
+7. Push to main
+8. Delete branch after merge
+
+### Commit Message Format
+```
+type(scope): description
+
+[optional body with AI assistance details]
+```
+
+**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+
+### Documentation Updates (IMPORTANT)
+- **Update docs BEFORE pushing to main**
+- Mark completed items in `roadmap.md`
+- Add new features to `README.md`
+- Document architecture changes in `architecture.md`
+- Format: `feat(scope): complete [item name]` with details in body
+
+## Project-Specific Guidelines
+
+### Design Philosophy
+- **Baseline alignment**: InDesign-style typography grid
+- **Designer-first**: Prioritize designer experience
+- **Code output**: Design generates production code
+- **Component-based**: Everything is reusable
 
 ### File Organization
 ```
@@ -57,216 +99,45 @@ src/
 ├── routes/           # SvelteKit routes (pages)
 ├── lib/
 │   ├── components/   # Reusable UI components
-│   ├── stores/       # Svelte stores (state management)
+│   │   ├── canvas/   # Canvas-related
+│   │   ├── design/   # Design components
+│   │   └── ui/       # UI components
+│   ├── stores/       # Svelte stores
 │   ├── utils/        # Utility functions
-│   ├── types/        # TypeScript type definitions
+│   ├── types/        # TypeScript types
 │   └── index.ts      # Public API exports
 ```
 
-## Commit Message Format
+## Current Phase
 
-```
-type(scope): description
+**Phase 1 - COMPLETED ✅**: Designer Tool
+- DOM canvas, baseline grid, event sourcing, persistence, components, code generation, export
 
-[optional body with AI assistance details]
+**Phase 1.5 - IN PROGRESS**: CMS Foundation
+- Next: Database layer → Publishing → Auth → Media → Admin panel
 
-[optional footer]
-```
+See `docs/planning/roadmap.md` for detailed tasks.
 
-### Commit Types
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, no logic change)
-- `refactor`: Code refactoring (no feature change)
-- `test`: Test additions or changes
-- `chore`: Build process or tooling changes
-- `ai`: AI-assisted changes (document AI tool used)
+## AI Contribution Guidelines
 
-### AI Contribution Commit Examples
-```
-ai(components): generate button component with Claude
+1. **AI Generation**: Generate initial code/documentation
+2. **Human Review**: Human reviews and tests
+3. **Human Refinement**: Optimize, add types, improve
+4. **Human Commit**: Human commits with AI credit
+5. **Documentation**: Update docs before pushing
 
-- AI generated base component structure
-- Human added TypeScript types and accessibility
-- Human optimized for performance
-- Tested across multiple browsers
-```
-
-```
-feat(api): implement user authentication (AI-assisted)
-
-AI generated initial implementation, human refined:
-- Added proper error handling and validation
-- Implemented security best practices
-- Added comprehensive test coverage
-```
-
-## AI Contribution Workflow
-
-1. **AI Generation**: Use AI to generate initial code/documentation
-2. **Human Review**: Review, understand, and test AI output
-3. **Human Refinement**: Optimize, add types, improve logic
-4. **Human Commit**: Commit with human authorship, document AI assistance
-5. **Documentation**: Update relevant docs
-
-## Code Quality Standards
-
-### Always Include
-- TypeScript types for all functions and variables
-- Error handling (try-catch, error boundaries)
-- Input validation for user-facing functions
-- JSDoc comments for public APIs
-- Unit tests for utilities and business logic
-
-### Performance Considerations
-- Lazy load components when possible
-- Optimize images and assets
-- Use Svelte's reactivity efficiently
-- Avoid unnecessary re-renders
-
-### Accessibility
-- Semantic HTML elements
-- ARIA labels where needed
-- Keyboard navigation support
-- Color contrast compliance
-
-## Project-Specific Guidelines
-
-### Design Philosophy
-- **Baseline alignment**: Text should align to baseline grid (like InDesign) (Optional)
-- **Designer-first**: Prioritize designer experience
-- **Code output**: Design directly generates production code
-- **Component-based**: Everything is a reusable component
-
-### Development Workflow
-
-### Branch Strategy
-- **MANDATORY: Each roadmap task gets its own branch**
-- Branch naming: `feat/task-name` or `fix/task-name`
-- Example: `feat/setup-vitest`, `feat/dom-canvas-component`, `feat/cms-database-layer`
-- Merge to main only when task is complete and tested
-- Keep branches focused on single roadmap items
-- **AI MUST create branch before starting any roadmap task**
-- **AI MUST NOT work directly on main for roadmap tasks**
-
-### AI Workflow for Roadmap Tasks
-1. **Always start with**: "Let me create a branch for this roadmap task"
-2. **Create branch**: `git checkout -b feat/task-name`
-3. **Implement task** with proper commits
-4. **Test thoroughly** (all tests passing)
-5. **Update documentation** if it's a major milestone
-6. **Merge to main** when complete
-7. **Delete branch** after merge
-
-### Task Planning
-- Before starting each task, AI should suggest:
-  - **Claude 3.5 Sonnet (Standard)** - For straightforward implementation
-  - **Claude 3.5 Sonnet with Extended Thinking** - For complex problem-solving
-- Current version: Claude 3.5 Sonnet (October 2024)
-
-### Documentation Updates
-- **When a roadmap ITEM (group of tasks) is completed**, update documentation:
-  - Mark item as complete in `docs/planning/roadmap.md`
-  - Update `docs/planning/architecture.md` if architecture changed
-  - Update `README.md` with new capabilities
-  - Commit changes with descriptive commit message
-- **Do NOT update docs for individual sub-tasks**, only for major roadmap items
-- **Commit format**: `feat(scope): complete [item name]` with details in body
-
-## Development Priorities
-1. Core design canvas functionality
-2. Component library foundation
-3. Code generation system
-4. Theme and styling system
-5. Plugin architecture (future)
-
-### What NOT to Do
-- Don't accept external contributions (yet)
-- Don't commit without human review
-- Don't use `any` type in TypeScript
-- Don't create components without TypeScript types
-- Don't skip error handling
-- Don't commit untested code
-
-## Testing Guidelines
-
-- Write tests for all utility functions
-- Test component behavior and edge cases
-- Use descriptive test names: `it('should validate email format correctly')`
-- Mock external dependencies
-- Aim for high coverage on critical paths
-
-## Documentation Standards
-
-- Update README when adding major features
-- Document all public APIs with JSDoc
-- Keep docs/ folder updated with planning and architecture
-- Explain complex logic with inline comments
-- Document AI assistance in commit messages
-
-## AI Tool Usage
-
-### Recommended for
-- Initial code structure generation
+### AI Best For
+- Code structure generation
 - Boilerplate and repetitive code
 - Documentation writing
-- Test case generation
-- Code optimization suggestions
+- Test generation
 
-### Human Oversight Required for
+### Human Oversight Required For
 - Architecture decisions
 - Security implementations
 - Performance-critical code
-- User-facing features
 - API design
-
-## Project Vision Alignment
-
-Every contribution should align with:
-- Replacing WordPress, Figma (for web), and Webflow
-- Designer-focused experience
-- Code ownership and customization
-- Open-source and free
-- Professional design tools with code output
-- Baseline grid alignment for typography
-
-## When in Doubt
-
-1. Prioritize code quality over speed
-2. Ask for clarification rather than assume
-3. Document AI assistance transparently
-4. Follow existing patterns in the codebase
-5. Keep it simple and maintainable
-
-## Current Status
-
-### Phase 1 - COMPLETED ✅
-- [x] DOM-based canvas component
-- [x] Baseline grid system implementation  
-- [x] Event sourcing for state management
-- [x] AST-based code generation
-- [x] IndexedDB persistence layer
-- [x] Core component library (baseline-aware)
-- [x] Undo/redo functionality
-- [x] Testing framework (Vitest)
-- [x] Code export system (ZIP download)
-
-### Phase 1.5 - CMS Foundation (Next Priority)
-- [ ] Database layer (SQLite/PostgreSQL)
-- [ ] Publishing system (design → live pages)
-- [ ] Authentication & user management
-- [ ] Media library
-- [ ] Admin panel basics
-- [ ] API layer (REST endpoints)
-
-### Immediate Next Steps
-1. Create branch for database layer implementation
-2. Set up Prisma ORM with SQLite
-3. Design database schema
-4. Implement basic CRUD operations
-5. Create publishing workflow
 
 ---
 
-Remember: This is a highly vibe-coded project. Embrace AI assistance, but maintain human accountability and quality standards.
+**Remember**: This is a highly vibe-coded project. Embrace AI assistance, but maintain human accountability and quality standards. Always update documentation before pushing to main.

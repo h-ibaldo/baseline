@@ -65,19 +65,17 @@ npm run build
 
 Baseline is currently in early development and is **NOT accepting external contributions** at this time.
 
-**✅ Phase 1 - Designer Tool (Completed):**
+**✅ Phase 1 - Designer Tool (COMPLETED):**
 - ✅ **DOM-based Canvas** - Infinite canvas with multiple artboards, drag-and-drop, selection, resize handles, multi-select
 - ✅ **Baseline Grid System** - InDesign-style baseline alignment with snap-to-grid, visual overlay, per-component overrides
 - ✅ **Event Sourcing** - Perfect undo/redo with complete event history and time-travel debugging
 - ✅ **IndexedDB Persistence** - Local-first architecture with auto-save, project management, and offline support
 - ✅ **Component Library** - 9 baseline-aware design components (Typography, Layout, Forms)
-- ✅ **Testing Framework** - Vitest setup with 40+ comprehensive tests
+- ✅ **AST Code Generation** - Complete code generation pipeline with HTML/CSS output
+- ✅ **Export System** - ZIP download with multiple presets and configuration options
+- ✅ **Testing Framework** - Vitest setup with 44 comprehensive tests
 
-**🚧 Phase 1.5 - Code Generation (In Progress):**
-- AST-based code generation
-- HTML/CSS export
-- Svelte component export
-- Code preview panel
+**Phase 1 is complete!** You can now design in Baseline and export production-ready HTML/CSS.
 
 **📋 Phase 2 - CMS Mode (Planned):**
 - Database integration (SQLite/PostgreSQL)
@@ -99,7 +97,7 @@ Contributions will open once we have a stable foundation. Watch the repository f
 - **Event sourcing**: Perfect undo/redo and time-travel debugging
 - **Project management**: Create, save, load, and manage multiple design projects
 - **Component library**: 9 baseline-aware components ready to use
-- **Export code**: Generate clean HTML/CSS/Svelte (coming soon)
+- **Export code**: Generate clean HTML/CSS and download as ZIP
 
 **CMS Mode (Planned):**
 - **Self-hosted**: Install on your own server, full control

@@ -5,11 +5,14 @@
 	 * This is the foundation for all design elements (text, images, etc. will extend this).
 	 */
 	import type { CanvasElement } from '$lib/types/canvas';
+	import type { BaselineConfig } from '$lib/types/baseline';
+	import { snapToBaseline } from '$lib/utils/baseline';
 
 	export let element: CanvasElement;
 	export let onUpdate: ((element: CanvasElement) => void) | undefined = undefined;
 	export let isSelected = false;
 	export let onSelect: ((shiftKey: boolean) => void) | undefined = undefined;
+	export let baselineConfig: BaselineConfig | undefined = undefined;
 
 	let isDragging = false;
 	let isResizing = false;
@@ -71,18 +74,37 @@
 	}
 
 	/**
-	 * Handle dragging
+	 * Handle dragging with optional baseline snapping
 	 */
 	function handleDrag(e: MouseEvent) {
 		const deltaX = e.clientX - dragStartX;
 		const deltaY = e.clientY - dragStartY;
 
-		element.x = elementStartX + deltaX;
-		element.y = elementStartY + deltaY;
+		let newX = elementStartX + deltaX;
+		let newY = elementStartY + deltaY;
+
+		// Apply baseline snapping if enabled
+		if (shouldSnapToBaseline()) {
+			newY = snapToBaseline(newY, baselineConfig!.height);
+		}
+
+		element.x = newX;
+		element.y = newY;
 
 		if (onUpdate) {
 			onUpdate(element);
 		}
+	}
+
+	/**
+	 * Check if element should snap to baseline
+	 */
+	function shouldSnapToBaseline(): boolean {
+		if (!baselineConfig || !baselineConfig.enabled) return false;
+		// Per-element override: if snapToBaseline is explicitly set, use it
+		if (element.snapToBaseline !== undefined) return element.snapToBaseline;
+		// Otherwise use global setting
+		return baselineConfig.enabled;
 	}
 
 	/**

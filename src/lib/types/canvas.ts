@@ -42,6 +42,8 @@ export interface CanvasElement {
 	height: number;
 	rotation?: number;
 	opacity?: number;
+	// Baseline settings (per-element override)
+	snapToBaseline?: boolean; // Override global baseline snap
 	// Type-specific properties added later
 }
 

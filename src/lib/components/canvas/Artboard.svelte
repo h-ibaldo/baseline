@@ -5,8 +5,11 @@
 	 * Each artboard can have its own grid, background, and contains design elements
 	 */
 	import type { Artboard } from '$lib/types/canvas';
+	import type { BaselineConfig } from '$lib/types/baseline';
+	import BaselineGrid from '$lib/components/baseline/BaselineGrid.svelte';
 
 	export let artboard: Artboard;
+	export let baselineConfig: BaselineConfig | undefined = undefined;
 </script>
 
 <!-- Artboard frame positioned absolutely on infinite canvas -->
@@ -31,6 +34,15 @@
 			<span class="publish-badge">📤</span>
 		{/if}
 	</div>
+
+	<!-- Baseline grid overlay (if enabled) -->
+	{#if baselineConfig}
+		<BaselineGrid 
+			config={baselineConfig} 
+			width={artboard.width} 
+			height={artboard.height} 
+		/>
+	{/if}
 
 	<!-- Child elements render here -->
 	<slot />

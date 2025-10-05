@@ -7,6 +7,7 @@
 	import Artboard from '$lib/components/canvas/Artboard.svelte';
 	import Element from '$lib/components/canvas/Element.svelte';
 	import type { CanvasConfig, Artboard as ArtboardType, CanvasElement } from '$lib/types/canvas';
+	import { baselineConfig, toggleBaselineSnap, toggleBaselineGrid, setBaselineHeight } from '$lib/stores/baseline';
 
 	// Canvas configuration
 	let canvasConfig: CanvasConfig = {
@@ -159,6 +160,42 @@
 		</div>
 	</div>
 
+	<!-- Baseline Grid Controls -->
+	<div class="baseline-controls">
+		<h3>Baseline Grid</h3>
+		
+		<label>
+			<input type="checkbox" checked={$baselineConfig.enabled} on:change={toggleBaselineSnap} />
+			Snap to Baseline
+		</label>
+
+		<label>
+			<input type="checkbox" checked={$baselineConfig.showGrid} on:change={toggleBaselineGrid} />
+			Show Grid
+		</label>
+
+		<label>
+			Baseline Height:
+			<input 
+				type="number" 
+				value={$baselineConfig.height} 
+				on:input={(e) => setBaselineHeight(Number(e.currentTarget.value))}
+				min="4"
+				max="32"
+				step="4"
+			/>
+			px
+		</label>
+
+		<div class="baseline-info">
+			{#if $baselineConfig.enabled}
+				<span class="status-enabled">✓ Snapping enabled</span>
+			{:else}
+				<span class="status-disabled">○ Snapping disabled</span>
+			{/if}
+		</div>
+	</div>
+
 	<div 
 		class="canvas-wrapper"
 		on:mousedown={clearSelection}
@@ -167,7 +204,7 @@
 	>
 		<Canvas config={canvasConfig}>
 			{#each artboards as artboard (artboard.id)}
-				<Artboard {artboard}>
+				<Artboard {artboard} baselineConfig={$baselineConfig}>
 					<!-- Render elements that belong to this artboard -->
 					{#each elements.filter(el => el.artboardId === artboard.id) as element (element.id)}
 						<Element 
@@ -175,6 +212,7 @@
 							isSelected={selectedElementIds.includes(element.id)}
 							onSelect={(shiftKey) => handleElementSelect(element.id, shiftKey)}
 							onUpdate={() => elements = elements}
+							baselineConfig={$baselineConfig}
 						/>
 					{/each}
 				</Artboard>
@@ -247,5 +285,49 @@
 		border-radius: 4px;
 		font-size: 0.85rem;
 		color: #666;
+	}
+
+	.baseline-controls {
+		margin-bottom: 2rem;
+		padding: 1.5rem;
+		background: #fff;
+		border: 2px solid #007bff;
+		border-radius: 8px;
+	}
+
+	.baseline-controls h3 {
+		margin: 0 0 1rem 0;
+		font-size: 1.1rem;
+		color: #007bff;
+	}
+
+	.baseline-controls label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.baseline-controls input[type="number"] {
+		width: 60px;
+		padding: 0.25rem;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+	}
+
+	.baseline-info {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid #eee;
+		font-size: 0.9rem;
+	}
+
+	.status-enabled {
+		color: #28a745;
+		font-weight: 600;
+	}
+
+	.status-disabled {
+		color: #6c757d;
 	}
 </style>

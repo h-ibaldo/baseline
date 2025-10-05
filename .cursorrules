@@ -142,11 +142,22 @@ AI generated initial implementation, human refined:
 ### Development Workflow
 
 ### Branch Strategy
-- **Each roadmap task gets its own branch**
+- **MANDATORY: Each roadmap task gets its own branch**
 - Branch naming: `feat/task-name` or `fix/task-name`
-- Example: `feat/setup-vitest`, `feat/dom-canvas-component`
+- Example: `feat/setup-vitest`, `feat/dom-canvas-component`, `feat/cms-database-layer`
 - Merge to main only when task is complete and tested
 - Keep branches focused on single roadmap items
+- **AI MUST create branch before starting any roadmap task**
+- **AI MUST NOT work directly on main for roadmap tasks**
+
+### AI Workflow for Roadmap Tasks
+1. **Always start with**: "Let me create a branch for this roadmap task"
+2. **Create branch**: `git checkout -b feat/task-name`
+3. **Implement task** with proper commits
+4. **Test thoroughly** (all tests passing)
+5. **Update documentation** if it's a major milestone
+6. **Merge to main** when complete
+7. **Delete branch** after merge
 
 ### Task Planning
 - Before starting each task, AI should suggest:
@@ -228,24 +239,33 @@ Every contribution should align with:
 4. Follow existing patterns in the codebase
 5. Keep it simple and maintainable
 
-## Current Focus Areas
+## Current Status
 
-### Phase 1 Priorities (Months 1-3)
-- [ ] DOM-based canvas component
-- [ ] Baseline grid system implementation
-- [ ] Event sourcing for state management
-- [ ] AST-based code generation
-- [ ] IndexedDB persistence layer
-- [ ] Core component library (baseline-aware)
-- [ ] Undo/redo functionality
-- [ ] Testing framework (Vitest)
+### Phase 1 - COMPLETED ✅
+- [x] DOM-based canvas component
+- [x] Baseline grid system implementation  
+- [x] Event sourcing for state management
+- [x] AST-based code generation
+- [x] IndexedDB persistence layer
+- [x] Core component library (baseline-aware)
+- [x] Undo/redo functionality
+- [x] Testing framework (Vitest)
+- [x] Code export system (ZIP download)
+
+### Phase 1.5 - CMS Foundation (Next Priority)
+- [ ] Database layer (SQLite/PostgreSQL)
+- [ ] Publishing system (design → live pages)
+- [ ] Authentication & user management
+- [ ] Media library
+- [ ] Admin panel basics
+- [ ] API layer (REST endpoints)
 
 ### Immediate Next Steps
-1. Set up Vitest testing framework
-2. Create DOM-based canvas component
-3. Implement baseline grid calculation engine
-4. Build event sourcing structure
-5. Create IndexedDB wrapper utilities
+1. Create branch for database layer implementation
+2. Set up Prisma ORM with SQLite
+3. Design database schema
+4. Implement basic CRUD operations
+5. Create publishing workflow
 
 ---
 

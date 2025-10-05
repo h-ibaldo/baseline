@@ -236,3 +236,25 @@ export type {
 export {
 	DEFAULT_BASELINE_TYPOGRAPHY
 } from './types/components';
+
+// Code Generation Utilities
+export { parseDesignToAST, validateAST, optimizeAST, printAST } from './utils/ast-parser';
+export { generateHTML } from './utils/html-generator';
+export { generateCSS, addVendorPrefixes, optimizeCSS } from './utils/css-generator';
+
+// AST Types
+export type {
+	ASTNode,
+	ASTRoot,
+	ASTPage,
+	ASTElement,
+	ASTStyles,
+	ASTMetadata,
+	PageMetadata,
+	CodeGenerationOptions,
+	GeneratedCode,
+	GeneratedFile,
+	GenerationMetadata,
+	CSSNamingStrategy,
+	ExportConfig
+} from './types/ast';

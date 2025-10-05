@@ -30,9 +30,15 @@
 				<span class="status completed">✅ Completed</span>
 			</a>
 
-			<a href="/components-demo" class="demo-card featured">
-				<h3>🎨 Components Demo</h3>
+			<a href="/components-demo" class="demo-card">
+				<h3>🧩 Components Demo</h3>
 				<p>Baseline-aware design components with typography, layout, and form elements</p>
+				<span class="status completed">✅ Completed</span>
+			</a>
+
+			<a href="/code-generation-demo" class="demo-card featured">
+				<h3>⚙️ Code Generation Demo</h3>
+				<p>AST-based HTML/CSS generation from design state</p>
 				<span class="status new">🆕 New!</span>
 			</a>
 		</div>

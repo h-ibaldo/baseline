@@ -81,6 +81,30 @@
 			height: 100,
 			opacity: 1,
 			rotation: 0
+		},
+		{
+			id: 'element-4',
+			type: 'text',
+			artboardId: 'artboard-1',
+			x: 100,
+			y: 320,
+			width: 250,
+			height: 48,
+			opacity: 1,
+			rotation: 0,
+			snapToBaseline: true // Explicitly enable baseline snap for this text
+		},
+		{
+			id: 'element-5',
+			type: 'text',
+			artboardId: 'artboard-1',
+			x: 700,
+			y: 64, // Positioned at 8 baseline units (64 = 8 * 8px baseline)
+			width: 300,
+			height: 96, // Height of 12 baseline units
+			opacity: 1,
+			rotation: 0,
+			snapToBaseline: false // This one can be freely positioned
 		}
 	];
 

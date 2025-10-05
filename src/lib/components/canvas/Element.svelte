@@ -183,6 +183,13 @@
 	{#if element.type === 'box'}
 		<div class="box-content"></div>
 	{/if}
+
+	<!-- Text type shows editable text -->
+	{#if element.type === 'text'}
+		<div class="text-content">
+			Sample Text
+		</div>
+	{/if}
 	
 	<!-- Show coordinates while dragging -->
 	{#if isDragging}
@@ -234,6 +241,26 @@
 
 	.element.box:hover .box-content {
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Text element styling */
+	.element.text .text-content {
+		width: 100%;
+		height: 100%;
+		padding: 8px;
+		font-size: 16px;
+		line-height: 1.5;
+		color: #333;
+		background: rgba(255, 255, 255, 0.9);
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		overflow: hidden;
+	}
+
+	.element.text:hover .text-content {
+		border-color: #999;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 	}
 
 	/* Selection border */

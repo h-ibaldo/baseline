@@ -50,10 +50,10 @@ Baseline is currently in early development and is **NOT accepting external contr
 
 **✅ Completed:**
 - ✅ **DOM-based Canvas** - Infinite canvas with multiple artboards, drag-and-drop, selection, resize handles, multi-select
-- ✅ **Testing Framework** - Vitest setup with test utilities
+- ✅ **Baseline Grid System** - InDesign-style baseline alignment with snap-to-grid, visual overlay, per-component overrides
+- ✅ **Testing Framework** - Vitest setup with comprehensive test coverage
 
 **🚧 In Progress:**
-- Baseline grid system implementation
 - Event sourcing for state management
 - AST-based code generation
 - Local-first architecture (IndexedDB)

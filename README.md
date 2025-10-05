@@ -79,7 +79,7 @@ Baseline is currently in early development and is **NOT accepting external contr
 
 **🚧 Phase 1.5 - CMS Foundation (In Progress):**
 - ✅ **Database Layer** - Complete Prisma ORM setup with SQLite, CRUD services for pages, users, media, and settings
-- 📋 Publishing system (design → live pages)
+- ✅ **Publishing System** - Full design-to-live-page workflow with API endpoints and SSR rendering
 - 📋 Authentication & JWT
 - 📋 Media upload
 - 📋 Admin panel

@@ -10,13 +10,30 @@ An open source project with huge ambition and expectations. The goal of this pro
 
 3. **Webflow and similar tools** are private sector. They allow you to design with the actual code of your website. But you have to pay high fees. You cannot change much of the tool itself. 
 
-## How to solve this:
+## How we solve this:
+
+**Dual-Mode Architecture**: Baseline works in two ways:
+
+1. **Designer Mode** (Browser-based, Local-First)
+   - Design and build pages entirely in your browser
+   - No installation or server required
+   - Export clean code (HTML/CSS/Svelte)
+   - Perfect for prototyping, learning, or designing for clients
+   - Try it free at baseline.app
+
+2. **CMS Mode** (Self-Hosted, Full-Stack)
+   - Install on your own server (VPS, shared hosting, Docker)
+   - Design AND publish pages directly to your domain
+   - Full content management system
+   - Multi-user support with role-based permissions
+   - Media library, SEO tools, blog system
+   - True WordPress replacement with modern technology
 
 **Design Experience**: Clean, light, dynamic (multiple artboards), you design with the actual code of your actual page. Designer focused. Allows you to design a visual identity for the website with variables and components, templates and themes. Allows you to design based on a baseline. Aligns text to baseline like InDesign, appealing to demanding Graphic Designers. Built in animation system in the future.
 
-You own the code and your platform. Developers or curious designers can change anything. Incentive to build plugins (must have plugin system), themes and libraries.
+**You own everything**: The code, the data, and the platform. Developers or curious designers can change anything. Extensible via plugin system, themes, and component libraries.
 
-100% free and open-source. **Currently in early development - not accepting contributions yet.** Will open contributions once the core foundation is established. Might offer paid hosted options in the future.
+**100% free and open-source.** Currently in early development - not accepting external contributions yet. Will open contributions once the core foundation is established.
 
 ## Development
 
@@ -48,27 +65,47 @@ npm run build
 
 Baseline is currently in early development and is **NOT accepting external contributions** at this time.
 
-**✅ Completed:**
+**✅ Phase 1 - Designer Tool (Completed):**
 - ✅ **DOM-based Canvas** - Infinite canvas with multiple artboards, drag-and-drop, selection, resize handles, multi-select
 - ✅ **Baseline Grid System** - InDesign-style baseline alignment with snap-to-grid, visual overlay, per-component overrides
 - ✅ **Event Sourcing** - Perfect undo/redo with complete event history and time-travel debugging
 - ✅ **IndexedDB Persistence** - Local-first architecture with auto-save, project management, and offline support
+- ✅ **Component Library** - 9 baseline-aware design components (Typography, Layout, Forms)
 - ✅ **Testing Framework** - Vitest setup with 40+ comprehensive tests
 
-**🚧 In Progress:**
-- Component library foundation
+**🚧 Phase 1.5 - Code Generation (In Progress):**
 - AST-based code generation
-- Code export functionality
+- HTML/CSS export
+- Svelte component export
+- Code preview panel
+
+**📋 Phase 2 - CMS Mode (Planned):**
+- Database integration (SQLite/PostgreSQL)
+- Publishing system (design → live pages)
+- Admin panel with page manager
+- Media library
+- User authentication & roles
+- Multi-page website management
+- SEO tools
 
 Contributions will open once we have a stable foundation. Watch the repository for updates!
 
 ### Key Features
 
+**Designer Tool:**
 - **Design with actual code**: DOM-based canvas, not Canvas API abstraction
 - **Baseline grid alignment**: Like InDesign, for demanding designers
 - **Local-first**: Your designs live in your browser (IndexedDB) with auto-save
 - **Event sourcing**: Perfect undo/redo and time-travel debugging
 - **Project management**: Create, save, load, and manage multiple design projects
-- **Auto-save**: Never lose work with automatic debounced saving
-- **AST code generation**: Clean, optimized code output (coming soon)
-- **You own everything**: Code, data, and platform
+- **Component library**: 9 baseline-aware components ready to use
+- **Export code**: Generate clean HTML/CSS/Svelte (coming soon)
+
+**CMS Mode (Planned):**
+- **Self-hosted**: Install on your own server, full control
+- **Direct publishing**: Design → Publish → Live on your domain
+- **Content management**: Pages, media library, users, SEO
+- **Modern stack**: SvelteKit + TypeScript + SQLite/PostgreSQL
+- **WordPress replacement**: All the features, modern technology
+- **Multi-user**: Role-based permissions (Admin, Editor, Author)
+- **You own everything**: Code, data, platform - no vendor lock-in

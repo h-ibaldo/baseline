@@ -20,16 +20,26 @@ Baseline is built as a modern web application using SvelteKit and TypeScript, de
 - **Code Review**: AI code analysis tools
 - **Refactoring**: AI code optimization tools
 
-### Backend (Future - Optional)
-- **Architecture**: Local-first with optional cloud sync
+### Backend (Dual-Mode Architecture)
+
+**Mode 1: Designer Tool (Browser-Only)**
 - **Primary Storage**: IndexedDB (browser-based, no server required)
-- **Cloud Sync** (Optional):
-  - **Runtime**: Node.js or serverless (Cloudflare Workers, Deno Deploy)
-  - **Database**: SQLite (simple) or PostgreSQL (if needed)
-  - **Sync Protocol**: Event-based sync (CRDTs for conflict resolution)
-  - **Authentication**: JWT-based or OAuth
-  - **File Storage**: Local filesystem or optional cloud (S3, R2)
-- **Philosophy**: You own your data. Server is optional for sync/collaboration only.
+- **Architecture**: Local-first, works entirely offline
+- **Export**: Generate code as ZIP files
+
+**Mode 2: CMS (Self-Hosted)**
+- **Runtime**: Node.js (via SvelteKit adapter-node)
+- **Database**: SQLite (simple, file-based) or PostgreSQL (scalable)
+- **Architecture**: Full-stack SSR with SvelteKit
+- **Storage**: Database + filesystem for media
+- **Authentication**: JWT-based with bcrypt password hashing
+- **Publishing**: Design → Database → SSR pages on custom domain
+- **Philosophy**: You own your data and server. Self-hosted, no vendor lock-in.
+
+**Optional Future: Cloud Sync**
+- **Sync Protocol**: Event-based sync (CRDTs for conflict resolution)
+- **Cloud Storage**: Optional alternative to self-hosting
+- **Multi-device**: Sync between browser and self-hosted installations
 
 ### Development Tools
 - **Version Control**: Git
@@ -310,39 +320,105 @@ interface PerformanceMetrics {
 
 ## Scalability Plan
 
-### Phase 1: MVP (Local-First)
+### Phase 1: Designer Tool (Local-First) ✅
 - Single-user design tool
 - IndexedDB storage (no server needed)
 - Basic component library
 - AST-based code generation
 - DOM-based canvas
 - Event sourcing for undo/redo
+- Export code as ZIP
 
-### Phase 2: Multi-user (Optional Cloud)
+### Phase 1.5: CMS Foundation 📋
+- Self-hosted CMS mode
+- Database integration (SQLite/PostgreSQL)
+- Publishing system (design → live pages)
+- User authentication and roles
+- Media library
+- Admin panel
+- Multi-page websites
+
+### Phase 2: CMS Core Features
+- Advanced content management
+- SEO tools and optimization
+- Page templates and blocks
+- Multi-language support
+- Custom post types
+- Navigation builder
+- Form builder
+
+### Phase 3: WordPress Parity
+- Blog system
+- Plugin architecture
+- Theme system
+- E-commerce foundation (optional)
+- Migration tools (WordPress → Baseline)
+- Advanced design features
+
+### Phase 4: Cloud Sync & Collaboration (Optional)
 - Optional cloud sync (you can still work offline)
-- User authentication (only if using cloud)
+- Multi-device sync
 - Real-time collaboration (CRDT-based)
-- Plugin system (trusted plugins)
+- Commenting and feedback
 
-### Phase 3: Enterprise (Advanced Features)
+### Phase 5: Enterprise Features
+- Multi-site management
 - Team management
 - Advanced permissions
 - API access for integrations
 - Custom integrations
-- Plugin sandboxing for third-party plugins
+- Plugin marketplace with sandboxing
 
 ## Deployment Strategy
 
-### Development
-- Local development server
-- Hot module replacement
+### Designer Mode (SPA)
+**Development:**
+- Local development server with HMR
 - Source maps for debugging
+- Client-side only (`ssr: false`)
 
-### Production
+**Production:**
 - Static site generation
-- CDN deployment
+- Deploy to any CDN (Vercel, Netlify, Cloudflare Pages)
 - Environment-specific configurations
-- Monitoring and analytics
+
+### CMS Mode (Full-Stack)
+**Development:**
+- Local development server with HMR
+- SQLite for local database
+- Hot reload for server and client
+
+**Production Options:**
+
+1. **VPS (Recommended)**
+   - Install Node.js 20+
+   - Clone repository or use setup script
+   - Run with PM2 or systemd
+   - Nginx reverse proxy
+   - SSL with Let's Encrypt
+
+2. **Docker**
+   - Official Docker image
+   - Volume mounts for data and uploads
+   - Docker Compose for multi-container
+   - Easy updates and rollbacks
+
+3. **Cloud Platforms**
+   - Railway, Render, Fly.io
+   - Auto-deploy from Git
+   - Managed databases
+   - Automatic scaling
+
+4. **Shared Hosting (if Node.js supported)**
+   - cPanel Node.js app
+   - Upload built files
+   - Configure environment variables
+
+**Monitoring:**
+- Application logs
+- Error tracking (Sentry)
+- Performance monitoring
+- Database backups
 
 ## Future Considerations
 

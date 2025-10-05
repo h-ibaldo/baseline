@@ -102,27 +102,104 @@
 - [ ] Web Worker for code generation
 - [ ] Multiple output formats (HTML/CSS, Svelte)
 - [ ] Code preview panel
-- [ ] Export functionality
+- [ ] Export functionality (ZIP download)
 
-## Phase 2: Core Features (Months 4-6)
+---
 
-### Advanced Design Tools
-- [ ] Advanced component library (50+ components)
-- [ ] Typography system with advanced baseline features
-- [ ] Color palette and theme management
-- [ ] Responsive design tools (breakpoints)
-- [ ] Layout constraints and auto-layout
-- [ ] Component variants and states
+## Phase 1.5: CMS Foundation (Months 3-4)
 
-### User Experience
-- [ ] Intuitive user interface design
+**Goal**: Enable self-hosted CMS mode for publishing pages directly
+
+### Database Layer
+- [ ] SQLite integration (simple, file-based)
+- [ ] Database schema design (pages, media, users, settings)
+- [ ] Prisma ORM setup
+- [ ] Migration system
+- [ ] Database utilities and helpers
+
+### Publishing System
+- [ ] Design → HTML/CSS generation pipeline
+- [ ] Page storage in database
+- [ ] URL routing system (SvelteKit dynamic routes)
+- [ ] SSR rendering for published pages
+- [ ] Publish/unpublish workflow
+- [ ] Draft vs published states
+
+### Authentication & Users
+- [ ] JWT-based authentication
+- [ ] User registration/login
+- [ ] Password hashing (bcrypt)
+- [ ] Session management
+- [ ] Role-based access control (Admin, Editor, Author)
+- [ ] Auth middleware
+
+### Media Library (Basic)
+- [ ] File upload system
+- [ ] Media storage (filesystem)
+- [ ] Image optimization (resize, compress)
+- [ ] Media metadata (filename, size, type)
+- [ ] Media deletion
+
+### Admin Panel (Basic)
+- [ ] Admin layout and navigation
+- [ ] Login/logout pages
+- [ ] Basic page manager (list, create, edit)
+- [ ] Basic media manager
+- [ ] User profile page
+
+### API Layer
+- [ ] REST API structure
+- [ ] Pages endpoints (CRUD)
+- [ ] Media endpoints (upload, delete)
+- [ ] Auth endpoints (login, logout, refresh)
+- [ ] Error handling and validation
+
+### Installation & Setup
+- [ ] Setup script (database, admin user)
+- [ ] Environment configuration
+- [ ] Docker support
+- [ ] Documentation for self-hosting
+
+---
+
+## Phase 2: CMS Core Features (Months 5-7)
+
+**Goal**: Complete CMS functionality for production use
+
+### Admin Panel (Advanced)
+- [ ] Enhanced page manager (search, filter, bulk actions)
+- [ ] Enhanced media library (folders, tags, search)
+- [ ] User management interface (CRUD users)
+- [ ] Site settings page (SEO, general settings)
+- [ ] Analytics dashboard (page views, popular pages)
+- [ ] Activity log (audit trail)
+
+### Content Management
+- [ ] Page templates system
+- [ ] Reusable content blocks
+- [ ] Draft autosave
+- [ ] Page revisions/version history
+- [ ] Scheduled publishing
+- [ ] Page duplication
+
+### SEO & Performance
+- [ ] SEO metadata editor (title, description, OG tags)
+- [ ] Sitemap generation (XML)
+- [ ] Robots.txt management
+- [ ] Page caching system
+- [ ] Image optimization and lazy loading
+- [ ] Performance monitoring
+
+### Advanced Features
+- [ ] Multi-language support (i18n)
+- [ ] Custom post types (blog posts, portfolio items)
+- [ ] Taxonomies (categories, tags)
+- [ ] Search functionality
+- [ ] Navigation menu builder
+- [ ] Form builder
+
+### Developer Tools
 - [ ] Keyboard shortcuts system
-- [ ] Context menus and toolbars
-- [ ] Design templates and presets
-- [ ] Import/export (JSON, HTML, Figma)
-- [ ] Search and command palette
-
-### Code Quality
 - [ ] Advanced AST optimization
 - [ ] Multiple framework outputs (React, Vue, Svelte)
 - [ ] Code style customization
@@ -130,15 +207,60 @@
 - [ ] CSS optimization (deduplication, minification)
 - [ ] Accessibility attributes generation
 
-### Performance Optimization
-- [ ] Performance monitoring system
-- [ ] Render time tracking
-- [ ] Memory usage optimization
-- [ ] Code splitting for large designs
+### Designer Experience
+- [ ] Advanced component library (50+ components)
+- [ ] Typography system with advanced baseline features
+- [ ] Color palette and theme management
+- [ ] Responsive design tools (breakpoints)
+- [ ] Layout constraints and auto-layout
+- [ ] Component variants and states
+- [ ] Design templates and presets
+- [ ] Command palette
 
-## Phase 3: Polish & Refinement (Months 7-9)
+## Phase 3: WordPress Parity & Ecosystem (Months 8-12)
 
-### Advanced Features
+**Goal**: Feature parity with WordPress + modern advantages
+
+### Blog System
+- [ ] Blog post type with rich editor
+- [ ] Categories and tags
+- [ ] Author pages
+- [ ] Archive pages (by date, category, tag)
+- [ ] RSS/Atom feeds
+- [ ] Comments system (optional)
+- [ ] Related posts
+
+### E-commerce Foundation (Optional)
+- [ ] Product custom post type
+- [ ] Shopping cart
+- [ ] Payment integration (Stripe, PayPal)
+- [ ] Order management
+- [ ] Inventory tracking
+- [ ] Shipping calculator
+
+### Plugin System
+- [ ] Plugin architecture (trusted plugins only initially)
+- [ ] Plugin API and hooks
+- [ ] Plugin sandboxing (Web Workers/iframes)
+- [ ] Plugin marketplace (when contributions open)
+- [ ] Official plugins (analytics, SEO, forms, etc.)
+- [ ] Third-party integrations
+
+### Theme System
+- [ ] Theme structure and API
+- [ ] Theme templates
+- [ ] Theme customizer
+- [ ] Theme marketplace
+- [ ] Default themes (5+ professional themes)
+
+### Migration Tools
+- [ ] WordPress import plugin
+- [ ] Figma import (basic)
+- [ ] HTML/CSS import
+- [ ] Export to static site
+- [ ] Backup and restore
+
+### Advanced Designer Features
 - [ ] Animation system (CSS animations, transitions)
 - [ ] Advanced layout tools (absolute positioning, z-index)
 - [ ] Custom component creation
@@ -147,41 +269,31 @@
 - [ ] Component documentation generation
 
 ### Developer Experience
-- [ ] API documentation
-- [ ] Developer SDK (if needed)
-- [ ] Plugin architecture (trusted plugins only)
+- [ ] Comprehensive API documentation
+- [ ] Developer SDK
+- [ ] CLI tools
 - [ ] Custom export templates
-- [ ] Batch operations
+- [ ] Webhooks
+- [ ] REST API extensions
 
-### Local-First Enhancements
-- [ ] Advanced IndexedDB features
-- [ ] Design versioning (local)
-- [ ] Project templates
-- [ ] Asset library (local)
-- [ ] Backup and restore
+## Phase 4: Cloud Sync & Collaboration (Months 13-18)
 
-## Phase 4: Optional Cloud Sync (Months 10-12)
-
-**Note**: Cloud features are optional. Baseline works fully offline.
+**Note**: Cloud features are optional. Baseline works fully offline and self-hosted.
 
 ### Cloud Sync (Optional)
 - [ ] Event-based sync protocol
 - [ ] CRDT implementation for conflict resolution
-- [ ] Optional user authentication
-- [ ] Cloud storage integration
+- [ ] Cloud storage option (alternative to self-hosting)
 - [ ] Multi-device sync
+- [ ] Automatic cloud backups
 
-### Collaboration (Optional)
-- [ ] Real-time collaboration (if using cloud)
-- [ ] Project sharing
-- [ ] Comment and feedback system
+### Real-time Collaboration (Optional)
+- [ ] Multi-user editing
+- [ ] Live cursors and selections
+- [ ] Commenting system
+- [ ] Activity feed
+- [ ] Conflict resolution
 - [ ] Version history (cloud-based)
-
-### Plugin Ecosystem
-- [ ] Plugin marketplace (if contributions open)
-- [ ] Plugin sandboxing (Web Workers/iframes)
-- [ ] Third-party integrations
-- [ ] Theme marketplace
 
 ## Phase 5: Scale & Ecosystem (Months 13-18)
 

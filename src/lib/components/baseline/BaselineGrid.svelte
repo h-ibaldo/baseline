@@ -1,8 +1,7 @@
 <script lang="ts">
 	/**
-	 * Baseline Grid Overlay Component (LineBasis Grid System)
+	 * Baseline Grid Overlay Component
 	 * Visual grid overlay showing baseline lines
-	 * Note: "baseline" is the technical term from typography; "LineBasis" is the product name.
 	 */
 	import type { BaselineConfig } from '$lib/types/baseline';
 

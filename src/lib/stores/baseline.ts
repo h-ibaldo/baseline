@@ -1,7 +1,6 @@
 /**
- * Baseline Grid Store (LineBasis Grid System)
+ * Baseline Grid Store
  * Global state management for baseline grid configuration
- * Note: "baseline" is the technical term from typography; "LineBasis" is the product name.
  */
 
 import { writable } from 'svelte/store';

@@ -1,7 +1,6 @@
 /**
- * Baseline Grid Calculation Engine (LineBasis Grid System)
+ * Baseline Grid Calculation Engine
  * Handles all mathematical operations for baseline grid snapping and alignment
- * Note: "baseline" is the technical term from typography; "LineBasis" is the product name.
  */
 
 import type { BaselineConfig, SnapResult } from '$lib/types/baseline';

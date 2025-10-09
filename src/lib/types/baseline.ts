@@ -1,6 +1,7 @@
 /**
- * Baseline Grid Type Definitions
+ * Baseline Grid Type Definitions (LineBasis Grid System)
  * Defines types for the baseline grid system (InDesign-style typography alignment)
+ * Note: "baseline" is the technical term from typography; "LineBasis" is the product name.
  */
 
 /**

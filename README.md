@@ -1,6 +1,8 @@
-# Baseline
+# LineBasis
 
 An open source project with huge ambition and expectations. The goal of this project is to fill a gap in the market of webdesign ecosystems replacing Wordpress, Figma (for web) and tools like Webflow. The success metric is to power 20% of the web in 5 years.
+
+**Official Website:** [linebasis.org](https://linebasis.org) (linebasis.com redirects here)
 
 ## The problems we're trying to solve:
 
@@ -29,7 +31,7 @@ An open source project with huge ambition and expectations. The goal of this pro
    - Media library, SEO tools, blog system
    - True WordPress replacement with modern technology
 
-**Design Experience**: Clean, light, dynamic (multiple artboards), you design with the actual code of your actual page. Designer focused. Allows you to design a visual identity for the website with variables and components, templates and themes. Allows you to design based on a baseline. Aligns text to baseline like InDesign, appealing to demanding Graphic Designers. Built in animation system in the future.
+**Design Experience**: Clean, light, dynamic (multiple artboards), you design with the actual code of your actual page. Designer focused. Allows you to design a visual identity for the website with variables and components, templates and themes. Allows you to design based on a line basis grid. Aligns text to baseline grid like InDesign, appealing to demanding Graphic Designers. Built in animation system in the future.
 
 **You own everything**: The code, the data, and the platform. Developers or curious designers can change anything. Extensible via plugin system, themes, and component libraries.
 
@@ -63,7 +65,7 @@ npm run build
 
 **⚠️ Early Development Phase**
 
-Baseline is currently in early development and is **NOT accepting external contributions** at this time.
+LineBasis is currently in early development and is **NOT accepting external contributions** at this time.
 
 **✅ Phase 1 - Designer Tool (COMPLETED):**
 - ✅ **DOM-based Canvas** - Infinite canvas with multiple artboards, drag-and-drop, selection, resize handles, multi-select

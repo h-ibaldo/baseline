@@ -2,7 +2,9 @@
 
 ## Overview
 
-Baseline is an open-source project with the ambitious goal of revolutionizing the web design ecosystem. Our mission is to fill the gap in the market by replacing WordPress, Figma (for web), and tools like Webflow with a more powerful, flexible, and user-friendly solution.
+LineBasis is an open-source project with the ambitious goal of revolutionizing the web design ecosystem. Our mission is to fill the gap in the market by replacing WordPress, Figma (for web), and tools like Webflow with a more powerful, flexible, and user-friendly solution.
+
+**Official Website:** [linebasis.org](https://linebasis.org) (linebasis.com redirects here)
 
 ## Success Metrics
 
@@ -36,7 +38,7 @@ Baseline is an open-source project with the ambitious goal of revolutionizing th
 - Design with actual code of your actual page
 - Designer-focused approach with professional tools
 - Visual identity system with variables and components
-- Baseline-aligned text (like InDesign) for demanding graphic designers
+- Baseline grid-aligned text (like InDesign) for demanding graphic designers
 - Built-in animation system for future releases
 
 ### Technical Approach
@@ -79,7 +81,7 @@ Baseline is an open-source project with the ambitious goal of revolutionizing th
 
 ## Long-term Vision
 
-Baseline aims to become the standard for web design and development, creating a new paradigm where design and code are seamlessly integrated. We envision a future where:
+LineBasis aims to become the standard for web design and development, creating a new paradigm where design and code are seamlessly integrated. We envision a future where:
 
 - Designers can create production-ready code without learning complex programming
 - Developers can design beautiful interfaces without specialized design tools

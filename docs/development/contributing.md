@@ -1,12 +1,12 @@
-# Contributing to Baseline
+# Contributing to LineBasis
 
-**⚠️ IMPORTANT: Baseline is currently in early development and is NOT accepting external contributions at this time.**
+**⚠️ IMPORTANT: LineBasis is currently in early development and is NOT accepting external contributions at this time.**
 
 This document outlines our future contribution guidelines. We will open contributions once the core foundation is established.
 
 ## Project Philosophy
 
-Baseline is a **highly vibe-coded, AI-friendly project** that will embrace both human and AI contributions while maintaining human authorship for all commits. We believe in transparent AI usage and human accountability.
+LineBasis is a **highly vibe-coded, AI-friendly project** that will embrace both human and AI contributions while maintaining human authorship for all commits. We believe in transparent AI usage and human accountability.
 
 ## When Will Contributions Open?
 
@@ -22,8 +22,8 @@ We will accept contributions once we have:
 ### 1. Setup
 ```bash
 # Fork and clone the repository
-git clone https://github.com/YOUR_USERNAME/baseline.git
-cd baseline
+git clone https://github.com/YOUR_USERNAME/linebasis.git
+cd linebasis
 
 # Install dependencies
 npm install
@@ -158,4 +158,4 @@ src/
 
 ---
 
-Thank you for your interest in Baseline! We look forward to collaborating with you once contributions open.
+Thank you for your interest in LineBasis! We look forward to collaborating with you once contributions open.

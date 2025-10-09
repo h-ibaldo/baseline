@@ -8,7 +8,7 @@ import {
 	snapDimensionToBaseline
 } from './baseline';
 
-describe('Baseline Grid Calculation Engine', () => {
+describe('Baseline Grid Calculation Engine (LineBasis Grid System)', () => {
 	const baselineHeight = 8;
 
 	describe('snapToBaseline', () => {

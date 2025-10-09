@@ -2,7 +2,7 @@
 
 ## Overview
 
-Baseline is built as a modern web application using SvelteKit and TypeScript, designed to be scalable, maintainable, and extensible.
+LineBasis is built as a modern web application using SvelteKit and TypeScript, designed to be scalable, maintainable, and extensible.
 
 ## Technology Stack
 
@@ -50,26 +50,26 @@ Baseline is built as a modern web application using SvelteKit and TypeScript, de
 ## Project Structure
 
 ```
-baseline/
+linebasis/
 ├── src/
 │   ├── routes/           # SvelteKit routes and pages
 │   ├── lib/              # Reusable components and utilities
 │   │   ├── components/   # UI components
 │   │   │   ├── canvas/   # Canvas-related components
-│   │   │   ├── baseline/ # Baseline grid components
+│   │   │   ├── linebasis/ # Line basis grid components
 │   │   │   └── ui/       # General UI components
 │   │   ├── stores/       # Svelte stores for state management
 │   │   │   ├── design.ts      # Design state (event sourcing)
-│   │   │   ├── baseline.ts    # Baseline grid config
+│   │   │   ├── linebasis.ts   # Line basis grid config
 │   │   │   └── history.ts     # Undo/redo history
 │   │   ├── utils/        # Utility functions
-│   │   │   ├── baseline.ts    # Baseline calculations
+│   │   │   ├── linebasis.ts   # Line basis calculations
 │   │   │   ├── ast.ts         # AST code generation
 │   │   │   └── storage.ts     # IndexedDB wrapper
 │   │   ├── workers/      # Web Workers
 │   │   │   └── code-generator.ts  # AST generation worker
 │   │   └── types/        # TypeScript type definitions
-│   │       ├── baseline.ts    # Baseline grid types
+│   │       ├── linebasis.ts   # Line basis grid types
 │   │       ├── design.ts      # Design state types
 │   │       └── events.ts      # Event sourcing types
 │   ├── app.html          # HTML template

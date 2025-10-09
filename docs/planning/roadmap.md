@@ -1,4 +1,4 @@
-# Project Roadmap
+# LineBasis Development Roadmap
 
 ## Phase 1: Foundation (Months 1-3)
 

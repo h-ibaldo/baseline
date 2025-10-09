@@ -156,7 +156,7 @@
 </script>
 
 <svelte:head>
-	<title>Canvas Demo - Baseline</title>
+	<title>Canvas Demo - LineBasis</title>
 </svelte:head>
 
 <main>

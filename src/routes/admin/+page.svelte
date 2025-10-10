@@ -113,7 +113,6 @@
 		<nav class="nav">
 			<a href="/admin" class="nav-link active">Dashboard</a>
 			<a href="/admin/pages" class="nav-link">Pages</a>
-			<a href="/admin/posts" class="nav-link">Posts</a>
 			<a href="/admin/media" class="nav-link">Media</a>
 			<a href="/admin/users" class="nav-link">Users</a>
 			<a href="/admin/plugins" class="nav-link">Plugins</a>

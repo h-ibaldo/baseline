@@ -175,7 +175,7 @@
 					<span>HTML directory:</span>
 					<input
 						type="text"
-						bind:value={config.fileStructure!.htmlDir}
+						bind:value={config.fileStructure.htmlDir}
 						placeholder="."
 						class="text-input"
 					/>
@@ -185,7 +185,7 @@
 					<span>CSS directory:</span>
 					<input
 						type="text"
-						bind:value={config.fileStructure!.cssDir}
+						bind:value={config.fileStructure.cssDir}
 						placeholder="css"
 						class="text-input"
 					/>
@@ -195,7 +195,7 @@
 					<span>Assets directory:</span>
 					<input
 						type="text"
-						bind:value={config.fileStructure!.assetsDir}
+						bind:value={config.fileStructure.assetsDir}
 						placeholder="assets"
 						class="text-input"
 					/>

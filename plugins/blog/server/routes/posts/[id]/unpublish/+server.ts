@@ -6,7 +6,7 @@
 
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getPostById, unpublishPost } from '$lib/server/services/posts';
+import { getPostById, unpublishPost } from '../../../../services/posts';
 import { requireAuth } from '$lib/server/middleware/auth';
 
 export const POST: RequestHandler = async (event) => {

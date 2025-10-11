@@ -18,6 +18,8 @@
 		"db:migrate": "npm run db:compose && prisma migrate dev",
 		"db:generate": "prisma generate",
 		"db:studio": "prisma studio",
+		"migrate:plugins": "tsx scripts/migrate-to-plugins.ts",
+		"migrate:plugins:check": "tsx scripts/migrate-to-plugins.ts --dry-run",
 		"setup": "npm run db:compose && prisma migrate dev && prisma generate && tsx scripts/setup-admin.ts"
 	},
 	"devDependencies": {

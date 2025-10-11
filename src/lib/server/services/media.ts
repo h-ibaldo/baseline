@@ -73,26 +73,25 @@ export async function getMedia(options?: {
 		where.uploadedBy = options.uploadedBy;
 	}
 
-	const result = await Promise.all([
-		prisma.media.findMany({
-			where,
-			include: {
-				uploader: {
-					select: {
-						id: true,
-						name: true,
-						email: true
-					}
+	const media = await prisma.media.findMany({
+		where,
+		include: {
+			uploader: {
+				select: {
+					id: true,
+					name: true,
+					email: true
 				}
-			},
-			orderBy: { createdAt: 'desc' },
-			take: options?.limit,
-			skip: options?.offset
-		}),
-		prisma.media.count({ where })
+			}
+		},
+		orderBy: { createdAt: 'desc' },
+		take: options?.limit,
+		skip: options?.offset
 	});
 
-	return { media: result[0], total: result[1] };
+	const total = await prisma.media.count({ where });
+
+	return { media, total };
 }
 
 /**

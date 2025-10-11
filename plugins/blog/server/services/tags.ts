@@ -5,7 +5,7 @@
  * Server-side only
  */
 
-import { db } from '../db/client';
+import { prisma } from '$lib/server/db/client';
 import type { Tag } from '@prisma/client';
 
 export interface CreateTagInput {

@@ -40,15 +40,24 @@
 		publishing = true;
 
 		try {
+			const token = localStorage.getItem('access_token');
+			if (!token) {
+				status = '❌ Error: Not authenticated. Please login at /admin/login first.';
+				publishing = false;
+				return;
+			}
+
 			const response = await fetch('/api/pages', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`
+				},
 				body: JSON.stringify({
 					slug: `demo-${Date.now()}`,
 					title: 'Demo Page',
 					description: 'A demonstration of the publishing system',
-					designEvents: JSON.stringify(sampleDesign),
-					authorId: 'demo-user' // In real app, use actual user ID
+					designEvents: JSON.stringify(sampleDesign)
 				})
 			});
 
@@ -76,9 +85,19 @@
 		publishing = true;
 
 		try {
+			const token = localStorage.getItem('access_token');
+			if (!token) {
+				status = '❌ Error: Not authenticated. Please login at /admin/login first.';
+				publishing = false;
+				return;
+			}
+
 			const response = await fetch(`/api/pages/${pageId}/publish`, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' }
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`
+				}
 			});
 
 			if (!response.ok) {

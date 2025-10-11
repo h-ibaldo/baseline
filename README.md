@@ -79,19 +79,40 @@ LineBasis is currently in early development and is **NOT accepting external cont
 
 **Phase 1 is complete!** You can now design in Baseline and export production-ready HTML/CSS.
 
-**🚧 Phase 1.5 - CMS Foundation (In Progress):**
+**✅ Phase 1.5 - CMS Foundation (COMPLETED):**
 - ✅ **Database Layer** - Complete Prisma ORM setup with SQLite, CRUD services for pages, users, media, and settings
 - ✅ **Publishing System** - Full design-to-live-page workflow with API endpoints and SSR rendering
-- 📋 Authentication & JWT
-- 📋 Media upload
-- 📋 Admin panel
+- ✅ **Authentication & JWT** - User registration, login, JWT tokens, session management, role-based access
+- ✅ **Media Upload** - File upload with image optimization, storage management, validation
+- ✅ **Admin Panel** - Beautiful admin interface with dashboard, login page, and statistics
 
-**📋 Phase 2 - CMS Core Features (Planned):**
-- Advanced page management
-- Multi-page website management
-- SEO tools and optimization
-- Blog system
-- Custom post types
+**Phase 1.5 is complete!** LineBasis is now a functional self-hosted CMS!
+
+**✅ Phase 2 - CMS Core Features (COMPLETED):**
+- ✅ Enhanced admin panel (page manager, media library UI, user management)
+- ✅ Advanced publishing (preview, scheduling, revisions UI)
+- ✅ SEO tools and optimization
+- ✅ **Plugin Architecture** - Extensible plugin system with lifecycle hooks, schema composition, and dynamic loading
+- ✅ **Blog Plugin** - First official plugin with posts, categories, tags, and SEO support
+
+**Phase 2 is complete!** LineBasis now has a powerful plugin architecture!
+
+**🔌 Plugin System:**
+- **Modular Architecture**: Extend LineBasis without touching core code
+- **Database Integration**: Plugins can add their own Prisma models via automatic schema composition
+- **API Routes**: Plugins register their own API endpoints
+- **Admin UI**: Plugins add custom admin pages and navigation
+- **Lifecycle Hooks**: React to core events (page publish, user create, etc.)
+- **Settings**: Each plugin can define configurable settings
+- **Blog Plugin**: Full-featured blog system as the first official plugin
+
+**📋 Phase 3 - Advanced Features (Next):**
+- Theme system and marketplace
+- Component marketplace
+- Advanced SEO and analytics
+- Multi-language support
+- Custom post types framework
+- API documentation and GraphQL
 
 Contributions will open once we have a stable foundation. Watch the repository for updates!
 
@@ -106,12 +127,23 @@ Contributions will open once we have a stable foundation. Watch the repository f
 - **Component library**: 9 baseline-aware components ready to use
 - **Export code**: Generate clean HTML/CSS and download as ZIP
 
-**CMS Mode (Planned):**
+**CMS Mode (Available Now!):**
 - **Self-hosted**: Install on your own server, full control
-- **Direct publishing**: Design → Publish → Live on your domain
-- **Content management**: Pages, media library, users, SEO
+- **Authentication**: User registration, login, JWT tokens, sessions
+- **Media management**: Upload images/files with automatic optimization
+- **Publishing**: Design → Publish → Live on your domain (via API)
+- **Admin panel**: Beautiful interface for managing your CMS
+- **Plugin system**: Extend functionality without touching core code
+- **Blog plugin**: Full-featured blog with posts, categories, and tags
 - **Modern stack**: SvelteKit + TypeScript + SQLite/PostgreSQL
-- **WordPress replacement**: All the features, modern technology
 - **Multi-user**: Role-based permissions (Admin, Editor, Author)
 - **You own everything**: Code, data, platform - no vendor lock-in
-test
+
+**Quick Start:**
+```bash
+npm install
+npm run setup        # Create database & admin user
+npm run dev         # Start server
+# Visit http://localhost:5173/admin/login
+# Default: admin@linebasis.com / admin123
+```

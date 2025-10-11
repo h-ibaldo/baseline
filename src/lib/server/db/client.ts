@@ -1,12 +1,14 @@
 /**
  * Database Client
- * 
+ *
  * Prisma client singleton for database operations
  * Server-side only
  */
 
 import { PrismaClient } from '@prisma/client';
-import { dev } from '$app/environment';
+
+// Determine if we're in dev mode
+const isDev = process.env.NODE_ENV !== 'production';
 
 // Singleton pattern to prevent multiple instances
 const globalForPrisma = globalThis as unknown as {
@@ -16,10 +18,13 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
 	globalForPrisma.prisma ??
 	new PrismaClient({
-		log: dev ? ['query', 'error', 'warn'] : ['error']
+		log: isDev ? ['query', 'error', 'warn'] : ['error']
 	});
 
-if (dev) globalForPrisma.prisma = prisma;
+// Export as db for convenience
+export const db = prisma;
+
+if (isDev) globalForPrisma.prisma = prisma;
 
 /**
  * Disconnect from database

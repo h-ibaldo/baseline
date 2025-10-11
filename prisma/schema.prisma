@@ -100,6 +100,7 @@ model User {
   pageRevisions PageRevision[]
   media         Media[]
   sessions      Session[]
+  posts         Post[]
 
   @@index([email])
   @@index([role])
@@ -120,8 +121,111 @@ model Session {
 
 // Site Settings - Global configuration
 model Setting {
-  key       String   @id
-  value     String
-  type      String   @default("string") // string, number, boolean, json
+  key         String   @id
+  value       String
+  type        String   @default("string") // string, number, boolean, json
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+// Plugins - Installed plugins registry
+model Plugin {
+  id          String   @id // Plugin ID (e.g., '@linebasis/blog')
+  name        String
+  version     String
+  isActive    Boolean  @default(false)
+  settings    String?  // JSON string of plugin settings
+  installedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+
+// ========================================
+// Plugin: @linebasis/blog
+// ========================================
+
+// Blog Plugin Schema
+// This extends the core LineBasis schema with blog-specific models
+// Blog Posts
+model Post {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  excerpt     String?
+  content     String   // Markdown or HTML content
+  featuredImage String?
+  // Status and metadata
+  status      String   @default("draft") // draft, published, scheduled, archived
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaImage       String?
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+  scheduledFor DateTime?
+  // Relations
+  categories  PostCategory[]
+  tags        PostTag[]
+  @@index([slug])
+  @@index([status])
+  @@index([authorId])
+  @@index([publishedAt])
+}
+// Categories
+model Category {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  description String?
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[] @relation("CategoryHierarchy")
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // Relations
+  posts       PostCategory[]
+  @@index([slug])
+  @@index([parentId])
+}
+// Tags
+model Tag {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  // Timestamps
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  // Relations
+  posts     PostTag[]
+  @@index([slug])
+}
+// Post-Category junction (many-to-many)
+model PostCategory {
+  postId     String
+  categoryId String
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  @@id([postId, categoryId])
+  @@index([postId])
+  @@index([categoryId])
+}
+// Post-Tag junction (many-to-many)
+model PostTag {
+  postId  String
+  tagId   String
+  post    Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag     Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  @@id([postId, tagId])
+  @@index([postId])
+  @@index([tagId])
 }

@@ -58,7 +58,7 @@ export class HooksManager {
 				const startTime = Date.now();
 
 				try {
-					const result = await hook(...args);
+					const result = await (hook as Function)(...args);
 					const executionTime = Date.now() - startTime;
 
 					results.push({
@@ -98,7 +98,7 @@ export class HooksManager {
 
 			if (hook && typeof hook === 'function') {
 				try {
-					const result = await hook(value, ...args);
+					const result = await (hook as Function)(value, ...args);
 					if (result !== undefined) {
 						value = result;
 					}

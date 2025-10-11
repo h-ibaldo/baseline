@@ -178,7 +178,7 @@
 
 	<!-- Baseline Grid Overlay -->
 	{#if $baselineConfig.showGrid}
-		<BaselineGrid config={$baselineConfig} />
+		<BaselineGrid config={$baselineConfig} width={1920} height={1080} />
 	{/if}
 
 	<!-- Components Showcase -->

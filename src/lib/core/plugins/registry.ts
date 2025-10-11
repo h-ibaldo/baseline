@@ -223,7 +223,7 @@ export class PluginRegistry implements IPluginRegistry {
 			const hook = plugin.manifest.hooks?.[hookName];
 			if (hook && typeof hook === 'function') {
 				try {
-					const result = await hook(...args);
+					const result = await (hook as Function)(...args);
 					if (result !== undefined) {
 						results.push(result);
 					}

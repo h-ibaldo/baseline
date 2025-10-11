@@ -5,7 +5,7 @@
  * Server-side only
  */
 
-import { db } from '../db/client';
+import { prisma } from '$lib/server/db/client';
 import type { Category } from '@prisma/client';
 
 export interface CreateCategoryInput {
@@ -30,7 +30,7 @@ export interface UpdateCategoryInput {
  * Create category
  */
 export async function createCategory(data: CreateCategoryInput): Promise<Category> {
-	return db.category.create({
+	return prisma.category.create({
 		data
 	});
 }

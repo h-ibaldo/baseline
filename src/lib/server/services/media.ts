@@ -73,7 +73,7 @@ export async function getMedia(options?: {
 		where.uploadedBy = options.uploadedBy;
 	}
 
-	const [media, total] = await Promise.all([
+	const result = await Promise.all([
 		prisma.media.findMany({
 			where,
 			include: {
@@ -92,7 +92,7 @@ export async function getMedia(options?: {
 		prisma.media.count({ where })
 	});
 
-	return { media, total };
+	return { media: result[0], total: result[1] };
 }
 
 /**

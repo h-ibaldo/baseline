@@ -27,13 +27,25 @@ LineBasis is built as a modern web application using SvelteKit and TypeScript, d
 - **Architecture**: Local-first, works entirely offline
 - **Export**: Generate code as ZIP files
 
-**Mode 2: CMS (Self-Hosted)**
+**Mode 2: CMS (Self-Hosted)** ✅ **IMPLEMENTED**
 - **Runtime**: Node.js (via SvelteKit adapter-node)
 - **Database**: SQLite (simple, file-based) or PostgreSQL (scalable)
 - **Architecture**: Full-stack SSR with SvelteKit
-- **Storage**: Database + filesystem for media
-- **Authentication**: JWT-based with bcrypt password hashing
-- **Publishing**: Design → Database → SSR pages on custom domain
+- **Storage**: Database + filesystem for media (`static/uploads/`)
+- **Authentication**: JWT-based with bcrypt password hashing ✅
+  - Access tokens (7-day expiry)
+  - Refresh tokens (30-day expiry, HTTP-only cookies)
+  - Role-based access control (admin, editor, author)
+  - Session management in database
+- **Media Management**: File upload with Sharp optimization ✅
+  - Image optimization (auto-resize, quality compression)
+  - Support for images, PDFs, videos
+  - Storage statistics tracking
+- **Admin Panel**: Modern interface for CMS management ✅
+  - Login page with authentication
+  - Dashboard with statistics
+  - Protected routes
+- **Publishing**: Design → Database → SSR pages on custom domain ✅
 - **Philosophy**: You own your data and server. Self-hosted, no vendor lock-in.
 
 **Optional Future: Cloud Sync**
@@ -136,7 +148,116 @@ Canvas (Infinite Viewport)
 - **Features**: Color schemes, typography, spacing, components
 - **Architecture**: Token-based system with inheritance
 
-### 5. Baseline Grid System
+### 5. Authentication System ✅ **NEW - Phase 1.5**
+- **Purpose**: User authentication, authorization, and session management
+- **Technology**: JWT tokens + bcrypt + database sessions
+- **Architecture**:
+  ```typescript
+  // JWT Tokens
+  - Access Token: 7-day expiry, sent as Bearer token
+  - Refresh Token: 30-day expiry, stored in HTTP-only cookie
+
+  // Services
+  - auth.ts: Register, login, logout, token management
+  - middleware/auth.ts: requireAuth, requireRole, requireAdmin, requireEditor
+
+  // Database
+  - User model: email, passwordHash, role, status
+  - Session model: userId, token, expiresAt
+  ```
+- **Features**:
+  - User registration and login
+  - Password hashing with bcrypt (10 rounds)
+  - JWT access and refresh tokens
+  - Role-based access control (admin, editor, author)
+  - Session management in database
+  - HTTP-only cookies for refresh tokens
+  - Comprehensive middleware for route protection
+- **Security**:
+  - Passwords hashed with bcrypt
+  - JWT tokens signed with secret
+  - HTTP-only cookies prevent XSS
+  - SameSite cookies prevent CSRF
+  - Role-based authorization
+  - Input validation on all endpoints
+
+**Files**:
+- `src/lib/server/services/auth.ts` - Auth service (~250 lines)
+- `src/lib/server/middleware/auth.ts` - Auth middleware (~120 lines)
+- `src/routes/api/auth/*` - 6 API endpoints
+
+### 6. Media Upload System ✅ **NEW - Phase 1.5**
+- **Purpose**: File upload, storage, and optimization
+- **Technology**: Sharp (image processing) + filesystem storage
+- **Architecture**:
+  ```typescript
+  // Upload Flow
+  1. Validate file (type, size)
+  2. Save to static/uploads/ with unique filename
+  3. If image → optimize with Sharp
+  4. Create Media record in database
+  5. Return URL and metadata
+
+  // Optimization
+  - Auto-resize images > 2000px width
+  - Quality optimization (JPEG 85%, PNG level 9, WebP 85%)
+  - Dimension detection
+  - Format-specific optimization
+  ```
+- **Features**:
+  - File type validation (images, PDFs, videos)
+  - File size limits (10MB default)
+  - Automatic image optimization
+  - Unique filename generation
+  - Metadata tracking (size, dimensions, mime type)
+  - Storage statistics per user
+  - Alt text and captions support
+- **Supported Formats**:
+  - Images: JPEG, PNG, GIF, WebP, SVG
+  - Documents: PDF
+  - Videos: MP4
+
+**Files**:
+- `src/lib/server/services/upload.ts` - Upload service (~220 lines)
+- `src/routes/api/media/*` - 3 API endpoints
+
+### 7. Admin Panel ✅ **NEW - Phase 1.5**
+- **Purpose**: Web interface for CMS management
+- **Technology**: SvelteKit pages with authentication
+- **Architecture**:
+  ```typescript
+  // Pages
+  - /admin/login - Login page
+  - /admin - Dashboard (protected)
+  - /admin/pages - Page manager (Phase 2)
+  - /admin/media - Media library (Phase 2)
+
+  // Auth Flow
+  1. User logs in → stores access token in localStorage
+  2. Protected pages check token on mount
+  3. If invalid → redirect to login
+  4. API calls include token in Authorization header
+  ```
+- **Features**:
+  - Beautiful gradient login page
+  - Dashboard with statistics
+  - User info with role badges
+  - Quick action cards
+  - Responsive design
+  - Protected route handling
+  - Auto-redirect if not authenticated
+- **Design**:
+  - Modern gradient backgrounds
+  - Card-based layout
+  - Responsive grid system
+  - Clean typography
+  - Professional color scheme
+
+**Files**:
+- `src/routes/admin/login/+page.svelte` - Login page (~170 lines)
+- `src/routes/admin/+page.svelte` - Dashboard (~250 lines)
+
+### 8. Baseline Grid System
 - **Purpose**: Typography and layout alignment system (like InDesign)
 - **Technology**: CSS Grid + Custom calculation engine
 - **Architecture**:

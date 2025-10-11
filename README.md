@@ -88,12 +88,31 @@ LineBasis is currently in early development and is **NOT accepting external cont
 
 **Phase 1.5 is complete!** LineBasis is now a functional self-hosted CMS!
 
-**📋 Phase 2 - CMS Core Features (Next):**
-- Enhanced admin panel (page manager, media library UI, user management)
-- Advanced publishing (preview, scheduling, revisions UI)
-- SEO tools and optimization
-- Blog system
-- Custom post types
+**✅ Phase 2 - CMS Core Features (COMPLETED):**
+- ✅ Enhanced admin panel (page manager, media library UI, user management)
+- ✅ Advanced publishing (preview, scheduling, revisions UI)
+- ✅ SEO tools and optimization
+- ✅ **Plugin Architecture** - Extensible plugin system with lifecycle hooks, schema composition, and dynamic loading
+- ✅ **Blog Plugin** - First official plugin with posts, categories, tags, and SEO support
+
+**Phase 2 is complete!** LineBasis now has a powerful plugin architecture!
+
+**🔌 Plugin System:**
+- **Modular Architecture**: Extend LineBasis without touching core code
+- **Database Integration**: Plugins can add their own Prisma models via automatic schema composition
+- **API Routes**: Plugins register their own API endpoints
+- **Admin UI**: Plugins add custom admin pages and navigation
+- **Lifecycle Hooks**: React to core events (page publish, user create, etc.)
+- **Settings**: Each plugin can define configurable settings
+- **Blog Plugin**: Full-featured blog system as the first official plugin
+
+**📋 Phase 3 - Advanced Features (Next):**
+- Theme system and marketplace
+- Component marketplace
+- Advanced SEO and analytics
+- Multi-language support
+- Custom post types framework
+- API documentation and GraphQL
 
 Contributions will open once we have a stable foundation. Watch the repository for updates!
 
@@ -114,6 +133,8 @@ Contributions will open once we have a stable foundation. Watch the repository f
 - **Media management**: Upload images/files with automatic optimization
 - **Publishing**: Design → Publish → Live on your domain (via API)
 - **Admin panel**: Beautiful interface for managing your CMS
+- **Plugin system**: Extend functionality without touching core code
+- **Blog plugin**: Full-featured blog with posts, categories, and tags
 - **Modern stack**: SvelteKit + TypeScript + SQLite/PostgreSQL
 - **Multi-user**: Role-based permissions (Admin, Editor, Author)
 - **You own everything**: Code, data, platform - no vendor lock-in

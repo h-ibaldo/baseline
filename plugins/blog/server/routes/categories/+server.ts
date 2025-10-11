@@ -7,7 +7,7 @@
 
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getCategories, createCategory } from '$lib/server/services/categories';
+import { getCategories, createCategory } from '../../services/categories';
 import { requireAuth, requireRole } from '$lib/server/middleware/auth';
 
 export const GET: RequestHandler = async (event) => {

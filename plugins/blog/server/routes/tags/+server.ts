@@ -7,7 +7,7 @@
 
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getTags, createTag, searchTags } from '$lib/server/services/tags';
+import { getTags, createTag, searchTags } from '../../services/tags';
 import { requireAuth } from '$lib/server/middleware/auth';
 
 export const GET: RequestHandler = async (event) => {

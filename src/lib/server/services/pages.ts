@@ -249,3 +249,68 @@ export async function searchPages(query: string): Promise<Page[]> {
 	});
 }
 
+/**
+ * Create a revision snapshot of a page
+ */
+export async function createRevision(pageId: string, createdBy: string): Promise<void> {
+	const page = await prisma.page.findUnique({
+		where: { id: pageId },
+		select: { designEvents: true }
+	});
+
+	if (!page) {
+		throw new Error('Page not found');
+	}
+
+	await prisma.pageRevision.create({
+		data: {
+			pageId,
+			designEvents: page.designEvents,
+			createdBy
+		}
+	});
+}
+
+/**
+ * Restore a page to a specific revision
+ */
+export async function restoreRevision(pageId: string, revisionId: string, restoredBy: string): Promise<void> {
+	const revision = await prisma.pageRevision.findUnique({
+		where: { id: revisionId },
+		select: { designEvents: true, pageId: true }
+	});
+
+	if (!revision || revision.pageId !== pageId) {
+		throw new Error('Revision not found');
+	}
+
+	// Create a new revision before restoring (so we can undo the restore)
+	await createRevision(pageId, restoredBy);
+
+	// Restore the page to the revision state
+	await prisma.page.update({
+		where: { id: pageId },
+		data: {
+			designEvents: revision.designEvents,
+			updatedAt: new Date()
+		}
+	});
+}
+
+/**
+ * Delete old revisions (keep last N revisions)
+ */
+export async function pruneRevisions(pageId: string, keepCount: number = 10): Promise<void> {
+	const revisions = await prisma.pageRevision.findMany({
+		where: { pageId },
+		orderBy: { createdAt: 'desc' },
+		select: { id: true }
+	});
+
+	if (revisions.length > keepCount) {
+		const toDelete = revisions.slice(keepCount).map(r => r.id);
+		await prisma.pageRevision.deleteMany({
+			where: { id: { in: toDelete } }
+		});
+	}
+}

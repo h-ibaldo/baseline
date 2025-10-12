@@ -150,9 +150,9 @@ export async function searchMedia(query: string): Promise<Media[]> {
 	return prisma.media.findMany({
 		where: {
 			OR: [
-				{ filename: { contains: query, mode: 'insensitive' } },
-				{ altText: { contains: query, mode: 'insensitive' } },
-				{ caption: { contains: query, mode: 'insensitive' } }
+				{ filename: { contains: query } },
+				{ altText: { contains: query } },
+				{ caption: { contains: query } }
 			]
 		},
 		include: {

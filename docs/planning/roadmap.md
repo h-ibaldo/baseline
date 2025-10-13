@@ -303,11 +303,19 @@
 
 ### SEO & Performance
 - [ ] SEO metadata editor (title, description, OG tags)
-- [ ] Sitemap generation (XML)
+- [x] Sitemap generation (XML) ✅ **COMPLETED**
 - [ ] Robots.txt management
 - [ ] Page caching system
 - [ ] Image optimization and lazy loading
 - [ ] Performance monitoring
+
+**Sitemap Generation - COMPLETED:**
+- Automatic XML sitemap at `/sitemap.xml`
+- Includes all published pages and blog posts
+- SEO-optimized with priority and changefreq
+- Admin API to view sitemap statistics
+- Configurable base URL via site settings
+- Automatically detects and includes blog plugin posts
 
 ### Advanced Features
 - [ ] Multi-language support (i18n)

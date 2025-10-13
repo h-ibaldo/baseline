@@ -76,6 +76,19 @@ describe('Sitemap Service', () => {
 			expect(entries[0].url).toBe('http://localhost:5173');
 		});
 
+	it('should normalize trailing slash in site_url', async () => {
+		mockPrisma.setting.findUnique.mockResolvedValue({ value: 'https://example.com/' });
+		mockPrisma.page.findMany.mockResolvedValue([
+			{ slug: 'about', updatedAt: new Date('2024-01-01') }
+		]);
+		mockPrisma.plugin.findUnique.mockResolvedValue(null);
+
+		const entries = await getSitemapEntries();
+		// homepage has no trailing slash; page URLs shouldn't have double slashes
+		expect(entries[0].url).toBe('https://example.com');
+		expect(entries[1].url).toBe('https://example.com/about');
+	});
+
 		it('should set higher priority for homepage and index pages', async () => {
 			mockPrisma.setting.findUnique.mockResolvedValue({
 				value: 'https://example.com'
@@ -153,6 +166,21 @@ describe('Sitemap Service', () => {
 			expect(xml).toContain('&lt;');
 			expect(xml).toContain('&gt;');
 		});
+
+	it('should include blog entries when blog plugin is active', async () => {
+		mockPrisma.setting.findUnique.mockResolvedValue({ value: 'https://example.com' });
+		mockPrisma.page.findMany.mockResolvedValue([]);
+		mockPrisma.plugin.findUnique.mockResolvedValue({ id: '@linebasis/blog', isActive: true });
+		// simulate prisma.post.findMany via any
+		(mockPrisma as any).post = {
+			findMany: vi.fn().mockResolvedValue([
+				{ slug: 'hello-world', updatedAt: new Date('2024-02-01') }
+			])
+		};
+
+		const xml = await generateSitemap();
+		expect(xml).toContain('<loc>https://example.com/blog/hello-world</loc>');
+	});
 	});
 
 	describe('getSitemapStats', () => {

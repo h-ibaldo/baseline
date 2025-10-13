@@ -22,7 +22,9 @@ async function getSitemapConfig(): Promise<{ baseUrl: string }> {
 		where: { key: 'site_url' }
 	});
 
-	const baseUrl = setting?.value || 'http://localhost:5173';
+	const rawUrl = setting?.value || 'http://localhost:5173';
+	// Normalize: drop trailing slash to avoid double slashes when composing URLs
+	const baseUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
 	return { baseUrl };
 }
 
@@ -46,7 +48,7 @@ async function getPublishedPages(): Promise<SitemapEntry[]> {
 	const { baseUrl } = await getSitemapConfig();
 
 	return pages.map((page) => ({
-		url: `${baseUrl}/${page.slug}`,
+		url: `${baseUrl}/${encodeURI(page.slug)}`,
 		lastmod: page.updatedAt.toISOString(),
 		changefreq: 'weekly' as const,
 		priority: page.slug === 'index' || page.slug === 'home' ? 1.0 : 0.8
@@ -88,7 +90,7 @@ async function getBlogPosts(): Promise<SitemapEntry[]> {
 		const { baseUrl } = await getSitemapConfig();
 
 		return posts.map((post: any) => ({
-			url: `${baseUrl}/blog/${post.slug}`,
+			url: `${baseUrl}/blog/${encodeURI(post.slug)}`,
 			lastmod: post.updatedAt.toISOString(),
 			changefreq: 'monthly' as const,
 			priority: 0.7

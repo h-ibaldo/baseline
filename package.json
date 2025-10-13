@@ -3,6 +3,10 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
+	"engines": {
+		"node": ">=20.0.0",
+		"npm": ">=10.0.0"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -23,27 +27,25 @@
 		"setup": "npm run db:compose && prisma migrate dev && prisma generate && tsx scripts/setup-admin.ts"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^2.0.0",
-		"@sveltejs/kit": "^1.20.0",
-		"@sveltejs/vite-plugin-svelte": "^2.0.0",
-		"@testing-library/jest-dom": "^6.9.1",
+		"@sveltejs/adapter-auto": "^3.3.1",
+		"@sveltejs/kit": "^2.10.0",
+		"@sveltejs/vite-plugin-svelte": "^3.1.2",
+		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.8",
 		"@types/bcrypt": "^6.0.0",
-		"@types/jszip": "^3.4.0",
 		"@vitest/ui": "^3.2.4",
 		"jsdom": "^27.0.0",
 		"prisma": "^6.16.3",
-		"svelte": "^4.0.0",
-		"svelte-check": "^3.0.0",
+		"svelte": "^4.2.19",
+		"svelte-check": "^4.1.1",
 		"tsx": "^4.20.6",
-		"typescript": "^5.0.0",
-		"vite": "^4.0.0",
+		"typescript": "^5.7.2",
+		"vite": "^5.4.11",
 		"vitest": "^3.2.4"
 	},
 	"dependencies": {
 		"@prisma/client": "^6.16.3",
 		"@types/jsonwebtoken": "^9.0.10",
-		"@types/sharp": "^0.31.1",
 		"bcrypt": "^6.0.0",
 		"jsonwebtoken": "^9.0.2",
 		"jszip": "^3.10.1",

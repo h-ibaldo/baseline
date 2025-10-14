@@ -13,6 +13,7 @@ export interface SitemapEntry {
 	lastmod?: string;
 	changefreq?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
 	priority?: number;
+	_isPluginEntry?: boolean; // Internal flag for tracking
 }
 
 /**
@@ -57,10 +58,33 @@ async function getPublishedPages(): Promise<SitemapEntry[]> {
 }
 
 /**
+ * Normalize plugin-provided URL
+ * - If relative, prefix with baseUrl
+ * - If absolute, ensure no double slashes and proper encoding
+ */
+function normalizePluginUrl(url: string, baseUrl: string): string {
+	// Relative path: prefix with baseUrl
+	if (url.startsWith('/')) {
+		return `${baseUrl}${encodeURI(url)}`;
+	}
+
+	// Absolute URL: normalize double slashes and encode path
+	try {
+		const parsed = new URL(url);
+		parsed.pathname = encodeURI(decodeURI(parsed.pathname));
+		return parsed.toString();
+	} catch {
+		// Invalid URL: treat as relative
+		return `${baseUrl}${encodeURI(url.startsWith('/') ? url : '/' + url)}`;
+	}
+}
+
+/**
  * Get plugin-provided sitemap entries via hooks
  */
 async function getPluginEntries(): Promise<SitemapEntry[]> {
 	try {
+		const { baseUrl } = await getSitemapConfig();
 		const hooks = HooksManager.getInstance();
 		const results = await hooks.execute<SitemapEntry[]>('getSitemapEntries');
 
@@ -69,7 +93,12 @@ async function getPluginEntries(): Promise<SitemapEntry[]> {
 			r.success && Array.isArray(r.result) ? r.result : []
 		);
 
-		return pluginEntries;
+		// Normalize URLs and mark as plugin entries
+		return pluginEntries.map((entry) => ({
+			...entry,
+			url: normalizePluginUrl(entry.url, baseUrl),
+			_isPluginEntry: true
+		}));
 	} catch (error) {
 		console.error('Error fetching plugin sitemap entries:', error);
 		return [];
@@ -135,17 +164,14 @@ function escapeXml(unsafe: string): string {
  */
 export async function getSitemapStats() {
 	const entries = await getSitemapEntries();
-	const { baseUrl } = await getSitemapConfig();
 
-	// Count homepage and core pages (not from plugins)
-	const coreEntries = entries.filter(
-		(e) => e.url === baseUrl || (!e.url.includes('/blog/') && !e.url.match(/\/[a-z-]+\/[^/]+$/))
-	);
+	// Count using internal flag
+	const pluginCount = entries.filter((e) => e._isPluginEntry).length;
 
 	return {
 		total: entries.length,
-		pages: coreEntries.length,
-		pluginEntries: entries.length - coreEntries.length,
+		pages: entries.length - pluginCount,
+		pluginEntries: pluginCount,
 		lastGenerated: new Date().toISOString()
 	};
 }

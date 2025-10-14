@@ -122,6 +122,86 @@ describe('Sitemap Service', () => {
 			expect(entries[0].url).toBe('http://localhost:5173');
 		});
 
+		it('should normalize plugin relative URLs', async () => {
+			mockPrisma.setting.findUnique.mockResolvedValue({
+				value: 'https://example.com'
+			});
+			mockPrisma.page.findMany.mockResolvedValue([]);
+
+			// Plugin returns relative path
+			mockHooksManager.execute.mockResolvedValue([
+				{
+					success: true,
+					result: [
+						{
+							url: '/blog/my-post',
+							lastmod: '2024-01-01T00:00:00.000Z',
+							changefreq: 'monthly',
+							priority: 0.7
+						}
+					]
+				}
+			]);
+
+			const entries = await getSitemapEntries();
+
+			expect(entries[1].url).toBe('https://example.com/blog/my-post');
+			expect(entries[1]._isPluginEntry).toBe(true);
+		});
+
+		it('should normalize absolute URLs with trailing slash', async () => {
+			mockPrisma.setting.findUnique.mockResolvedValue({
+				value: 'https://example.com/'
+			});
+			mockPrisma.page.findMany.mockResolvedValue([]);
+
+			// Plugin returns absolute URL
+			mockHooksManager.execute.mockResolvedValue([
+				{
+					success: true,
+					result: [
+						{
+							url: 'https://example.com//blog/post-1',
+							lastmod: '2024-01-01T00:00:00.000Z',
+							changefreq: 'monthly',
+							priority: 0.7
+						}
+					]
+				}
+			]);
+
+			const entries = await getSitemapEntries();
+
+			// Should normalize and encode
+			expect(entries[0].url).toBe('https://example.com');
+			expect(entries[1].url).not.toContain('//blog');
+		});
+
+		it('should encode special characters in plugin URLs', async () => {
+			mockPrisma.setting.findUnique.mockResolvedValue({
+				value: 'https://example.com'
+			});
+			mockPrisma.page.findMany.mockResolvedValue([]);
+
+			mockHooksManager.execute.mockResolvedValue([
+				{
+					success: true,
+					result: [
+						{
+							url: '/blog/hello world',
+							lastmod: '2024-01-01T00:00:00.000Z',
+							changefreq: 'monthly',
+							priority: 0.7
+						}
+					]
+				}
+			]);
+
+			const entries = await getSitemapEntries();
+
+			expect(entries[1].url).toContain('hello%20world');
+		});
+
 		it('should set higher priority for homepage and index pages', async () => {
 			mockPrisma.setting.findUnique.mockResolvedValue({
 				value: 'https://example.com'

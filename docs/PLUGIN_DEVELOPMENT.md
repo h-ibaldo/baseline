@@ -604,47 +604,62 @@ The `getSitemapEntries` hook allows your plugin to contribute entries to the sit
 **Purpose:** Automatically include your plugin's content in search engine sitemaps for better SEO.
 
 **Contract:**
-- Must return an array of sitemap entry objects
-- Each entry must have a `url` (full URL including base domain)
+- Must return an array of `SitemapEntry` objects
+- Each entry must have a `url` (relative path like `/blog/post` preferred, or absolute)
 - Optional fields: `lastmod` (ISO date string), `changefreq`, `priority` (0.0-1.0)
 - Hook is called every time the sitemap is generated
 - Should only return publicly accessible, published content
+- **Note:** Core will normalize base URLs (removes trailing slash), encode slugs, and prefix relative paths
 
 **Example (Blog Plugin):**
 
 ```typescript
 getSitemapEntries: async () => {
   const { prisma } = await import('../../src/lib/server/db/client');
-  const { getSetting } = await import('../../src/lib/server/services/settings');
 
-  // Get site base URL
-  const siteSetting = await getSetting('site_url');
-  const baseUrl = siteSetting?.value || 'http://localhost:5173';
+  // Cast to unknown, then narrow to typed interface
+  const postModel = (prisma as unknown as Record<string, unknown>).post;
+  if (!postModel || typeof postModel !== 'object') {
+    return [];
+  }
+
+  const findMany = (postModel as Record<string, unknown>).findMany as
+    | ((args: unknown) => Promise<unknown[]>)
+    | undefined;
+
+  if (!findMany) {
+    return [];
+  }
 
   // Query published posts
-  const posts = await (prisma as any).post.findMany({
+  const posts = await findMany({
     where: { status: 'published' },
     select: { slug: true, updatedAt: true },
     orderBy: { updatedAt: 'desc' }
   });
 
-  // Map to sitemap entries
-  return posts.map((post: any) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastmod: post.updatedAt.toISOString(),
-    changefreq: 'monthly' as const,
-    priority: 0.7
-  }));
+  // Return relative paths (preferred); core will normalize
+  return posts.map((post) => {
+    const p = post as { slug: string; updatedAt: Date };
+    return {
+      url: `/blog/${encodeURIComponent(p.slug)}`,
+      lastmod: p.updatedAt.toISOString(),
+      changefreq: 'monthly' as const,
+      priority: 0.7
+    };
+  });
 }
 ```
 
 **Best Practices:**
-- Use absolute URLs with proper base domain
+- **Prefer relative URLs** (`/blog/post`) over absolute; core handles base domain
+- Encode slugs with `encodeURIComponent()` for special characters
 - Set appropriate `changefreq` based on content update patterns
 - Set `priority` relative to other content (homepage = 1.0, blog posts ≈ 0.6-0.8)
 - Only include public, SEO-friendly URLs
 - Keep queries efficient (select only needed fields, add where clauses)
 - Handle errors gracefully (return empty array on failure)
+- Avoid `any` types; cast to `unknown` then narrow
 
 ---
 

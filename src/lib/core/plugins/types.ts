@@ -6,6 +6,7 @@
 
 import type { RequestHandler } from '@sveltejs/kit';
 import type { ComponentType } from 'svelte';
+import type { SitemapEntry } from '$lib/server/services/sitemap';
 
 /**
  * Plugin navigation item
@@ -74,14 +75,7 @@ export interface PluginHooks {
 	beforeUserDelete?: (userId: string) => Promise<void>;
 
 	// SEO hooks
-	getSitemapEntries?: () => Promise<
-		Array<{
-			url: string;
-			lastmod?: string;
-			changefreq?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
-			priority?: number;
-		}>
-	>;
+	getSitemapEntries?: () => Promise<SitemapEntry[]>;
 }
 
 /**

@@ -132,14 +132,23 @@ export const manifest: PluginManifest = {
 		// SEO hooks
 		getSitemapEntries: async () => {
 			const { prisma } = await import('../../src/lib/server/db/client');
-			const { getSetting } = await import('../../src/lib/server/services/settings');
 
-			// Get base URL from settings
-			const siteSetting = await getSetting('site_url');
-			const baseUrl = siteSetting?.value || 'http://localhost:5173';
+			// Cast to unknown, then narrow
+			const postModel = (prisma as unknown as Record<string, unknown>).post;
+			if (!postModel || typeof postModel !== 'object') {
+				return [];
+			}
+
+			const findMany = (postModel as Record<string, unknown>).findMany as
+				| ((args: unknown) => Promise<unknown[]>)
+				| undefined;
+
+			if (!findMany) {
+				return [];
+			}
 
 			// Get all published posts
-			const posts = await (prisma as any).post.findMany({
+			const posts = await findMany({
 				where: { status: 'published' },
 				select: {
 					slug: true,
@@ -148,12 +157,16 @@ export const manifest: PluginManifest = {
 				orderBy: { updatedAt: 'desc' }
 			});
 
-			return posts.map((post: any) => ({
-				url: `${baseUrl}/blog/${post.slug}`,
-				lastmod: post.updatedAt.toISOString(),
-				changefreq: 'monthly' as const,
-				priority: 0.7
-			}));
+			// Return relative paths; core will normalize
+			return posts.map((post) => {
+				const p = post as { slug: string; updatedAt: Date };
+				return {
+					url: `/blog/${encodeURIComponent(p.slug)}`,
+					lastmod: p.updatedAt.toISOString(),
+					changefreq: 'monthly' as const,
+					priority: 0.7
+				};
+			});
 		}
 	},
 

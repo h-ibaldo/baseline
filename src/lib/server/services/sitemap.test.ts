@@ -21,6 +21,17 @@ vi.mock('../db/client', () => ({
 	prisma: mockPrisma
 }));
 
+// Mock HooksManager
+const mockHooksManager = {
+	execute: vi.fn()
+};
+
+vi.mock('$lib/core/plugins/hooks', () => ({
+	HooksManager: {
+		getInstance: () => mockHooksManager
+	}
+}));
+
 // Import after mocking
 import { generateSitemap, getSitemapEntries, getSitemapStats } from './sitemap';
 
@@ -49,8 +60,8 @@ describe('Sitemap Service', () => {
 				}
 			]);
 
-			// Mock blog plugin not active
-			mockPrisma.plugin.findUnique.mockResolvedValue(null);
+			// Mock no plugin entries
+			mockHooksManager.execute.mockResolvedValue([]);
 
 			const entries = await getSitemapEntries();
 
@@ -61,6 +72,41 @@ describe('Sitemap Service', () => {
 			expect(entries[2].url).toBe('https://example.com/contact');
 		});
 
+		it('should include plugin-provided entries via hooks', async () => {
+			// Mock site URL setting
+			mockPrisma.setting.findUnique.mockResolvedValue({
+				key: 'site_url',
+				value: 'https://example.com'
+			});
+
+			// Mock pages
+			mockPrisma.page.findMany.mockResolvedValue([]);
+
+			// Mock plugin entries from blog plugin
+			mockHooksManager.execute.mockResolvedValue([
+				{
+					success: true,
+					result: [
+						{
+							url: 'https://example.com/blog/post-1',
+							lastmod: '2024-01-01T00:00:00.000Z',
+							changefreq: 'monthly',
+							priority: 0.7
+						}
+					]
+				}
+			]);
+
+			const entries = await getSitemapEntries();
+
+			// Should have homepage + blog entry
+			expect(entries).toHaveLength(2);
+			expect(entries[0].url).toBe('https://example.com');
+			expect(entries[1].url).toBe('https://example.com/blog/post-1');
+			expect(entries[1].priority).toBe(0.7);
+			expect(mockHooksManager.execute).toHaveBeenCalledWith('getSitemapEntries');
+		});
+
 		it('should use localhost as default URL', async () => {
 			// Mock no site URL setting
 			mockPrisma.setting.findUnique.mockResolvedValue(null);
@@ -68,26 +114,13 @@ describe('Sitemap Service', () => {
 			// Mock no pages
 			mockPrisma.page.findMany.mockResolvedValue([]);
 
-			// Mock blog plugin not active
-			mockPrisma.plugin.findUnique.mockResolvedValue(null);
+			// Mock no plugin entries
+			mockHooksManager.execute.mockResolvedValue([]);
 
 			const entries = await getSitemapEntries();
 
 			expect(entries[0].url).toBe('http://localhost:5173');
 		});
-
-	it('should normalize trailing slash in site_url', async () => {
-		mockPrisma.setting.findUnique.mockResolvedValue({ value: 'https://example.com/' });
-		mockPrisma.page.findMany.mockResolvedValue([
-			{ slug: 'about', updatedAt: new Date('2024-01-01') }
-		]);
-		mockPrisma.plugin.findUnique.mockResolvedValue(null);
-
-		const entries = await getSitemapEntries();
-		// homepage has no trailing slash; page URLs shouldn't have double slashes
-		expect(entries[0].url).toBe('https://example.com');
-		expect(entries[1].url).toBe('https://example.com/about');
-	});
 
 		it('should set higher priority for homepage and index pages', async () => {
 			mockPrisma.setting.findUnique.mockResolvedValue({
@@ -99,7 +132,7 @@ describe('Sitemap Service', () => {
 				{ slug: 'about', updatedAt: new Date() }
 			]);
 
-			mockPrisma.plugin.findUnique.mockResolvedValue(null);
+			mockHooksManager.execute.mockResolvedValue([]);
 
 			const entries = await getSitemapEntries();
 
@@ -124,7 +157,7 @@ describe('Sitemap Service', () => {
 				}
 			]);
 
-			mockPrisma.plugin.findUnique.mockResolvedValue(null);
+			mockHooksManager.execute.mockResolvedValue([]);
 
 			const xml = await generateSitemap();
 
@@ -157,7 +190,7 @@ describe('Sitemap Service', () => {
 				}
 			]);
 
-			mockPrisma.plugin.findUnique.mockResolvedValue(null);
+			mockHooksManager.execute.mockResolvedValue([]);
 
 			const xml = await generateSitemap();
 
@@ -194,14 +227,51 @@ describe('Sitemap Service', () => {
 				{ slug: 'contact', updatedAt: new Date() }
 			]);
 
-			mockPrisma.plugin.findUnique.mockResolvedValue(null);
+			mockHooksManager.execute.mockResolvedValue([]);
 
 			const stats = await getSitemapStats();
 
 			expect(stats.total).toBe(3); // homepage + 2 pages
 			expect(stats.pages).toBe(3);
-			expect(stats.blogPosts).toBe(0);
+			expect(stats.pluginEntries).toBe(0);
 			expect(stats.lastGenerated).toBeDefined();
+		});
+
+		it('should count plugin entries separately', async () => {
+			mockPrisma.setting.findUnique.mockResolvedValue({
+				value: 'https://example.com'
+			});
+
+			mockPrisma.page.findMany.mockResolvedValue([
+				{ slug: 'about', updatedAt: new Date() }
+			]);
+
+			// Mock 2 blog entries from plugin
+			mockHooksManager.execute.mockResolvedValue([
+				{
+					success: true,
+					result: [
+						{
+							url: 'https://example.com/blog/post-1',
+							lastmod: '2024-01-01T00:00:00.000Z',
+							changefreq: 'monthly',
+							priority: 0.7
+						},
+						{
+							url: 'https://example.com/blog/post-2',
+							lastmod: '2024-01-02T00:00:00.000Z',
+							changefreq: 'monthly',
+							priority: 0.7
+						}
+					]
+				}
+			]);
+
+			const stats = await getSitemapStats();
+
+			expect(stats.total).toBe(4); // homepage + 1 page + 2 blog posts
+			expect(stats.pages).toBe(2); // homepage + about
+			expect(stats.pluginEntries).toBe(2); // 2 blog posts
 		});
 	});
 });

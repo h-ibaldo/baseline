@@ -534,6 +534,14 @@ export interface PluginHooks {
   onUserCreate?: (user: any) => Promise<void>;
   onUserUpdate?: (user: any) => Promise<void>;
   onUserDelete?: (user: any) => Promise<void>;
+
+  // SEO hooks
+  getSitemapEntries?: () => Promise<Array<{
+    url: string;
+    lastmod?: string;
+    changefreq?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
+    priority?: number;
+  }>>;
 }
 ```
 
@@ -563,10 +571,80 @@ export const manifest: PluginManifest = {
     onUserCreate: async (user) => {
       // React to new user
       await createUserDefaults(user.id);
+    },
+
+    getSitemapEntries: async () => {
+      // Provide sitemap entries for your plugin's content
+      const { prisma } = await import('../../src/lib/server/db/client');
+      const { getSetting } = await import('../../src/lib/server/services/settings');
+
+      const siteSetting = await getSetting('site_url');
+      const baseUrl = siteSetting?.value || 'http://localhost:5173';
+
+      const items = await (prisma as any).myPluginItem.findMany({
+        where: { published: true },
+        select: { slug: true, updatedAt: true }
+      });
+
+      return items.map((item: any) => ({
+        url: `${baseUrl}/my-plugin/${item.slug}`,
+        lastmod: item.updatedAt.toISOString(),
+        changefreq: 'weekly' as const,
+        priority: 0.7
+      }));
     }
   }
 };
 ```
+
+#### SEO Hook: `getSitemapEntries`
+
+The `getSitemapEntries` hook allows your plugin to contribute entries to the site's XML sitemap (`/sitemap.xml`).
+
+**Purpose:** Automatically include your plugin's content in search engine sitemaps for better SEO.
+
+**Contract:**
+- Must return an array of sitemap entry objects
+- Each entry must have a `url` (full URL including base domain)
+- Optional fields: `lastmod` (ISO date string), `changefreq`, `priority` (0.0-1.0)
+- Hook is called every time the sitemap is generated
+- Should only return publicly accessible, published content
+
+**Example (Blog Plugin):**
+
+```typescript
+getSitemapEntries: async () => {
+  const { prisma } = await import('../../src/lib/server/db/client');
+  const { getSetting } = await import('../../src/lib/server/services/settings');
+
+  // Get site base URL
+  const siteSetting = await getSetting('site_url');
+  const baseUrl = siteSetting?.value || 'http://localhost:5173';
+
+  // Query published posts
+  const posts = await (prisma as any).post.findMany({
+    where: { status: 'published' },
+    select: { slug: true, updatedAt: true },
+    orderBy: { updatedAt: 'desc' }
+  });
+
+  // Map to sitemap entries
+  return posts.map((post: any) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastmod: post.updatedAt.toISOString(),
+    changefreq: 'monthly' as const,
+    priority: 0.7
+  }));
+}
+```
+
+**Best Practices:**
+- Use absolute URLs with proper base domain
+- Set appropriate `changefreq` based on content update patterns
+- Set `priority` relative to other content (homepage = 1.0, blog posts ≈ 0.6-0.8)
+- Only include public, SEO-friendly URLs
+- Keep queries efficient (select only needed fields, add where clauses)
+- Handle errors gracefully (return empty array on failure)
 
 ---
 

@@ -72,6 +72,16 @@ export interface PluginHooks {
 	// User hooks
 	afterUserRegister?: (user: any) => Promise<void>;
 	beforeUserDelete?: (userId: string) => Promise<void>;
+
+	// SEO hooks
+	getSitemapEntries?: () => Promise<
+		Array<{
+			url: string;
+			lastmod?: string;
+			changefreq?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
+			priority?: number;
+		}>
+	>;
 }
 
 /**

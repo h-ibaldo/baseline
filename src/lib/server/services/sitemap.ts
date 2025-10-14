@@ -2,10 +2,11 @@
  * Sitemap Service
  *
  * Generates XML sitemaps for SEO
- * Includes published pages and blog posts (if blog plugin is active)
+ * Includes published pages and entries from plugins via hooks
  */
 
 import { prisma } from '../db/client';
+import { HooksManager } from '$lib/core/plugins/hooks';
 
 export interface SitemapEntry {
 	url: string;
@@ -56,48 +57,21 @@ async function getPublishedPages(): Promise<SitemapEntry[]> {
 }
 
 /**
- * Get blog posts for sitemap (if blog plugin is active)
+ * Get plugin-provided sitemap entries via hooks
  */
-async function getBlogPosts(): Promise<SitemapEntry[]> {
+async function getPluginEntries(): Promise<SitemapEntry[]> {
 	try {
-		// Check if blog plugin is active
-		const blogPlugin = await prisma.plugin.findUnique({
-			where: { id: '@linebasis/blog' }
-		});
+		const hooks = HooksManager.getInstance();
+		const results = await hooks.execute<SitemapEntry[]>('getSitemapEntries');
 
-		if (!blogPlugin || !blogPlugin.isActive) {
-			return [];
-		}
+		// Flatten and filter successful results
+		const pluginEntries = results.flatMap((r) =>
+			r.success && Array.isArray(r.result) ? r.result : []
+		);
 
-		// Check if Post model exists (blog plugin schema)
-		const posts = await (prisma as any).post?.findMany({
-			where: {
-				status: 'published'
-			},
-			select: {
-				slug: true,
-				updatedAt: true
-			},
-			orderBy: {
-				updatedAt: 'desc'
-			}
-		});
-
-		if (!posts) {
-			return [];
-		}
-
-		const { baseUrl } = await getSitemapConfig();
-
-		return posts.map((post: any) => ({
-			url: `${baseUrl}/blog/${encodeURI(post.slug)}`,
-			lastmod: post.updatedAt.toISOString(),
-			changefreq: 'monthly' as const,
-			priority: 0.7
-		}));
+		return pluginEntries;
 	} catch (error) {
-		// Blog plugin not installed or Post model doesn't exist
-		console.error('Error fetching blog posts for sitemap:', error);
+		console.error('Error fetching plugin sitemap entries:', error);
 		return [];
 	}
 }
@@ -106,7 +80,7 @@ async function getBlogPosts(): Promise<SitemapEntry[]> {
  * Get all sitemap entries
  */
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
-	const [pages, blogPosts] = await Promise.all([getPublishedPages(), getBlogPosts()]);
+	const [pages, pluginEntries] = await Promise.all([getPublishedPages(), getPluginEntries()]);
 
 	const { baseUrl } = await getSitemapConfig();
 
@@ -118,7 +92,7 @@ export async function getSitemapEntries(): Promise<SitemapEntry[]> {
 		priority: 1.0
 	};
 
-	return [homepage, ...pages, ...blogPosts];
+	return [homepage, ...pages, ...pluginEntries];
 }
 
 /**
@@ -161,11 +135,17 @@ function escapeXml(unsafe: string): string {
  */
 export async function getSitemapStats() {
 	const entries = await getSitemapEntries();
+	const { baseUrl } = await getSitemapConfig();
+
+	// Count homepage and core pages (not from plugins)
+	const coreEntries = entries.filter(
+		(e) => e.url === baseUrl || (!e.url.includes('/blog/') && !e.url.match(/\/[a-z-]+\/[^/]+$/))
+	);
 
 	return {
 		total: entries.length,
-		pages: entries.filter((e) => !e.url.includes('/blog/')).length,
-		blogPosts: entries.filter((e) => e.url.includes('/blog/')).length,
+		pages: coreEntries.length,
+		pluginEntries: entries.length - coreEntries.length,
 		lastGenerated: new Date().toISOString()
 	};
 }

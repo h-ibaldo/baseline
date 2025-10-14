@@ -311,11 +311,12 @@
 
 **Sitemap Generation - COMPLETED:**
 - Automatic XML sitemap at `/sitemap.xml`
-- Includes all published pages and blog posts
+- Includes all published pages and plugin content via hooks
 - SEO-optimized with priority and changefreq
 - Admin API to view sitemap statistics
 - Configurable base URL via site settings
-- Automatically detects and includes blog plugin posts
+- Plugin hook system: `getSitemapEntries` allows plugins to contribute URLs
+- Blog plugin integrated via hook (no core coupling)
 
 ### Advanced Features
 - [ ] Multi-language support (i18n)

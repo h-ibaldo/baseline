@@ -127,6 +127,33 @@ export const manifest: PluginManifest = {
 		afterPagePublish: async (page) => {
 			console.log(`📝 Blog plugin: Page "${page.title}" was published`);
 			// Could update related posts, regenerate sitemap, etc.
+		},
+
+		// SEO hooks
+		getSitemapEntries: async () => {
+			const { prisma } = await import('../../src/lib/server/db/client');
+			const { getSetting } = await import('../../src/lib/server/services/settings');
+
+			// Get base URL from settings
+			const siteSetting = await getSetting('site_url');
+			const baseUrl = siteSetting?.value || 'http://localhost:5173';
+
+			// Get all published posts
+			const posts = await (prisma as any).post.findMany({
+				where: { status: 'published' },
+				select: {
+					slug: true,
+					updatedAt: true
+				},
+				orderBy: { updatedAt: 'desc' }
+			});
+
+			return posts.map((post: any) => ({
+				url: `${baseUrl}/blog/${post.slug}`,
+				lastmod: post.updatedAt.toISOString(),
+				changefreq: 'monthly' as const,
+				priority: 0.7
+			}));
 		}
 	},
 

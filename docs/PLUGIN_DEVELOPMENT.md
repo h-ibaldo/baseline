@@ -605,11 +605,15 @@ The `getSitemapEntries` hook allows your plugin to contribute entries to the sit
 
 **Contract:**
 - Must return an array of `SitemapEntry` objects
-- Each entry must have a `url` (relative path like `/blog/post` preferred, or absolute)
+- Each entry must have a `url` (relative path like `/blog/post` **strongly preferred**, or absolute URL)
 - Optional fields: `lastmod` (ISO date string), `changefreq`, `priority` (0.0-1.0)
 - Hook is called every time the sitemap is generated
 - Should only return publicly accessible, published content
-- **Note:** Core will normalize base URLs (removes trailing slash), encode slugs, and prefix relative paths
+- **Core normalization:** The sitemap service automatically:
+  - Removes trailing slashes from base URLs
+  - Prefixes relative paths with the normalized base URL
+  - Removes double slashes (e.g., `//blog` → `/blog`)
+  - Encodes URL paths for special characters
 
 **Example (Blog Plugin):**
 

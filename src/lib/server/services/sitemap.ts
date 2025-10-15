@@ -71,7 +71,9 @@ function normalizePluginUrl(url: string, baseUrl: string): string {
 	// Absolute URL: normalize double slashes and encode path
 	try {
 		const parsed = new URL(url);
-		parsed.pathname = encodeURI(decodeURI(parsed.pathname));
+		// Remove double slashes from pathname and encode
+		const normalizedPath = parsed.pathname.replace(/\/+/g, '/');
+		parsed.pathname = encodeURI(decodeURI(normalizedPath));
 		return parsed.toString();
 	} catch {
 		// Invalid URL: treat as relative

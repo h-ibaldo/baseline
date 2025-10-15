@@ -5,20 +5,18 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Mock Prisma client before importing
-const mockPrisma = {
-	page: {
-		findMany: vi.fn()
-	},
-	plugin: {
-		findUnique: vi.fn()
-	},
-	setting: {
-		findUnique: vi.fn()
-	}
-};
-
 vi.mock('../db/client', () => ({
-	prisma: mockPrisma
+	prisma: {
+		page: {
+			findMany: vi.fn()
+		},
+		plugin: {
+			findUnique: vi.fn()
+		},
+		setting: {
+			findUnique: vi.fn()
+		}
+	}
 }));
 
 // Mock HooksManager
@@ -34,6 +32,10 @@ vi.mock('$lib/core/plugins/hooks', () => ({
 
 // Import after mocking
 import { generateSitemap, getSitemapEntries, getSitemapStats } from './sitemap';
+import { prisma } from '../db/client';
+
+// Get mocked prisma for type-safe access
+const mockPrisma = vi.mocked(prisma);
 
 describe('Sitemap Service', () => {
 	beforeEach(() => {
@@ -149,19 +151,37 @@ describe('Sitemap Service', () => {
 			expect(entries[1]._isPluginEntry).toBe(true);
 		});
 
-		it('should normalize absolute URLs with trailing slash', async () => {
+		it('should normalize baseUrl with trailing slash', async () => {
 			mockPrisma.setting.findUnique.mockResolvedValue({
 				value: 'https://example.com/'
 			});
+			mockPrisma.page.findMany.mockResolvedValue([
+				{ slug: 'about', updatedAt: new Date('2024-01-01') }
+			]);
+			mockHooksManager.execute.mockResolvedValue([]);
+
+			const entries = await getSitemapEntries();
+
+			// Trailing slash should be removed from baseUrl
+			expect(entries[0].url).toBe('https://example.com');
+			expect(entries[1].url).toBe('https://example.com/about');
+			// No double slashes in path portion
+			expect(entries[1].url.split('://')[1]).not.toContain('//');
+		});
+
+		it('should normalize absolute plugin URLs with double slashes', async () => {
+			mockPrisma.setting.findUnique.mockResolvedValue({
+				value: 'https://example.com'
+			});
 			mockPrisma.page.findMany.mockResolvedValue([]);
 
-			// Plugin returns absolute URL
+			// Plugin returns absolute URL with double slashes
 			mockHooksManager.execute.mockResolvedValue([
 				{
 					success: true,
 					result: [
 						{
-							url: 'https://example.com//blog/post-1',
+							url: 'https://example.com//blog//post-1',
 							lastmod: '2024-01-01T00:00:00.000Z',
 							changefreq: 'monthly',
 							priority: 0.7
@@ -172,9 +192,10 @@ describe('Sitemap Service', () => {
 
 			const entries = await getSitemapEntries();
 
-			// Should normalize and encode
-			expect(entries[0].url).toBe('https://example.com');
+			// Should normalize double slashes
+			expect(entries[1].url).toBe('https://example.com/blog/post-1');
 			expect(entries[1].url).not.toContain('//blog');
+			expect(entries[1].url).not.toContain('//post');
 		});
 
 		it('should encode special characters in plugin URLs', async () => {
@@ -258,7 +279,7 @@ describe('Sitemap Service', () => {
 			expect(xml).toContain('<priority>');
 		});
 
-		it('should escape XML special characters in URLs', async () => {
+		it('should URL-encode and XML-escape special characters', async () => {
 			mockPrisma.setting.findUnique.mockResolvedValue({
 				value: 'https://example.com'
 			});
@@ -274,26 +295,35 @@ describe('Sitemap Service', () => {
 
 			const xml = await generateSitemap();
 
-			// Should escape special characters
+			// & should be URL-encoded to %26, then XML-escaped to &amp;
 			expect(xml).toContain('&amp;');
-			expect(xml).toContain('&lt;');
-			expect(xml).toContain('&gt;');
+			// < and > should be URL-encoded to %3C and %3E
+			expect(xml).toContain('%3C');
+			expect(xml).toContain('%3E');
 		});
 
-	it('should include blog entries when blog plugin is active', async () => {
-		mockPrisma.setting.findUnique.mockResolvedValue({ value: 'https://example.com' });
-		mockPrisma.page.findMany.mockResolvedValue([]);
-		mockPrisma.plugin.findUnique.mockResolvedValue({ id: '@linebasis/blog', isActive: true });
-		// simulate prisma.post.findMany via any
-		(mockPrisma as any).post = {
-			findMany: vi.fn().mockResolvedValue([
-				{ slug: 'hello-world', updatedAt: new Date('2024-02-01') }
-			])
-		};
+		it('should include blog entries from plugin hooks', async () => {
+			mockPrisma.setting.findUnique.mockResolvedValue({ value: 'https://example.com' });
+			mockPrisma.page.findMany.mockResolvedValue([]);
 
-		const xml = await generateSitemap();
-		expect(xml).toContain('<loc>https://example.com/blog/hello-world</loc>');
-	});
+			// Mock blog plugin returning entries via hook
+			mockHooksManager.execute.mockResolvedValue([
+				{
+					success: true,
+					result: [
+						{
+							url: '/blog/hello-world',
+							lastmod: new Date('2024-02-01').toISOString(),
+							changefreq: 'monthly',
+							priority: 0.7
+						}
+					]
+				}
+			]);
+
+			const xml = await generateSitemap();
+			expect(xml).toContain('<loc>https://example.com/blog/hello-world</loc>');
+		});
 	});
 
 	describe('getSitemapStats', () => {

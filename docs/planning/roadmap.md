@@ -304,7 +304,7 @@
 ### SEO & Performance
 - [ ] SEO metadata editor (title, description, OG tags)
 - [x] Sitemap generation (XML) ✅ **COMPLETED**
-- [ ] Robots.txt management
+- [x] Robots.txt management ✅ **COMPLETED**
 - [ ] Page caching system
 - [ ] Image optimization and lazy loading
 - [ ] Performance monitoring
@@ -317,6 +317,13 @@
 - Configurable base URL via site settings
 - Plugin hook system: `getSitemapEntries` allows plugins to contribute URLs
 - Blog plugin integrated via hook (no core coupling)
+
+**Robots.txt Management - COMPLETED:**
+- Automatic robots.txt generation at `/robots.txt`
+- Configurable via settings: allow/disallow paths, crawl delay
+- Always includes sitemap reference for SEO
+- Cached responses with ETag for performance
+- Falls back gracefully on errors
 
 ### Advanced Features
 - [ ] Multi-language support (i18n)

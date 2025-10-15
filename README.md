@@ -107,7 +107,7 @@ LineBasis is currently in early development and is **NOT accepting external cont
 - **Blog Plugin**: Full-featured blog system as the first official plugin
 
 **🚀 Phase 3 - Advanced Features (IN PROGRESS):**
-- ✅ **XML Sitemap Generation** - Automatic `/sitemap.xml` for SEO
+- ✅ **SEO Tools** - Automatic XML sitemap + robots.txt generation
 - Theme system and marketplace
 - Component marketplace
 - Advanced SEO and analytics
@@ -136,7 +136,7 @@ Contributions will open once we have a stable foundation. Watch the repository f
 - **Admin panel**: Beautiful interface for managing your CMS
 - **Plugin system**: Extend functionality without touching core code
 - **Blog plugin**: Full-featured blog with posts, categories, and tags
-- **SEO Ready**: Automatic XML sitemap generation at `/sitemap.xml`
+- **SEO Ready**: Automatic XML sitemap + robots.txt generation
 - **Modern stack**: SvelteKit + TypeScript + SQLite/PostgreSQL
 - **Multi-user**: Role-based permissions (Admin, Editor, Author)
 - **You own everything**: Code, data, platform - no vendor lock-in

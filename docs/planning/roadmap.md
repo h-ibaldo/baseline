@@ -296,7 +296,7 @@
 - [ ] Activity log (audit trail)
 
 ### Content Management
-- [x] Page templates system ✅ **COMPLETED** - Basic template system complete (JSON storage, CRUD, admin UI, versioning). Advanced features (template marketplace) pending.
+- [x] Page templates system ✅ **COMPLETED** - Full template system with JSON storage, CRUD, admin UI, versioning, template application. Fixed: schema composition bug resolved, "Use Template" working. Advanced features (template marketplace) pending.
 - [ ] Reusable content blocks
 - [ ] Draft autosave
 - [ ] Page revisions/version history

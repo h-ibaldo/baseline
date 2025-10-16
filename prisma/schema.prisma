@@ -87,6 +87,36 @@ model Template {
   @@index([category])
 }
 
+// Content Blocks - Reusable modular components
+model ContentBlock {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  category    String   @default("custom") // text, image, button, card, hero, etc.
+
+  // Block content (JSON component data)
+  content     String   // JSON string of block structure
+  properties  String?  // JSON string of editable properties
+  thumbnail   String?  // Preview image URL
+
+  // Usage tracking
+  usageCount  Int      @default(0)
+
+  // Metadata
+  createdBy   String
+  creator     User     @relation(fields: [createdBy], references: [id])
+  isPublic    Boolean  @default(false) // shared across users or private
+  version     Int      @default(1)
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([createdBy])
+  @@index([category])
+  @@index([isPublic])
+}
+
 // Media Library
 model Media {
   id         String   @id @default(uuid())
@@ -123,6 +153,7 @@ model User {
   pages         Page[]
   pageRevisions PageRevision[]
   templates     Template[]
+  contentBlocks ContentBlock[]
   media         Media[]
   sessions      Session[]
   posts         Post[]

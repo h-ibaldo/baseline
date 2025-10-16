@@ -15,6 +15,17 @@
 		siteUrl: string;
 		allowRegistration: boolean;
 		defaultRole: 'admin' | 'editor' | 'author';
+		// SEO
+		metaTitle: string;
+		metaDescription: string;
+		ogImageUrl: string;
+		// Robots
+		robotsAllowAll: boolean;
+		robotsDisallowPaths: string;
+		robotsCrawlDelay: number;
+		// Appearance
+		themeColor: string;
+		faviconUrl: string;
 	}
 
 	let user: User | null = null;
@@ -40,7 +51,15 @@
 		siteDescription: 'Open-source designer-first CMS',
 		siteUrl: 'http://localhost:5173',
 		allowRegistration: false,
-		defaultRole: 'author'
+		defaultRole: 'author',
+		metaTitle: '',
+		metaDescription: '',
+		ogImageUrl: '',
+		robotsAllowAll: true,
+		robotsDisallowPaths: '',
+		robotsCrawlDelay: 0,
+		themeColor: '#667eea',
+		faviconUrl: ''
 	};
 	let settingsError = '';
 	let settingsSuccess = '';
@@ -96,18 +115,23 @@
 			if (response.ok) {
 				const data = await response.json();
 				if (data.settings) {
+					const getSetting = (key: string, defaultVal: any) =>
+						data.settings.find((s: any) => s.key === key)?.value ?? defaultVal;
+
 					siteSettings = {
-						siteName: data.settings.find((s: any) => s.key === 'site_name')?.value || 'LineBasis',
-						siteDescription:
-							data.settings.find((s: any) => s.key === 'site_description')?.value ||
-							'Open-source designer-first CMS',
-						siteUrl:
-							data.settings.find((s: any) => s.key === 'site_url')?.value ||
-							'http://localhost:5173',
-						allowRegistration:
-							data.settings.find((s: any) => s.key === 'allow_registration')?.value === 'true',
-						defaultRole:
-							data.settings.find((s: any) => s.key === 'default_role')?.value || 'author'
+						siteName: getSetting('site_name', 'LineBasis'),
+						siteDescription: getSetting('site_description', 'Open-source designer-first CMS'),
+						siteUrl: getSetting('site_url', 'http://localhost:5173'),
+						allowRegistration: getSetting('allow_registration', 'false') === 'true',
+						defaultRole: getSetting('default_role', 'author'),
+						metaTitle: getSetting('meta_title', ''),
+						metaDescription: getSetting('meta_description', ''),
+						ogImageUrl: getSetting('og_image_url', ''),
+						robotsAllowAll: getSetting('robots_allow_all', 'true') === 'true',
+						robotsDisallowPaths: getSetting('robots_disallow_paths', ''),
+						robotsCrawlDelay: parseInt(getSetting('robots_crawl_delay', '0')) || 0,
+						themeColor: getSetting('theme_color', '#667eea'),
+						faviconUrl: getSetting('favicon_url', '')
 					};
 				}
 			}
@@ -197,7 +221,15 @@
 				{ key: 'site_description', value: siteSettings.siteDescription },
 				{ key: 'site_url', value: siteSettings.siteUrl },
 				{ key: 'allow_registration', value: siteSettings.allowRegistration.toString() },
-				{ key: 'default_role', value: siteSettings.defaultRole }
+				{ key: 'default_role', value: siteSettings.defaultRole },
+				{ key: 'meta_title', value: siteSettings.metaTitle },
+				{ key: 'meta_description', value: siteSettings.metaDescription },
+				{ key: 'og_image_url', value: siteSettings.ogImageUrl },
+				{ key: 'robots_allow_all', value: siteSettings.robotsAllowAll.toString() },
+				{ key: 'robots_disallow_paths', value: siteSettings.robotsDisallowPaths },
+				{ key: 'robots_crawl_delay', value: siteSettings.robotsCrawlDelay.toString() },
+				{ key: 'theme_color', value: siteSettings.themeColor },
+				{ key: 'favicon_url', value: siteSettings.faviconUrl }
 			];
 
 			for (const update of updates) {
@@ -370,6 +402,137 @@
 
 						<button type="submit" class="btn-primary" disabled={saving}>
 							{saving ? 'Saving...' : 'Save Settings'}
+						</button>
+					</form>
+				</section>
+
+				<!-- SEO Settings -->
+				<section class="settings-section">
+					<h2>🔍 SEO Settings</h2>
+					<p class="section-desc">Configure search engine optimization metadata</p>
+
+					<form on:submit|preventDefault={handleSettingsUpdate}>
+						<div class="form-group">
+							<label for="metaTitle">Meta Title</label>
+							<input
+								id="metaTitle"
+								type="text"
+								bind:value={siteSettings.metaTitle}
+								placeholder="Your Site Title - Keywords"
+							/>
+							<p class="field-help">Default page title for SEO (50-60 characters recommended)</p>
+						</div>
+
+						<div class="form-group">
+							<label for="metaDescription">Meta Description</label>
+							<textarea
+								id="metaDescription"
+								bind:value={siteSettings.metaDescription}
+								rows="3"
+								placeholder="A compelling description of your site..."
+							></textarea>
+							<p class="field-help">Default meta description (150-160 characters recommended)</p>
+						</div>
+
+						<div class="form-group">
+							<label for="ogImageUrl">Open Graph Image URL</label>
+							<input
+								id="ogImageUrl"
+								type="url"
+								bind:value={siteSettings.ogImageUrl}
+								placeholder="https://example.com/og-image.jpg"
+							/>
+							<p class="field-help">Default social media share image (1200x630px recommended)</p>
+						</div>
+
+						<button type="submit" class="btn-primary" disabled={saving}>
+							{saving ? 'Saving...' : 'Save SEO Settings'}
+						</button>
+					</form>
+				</section>
+
+				<!-- Robots Settings -->
+				<section class="settings-section">
+					<h2>🤖 Robots Settings</h2>
+					<p class="section-desc">Control how search engines crawl your site</p>
+
+					<form on:submit|preventDefault={handleSettingsUpdate}>
+						<div class="form-group">
+							<label class="checkbox-label">
+								<input type="checkbox" bind:checked={siteSettings.robotsAllowAll} />
+								<span>Allow all search engines</span>
+							</label>
+							<p class="field-help">Uncheck to restrict search engine access</p>
+						</div>
+
+						<div class="form-group">
+							<label for="robotsDisallowPaths">Disallowed Paths</label>
+							<textarea
+								id="robotsDisallowPaths"
+								bind:value={siteSettings.robotsDisallowPaths}
+								rows="3"
+								placeholder="/admin&#10;/private&#10;/api"
+							></textarea>
+							<p class="field-help">One path per line (e.g., /admin, /private)</p>
+						</div>
+
+						<div class="form-group">
+							<label for="robotsCrawlDelay">Crawl Delay (seconds)</label>
+							<input
+								id="robotsCrawlDelay"
+								type="number"
+								min="0"
+								max="60"
+								bind:value={siteSettings.robotsCrawlDelay}
+								placeholder="0"
+							/>
+							<p class="field-help">Delay between crawler requests (0 = no delay)</p>
+						</div>
+
+						<button type="submit" class="btn-primary" disabled={saving}>
+							{saving ? 'Saving...' : 'Save Robots Settings'}
+						</button>
+					</form>
+				</section>
+
+				<!-- Appearance Settings -->
+				<section class="settings-section">
+					<h2>🎨 Appearance Settings</h2>
+					<p class="section-desc">Customize your site's visual identity</p>
+
+					<form on:submit|preventDefault={handleSettingsUpdate}>
+						<div class="form-group">
+							<label for="themeColor">Theme Color</label>
+							<div style="display: flex; gap: 1rem; align-items: center;">
+								<input
+									id="themeColor"
+									type="color"
+									bind:value={siteSettings.themeColor}
+									style="width: 80px; height: 40px; cursor: pointer;"
+								/>
+								<input
+									type="text"
+									bind:value={siteSettings.themeColor}
+									placeholder="#667eea"
+									style="flex: 1;"
+								/>
+							</div>
+							<p class="field-help">Primary brand color for your site</p>
+						</div>
+
+						<div class="form-group">
+							<label for="faviconUrl">Favicon URL</label>
+							<input
+								id="faviconUrl"
+								type="url"
+								bind:value={siteSettings.faviconUrl}
+								placeholder="https://example.com/favicon.ico"
+							/>
+							<p class="field-help">Browser tab icon (32x32px or SVG recommended)</p>
+						</div>
+
+						<button type="submit" class="btn-primary" disabled={saving}>
+							{saving ? 'Saving...' : 'Save Appearance'}
 						</button>
 					</form>
 				</section>

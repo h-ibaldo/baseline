@@ -15,8 +15,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { db } from '../src/lib/server/db/client';
 
-const CORE_SCHEMA_PATH = join(process.cwd(), 'prisma', 'schema.prisma');
-const CORE_SCHEMA_BACKUP_PATH = join(process.cwd(), 'prisma', 'schema.core.prisma');
+const CORE_SCHEMA_PATH = join(process.cwd(), 'prisma', 'schema.core.prisma');
 const OUTPUT_SCHEMA_PATH = join(process.cwd(), 'prisma', 'schema.prisma');
 
 async function getActivePlugins() {
@@ -148,16 +147,6 @@ async function main() {
 		console.log('─'.repeat(80));
 	} else {
 		console.log('\n💾 Writing composed schema...');
-
-		// Backup existing schema if different from core
-		if (existsSync(OUTPUT_SCHEMA_PATH)) {
-			const existing = readFileSync(OUTPUT_SCHEMA_PATH, 'utf-8');
-			if (existing !== coreSchema && !existsSync(CORE_SCHEMA_BACKUP_PATH)) {
-				writeFileSync(CORE_SCHEMA_BACKUP_PATH, coreSchema, 'utf-8');
-				console.log(`   💾 Backed up core schema to: schema.core.prisma`);
-			}
-		}
-
 		writeFileSync(OUTPUT_SCHEMA_PATH, composedSchema, 'utf-8');
 		console.log(`   ✅ Written to: ${OUTPUT_SCHEMA_PATH}`);
 

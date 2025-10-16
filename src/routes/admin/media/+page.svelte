@@ -22,8 +22,12 @@
 	let error = '';
 	let uploadError = '';
 	let uploading = false;
+	let uploadProgress = 0;
 	let searchQuery = '';
 	let typeFilter: 'all' | 'image' | 'video' | 'document' = 'all';
+	let viewMode: 'grid' | 'list' = 'grid';
+	let selectedItems = new Set<string>();
+	let storageQuota = 1024 * 1024 * 1024; // 1GB default quota
 
 	// Stats
 	let stats = {
@@ -105,17 +109,26 @@
 		const token = localStorage.getItem('access_token');
 		uploadError = '';
 		uploading = true;
+		uploadProgress = 0;
 
 		try {
 			const formData = new FormData();
 			formData.append('file', file);
 			formData.append('optimize', 'true');
 
+			// Simulate progress (real progress requires XMLHttpRequest or server-sent events)
+			const progressInterval = setInterval(() => {
+				uploadProgress = Math.min(uploadProgress + 10, 90);
+			}, 200);
+
 			const response = await fetch('/api/media/upload', {
 				method: 'POST',
 				headers: { Authorization: `Bearer ${token}` },
 				body: formData
 			});
+
+			clearInterval(progressInterval);
+			uploadProgress = 100;
 
 			if (!response.ok) {
 				const data = await response.json();
@@ -127,7 +140,10 @@
 		} catch (err) {
 			uploadError = err instanceof Error ? err.message : 'Upload failed';
 		} finally {
-			uploading = false;
+			setTimeout(() => {
+				uploading = false;
+				uploadProgress = 0;
+			}, 500);
 		}
 	}
 
@@ -186,10 +202,68 @@
 		alert('URL copied to clipboard!');
 	}
 
+	function toggleSelection(id: string) {
+		const newSelection = new Set(selectedItems);
+		if (newSelection.has(id)) {
+			newSelection.delete(id);
+		} else {
+			newSelection.add(id);
+		}
+		selectedItems = newSelection;
+	}
+
+	function selectAll() {
+		selectedItems = new Set(filteredMedia.map((item) => item.id));
+	}
+
+	function deselectAll() {
+		selectedItems = new Set();
+	}
+
+	async function bulkDelete() {
+		if (selectedItems.size === 0) return;
+
+		if (!confirm(`Delete ${selectedItems.size} file(s)?`)) return;
+
+		const token = localStorage.getItem('access_token');
+		const failures: string[] = [];
+
+		for (const id of selectedItems) {
+			try {
+				const response = await fetch('/api/media', {
+					method: 'DELETE',
+					headers: {
+						Authorization: `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ id })
+				});
+
+				if (!response.ok) throw new Error('Delete failed');
+			} catch (err) {
+				failures.push(id);
+			}
+		}
+
+		if (failures.length > 0) {
+			alert(`Failed to delete ${failures.length} file(s)`);
+		}
+
+		selectedItems = new Set();
+		await loadMedia();
+		await loadStats();
+	}
+
 	$: filteredMedia = media.filter((item) => {
 		const matchesSearch = item.filename.toLowerCase().includes(searchQuery.toLowerCase());
-		return matchesSearch;
+		const matchesType =
+			searchQuery.toLowerCase().includes('image') ||
+			searchQuery.toLowerCase().includes('video') ||
+			searchQuery.toLowerCase().includes('document');
+		return matchesSearch || (matchesType && item.mimeType.toLowerCase().includes(searchQuery.toLowerCase()));
 	});
+
+	$: storagePercentage = Math.round((stats.totalSize / storageQuota) * 100);
 </script>
 
 <svelte:head>
@@ -223,11 +297,13 @@
 		</div>
 		<div class="stat">
 			<span class="stat-label">Storage Used:</span>
-			<span class="stat-value">{formatBytes(stats.totalSize)}</span>
+			<span class="stat-value">{formatBytes(stats.totalSize)} / {formatBytes(storageQuota)}</span>
 		</div>
-		<div class="stat">
-			<span class="stat-label">Images:</span>
-			<span class="stat-value">{stats.filesByType['image/jpeg'] || 0 + stats.filesByType['image/png'] || 0}</span>
+		<div class="stat storage-quota">
+			<div class="quota-bar">
+				<div class="quota-fill" style="width: {storagePercentage}%"></div>
+			</div>
+			<span class="quota-text">{storagePercentage}% used</span>
 		</div>
 	</div>
 
@@ -236,7 +312,7 @@
 			<input
 				type="text"
 				bind:value={searchQuery}
-				placeholder="Search files..."
+				placeholder="Search files by name or type..."
 				class="search-input"
 			/>
 		</div>
@@ -249,7 +325,45 @@
 				<option value="document">Documents</option>
 			</select>
 		</div>
+
+		<div class="view-toggle">
+			<button
+				class="view-btn"
+				class:active={viewMode === 'grid'}
+				on:click={() => (viewMode = 'grid')}
+				title="Grid view"
+			>
+				⊞
+			</button>
+			<button
+				class="view-btn"
+				class:active={viewMode === 'list'}
+				on:click={() => (viewMode = 'list')}
+				title="List view"
+			>
+				☰
+			</button>
+		</div>
+
+		{#if selectedItems.size > 0}
+			<div class="bulk-actions">
+				<span class="selected-count">{selectedItems.size} selected</span>
+				<button class="btn-bulk" on:click={deselectAll}>Deselect All</button>
+				<button class="btn-bulk btn-danger" on:click={bulkDelete}>🗑️ Delete</button>
+			</div>
+		{:else if filteredMedia.length > 0}
+			<button class="btn-bulk" on:click={selectAll}>Select All</button>
+		{/if}
 	</div>
+
+	{#if uploading}
+		<div class="upload-progress">
+			<div class="progress-bar">
+				<div class="progress-fill" style="width: {uploadProgress}%"></div>
+			</div>
+			<span class="progress-text">Uploading... {uploadProgress}%</span>
+		</div>
+	{/if}
 
 	{#if uploadError}
 		<div class="upload-error">
@@ -270,9 +384,15 @@
 			<button class="btn-primary" on:click={() => fileInput.click()}>Upload File</button>
 		</div>
 	{:else}
-		<div class="media-grid">
+		<div class="media-{viewMode}">
 			{#each filteredMedia as item (item.id)}
-				<div class="media-item">
+				<div class="media-item" class:selected={selectedItems.has(item.id)}>
+					<input
+						type="checkbox"
+						class="item-checkbox"
+						checked={selectedItems.has(item.id)}
+						on:change={() => toggleSelection(item.id)}
+					/>
 					<div class="media-preview">
 						{#if isImage(item.mimeType)}
 							<img src={item.url} alt={item.altText || item.filename} />
@@ -290,6 +410,10 @@
 							<span>{formatBytes(item.size)}</span>
 							<span>·</span>
 							<span>{formatDate(item.createdAt)}</span>
+							{#if viewMode === 'list'}
+								<span>·</span>
+								<span>{item.uploader.name}</span>
+							{/if}
 						</div>
 					</div>
 					<div class="media-actions">
@@ -414,6 +538,34 @@
 		font-size: 16px;
 	}
 
+	.storage-quota {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		flex: 1;
+		max-width: 300px;
+	}
+
+	.quota-bar {
+		flex: 1;
+		height: 8px;
+		background: #e2e8f0;
+		border-radius: 4px;
+		overflow: hidden;
+	}
+
+	.quota-fill {
+		height: 100%;
+		background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+		transition: width 0.3s ease;
+	}
+
+	.quota-text {
+		color: #718096;
+		font-size: 13px;
+		white-space: nowrap;
+	}
+
 	.toolbar {
 		max-width: 1400px;
 		margin: 24px auto;
@@ -421,6 +573,7 @@
 		display: flex;
 		gap: 16px;
 		align-items: center;
+		flex-wrap: wrap;
 	}
 
 	.search-box {
@@ -448,6 +601,96 @@
 		font-size: 14px;
 		cursor: pointer;
 		background: white;
+	}
+
+	.view-toggle {
+		display: flex;
+		gap: 4px;
+		border: 2px solid #e2e8f0;
+		border-radius: 6px;
+		overflow: hidden;
+	}
+
+	.view-btn {
+		padding: 8px 14px;
+		background: white;
+		border: none;
+		cursor: pointer;
+		font-size: 18px;
+		transition: all 0.2s;
+		color: #718096;
+	}
+
+	.view-btn:hover {
+		background: #f7fafc;
+	}
+
+	.view-btn.active {
+		background: #667eea;
+		color: white;
+	}
+
+	.bulk-actions {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+	}
+
+	.selected-count {
+		color: #667eea;
+		font-weight: 600;
+		font-size: 14px;
+	}
+
+	.btn-bulk {
+		padding: 8px 16px;
+		background: white;
+		border: 2px solid #e2e8f0;
+		border-radius: 6px;
+		font-size: 14px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.btn-bulk:hover {
+		border-color: #cbd5e0;
+		background: #f7fafc;
+	}
+
+	.btn-bulk.btn-danger {
+		color: #e53e3e;
+		border-color: #fc8181;
+	}
+
+	.btn-bulk.btn-danger:hover {
+		background: #fed7d7;
+	}
+
+	.upload-progress {
+		max-width: 1400px;
+		margin: 0 auto 24px;
+		padding: 0 24px;
+	}
+
+	.progress-bar {
+		height: 8px;
+		background: #e2e8f0;
+		border-radius: 4px;
+		overflow: hidden;
+		margin-bottom: 8px;
+	}
+
+	.progress-fill {
+		height: 100%;
+		background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+		transition: width 0.3s ease;
+	}
+
+	.progress-text {
+		color: #667eea;
+		font-size: 14px;
+		font-weight: 600;
 	}
 
 	.upload-error {
@@ -516,17 +759,65 @@
 		gap: 24px;
 	}
 
+	.media-list {
+		max-width: 1400px;
+		margin: 0 auto 40px;
+		padding: 0 24px;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.media-list .media-item {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		padding: 12px;
+	}
+
+	.media-list .media-preview {
+		width: 80px;
+		height: 60px;
+		flex-shrink: 0;
+	}
+
+	.media-list .media-info {
+		flex: 1;
+		padding: 0;
+	}
+
+	.media-list .media-actions {
+		padding: 0;
+		border: none;
+	}
+
 	.media-item {
 		background: white;
 		border-radius: 8px;
 		overflow: hidden;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 		transition: transform 0.2s, box-shadow 0.2s;
+		position: relative;
 	}
 
 	.media-item:hover {
 		transform: translateY(-2px);
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	}
+
+	.media-item.selected {
+		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+	}
+
+	.item-checkbox {
+		position: absolute;
+		top: 12px;
+		left: 12px;
+		width: 20px;
+		height: 20px;
+		cursor: pointer;
+		z-index: 10;
+		accent-color: #667eea;
 	}
 
 	.media-preview {

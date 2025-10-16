@@ -297,7 +297,7 @@
 
 ### Content Management
 - [x] Page templates system ✅ **COMPLETED** - Full template system with JSON storage, CRUD, admin UI, versioning, template application. Fixed: schema composition bug resolved, "Use Template" working. Advanced features (template marketplace) pending.
-- [x] Reusable content blocks ✅ **COMPLETED** - Full block system with database, CRUD API, admin UI (list/create/edit/delete), categories, public/private sharing, usage tracking, version control, JSON editor. Page editor integration pending.
+- [x] Reusable content blocks ✅ **COMPLETED** - Full block system with database, CRUD API, admin UI (list/create/edit/delete), categories, public/private sharing, usage tracking, version control, JSON editor. **Page editor integration complete**: BlockPanel component, BLOCK_INSERTED event sourcing, insertBlock() design action, canvas integration with undo/redo support.
 - [ ] Draft autosave
 - [ ] Page revisions/version history
 - [ ] Scheduled publishing

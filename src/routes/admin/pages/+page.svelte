@@ -150,7 +150,7 @@
 				<a href="/admin" class="back-link">← Dashboard</a>
 				<h1>Pages</h1>
 			</div>
-			<a href="/" class="btn-primary">+ New Page</a>
+			<a href="/admin/pages/editor" class="btn-primary">+ New Page</a>
 		</div>
 	</header>
 
@@ -183,7 +183,7 @@
 			<div class="empty-icon">📄</div>
 			<h2>No pages found</h2>
 			<p>Create your first page to get started!</p>
-			<a href="/" class="btn-primary">Create Page</a>
+			<a href="/admin/pages/editor" class="btn-primary">Create Page</a>
 		</div>
 	{:else}
 		<div class="pages-table">

@@ -133,6 +133,13 @@ export function applyEvent(state: CanvasState, event: DesignEvent): CanvasState 
 			// This event is tracked for history but doesn't modify state
 			return state;
 
+		case 'BLOCK_INSERTED':
+			// Add all elements from the block to the canvas
+			return {
+				...state,
+				elements: [...state.elements, ...event.elements]
+			};
+
 		default:
 			// TypeScript exhaustiveness check
 			const _exhaustive: never = event;

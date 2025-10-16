@@ -116,6 +116,19 @@ export interface SelectionChangedEvent extends BaseEvent {
 }
 
 /**
+ * Content Block Events
+ */
+export interface BlockInsertedEvent extends BaseEvent {
+	type: 'BLOCK_INSERTED';
+	blockId: string;
+	blockName: string;
+	artboardId: string;
+	x: number;
+	y: number;
+	elements: CanvasElement[];
+}
+
+/**
  * Union type of all possible events
  * This is what gets stored in the event history
  */
@@ -133,7 +146,8 @@ export type DesignEvent =
 	| ElementResizedEvent
 	| ElementsMovedEvent
 	| ElementsDeletedEvent
-	| SelectionChangedEvent;
+	| SelectionChangedEvent
+	| BlockInsertedEvent;
 
 /**
  * Event history state

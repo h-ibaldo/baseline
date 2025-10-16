@@ -234,10 +234,105 @@ export function clearSelection(): void {
 
 export function selectMultiple(elementIds: string[]): void {
 	selectedElementIds.set(elementIds);
-	
+
 	addEvent({
 		type: 'SELECTION_CHANGED',
 		elementIds
 	} as any);
+}
+
+// ============================================================================
+// Content Block Actions
+// ============================================================================
+
+export function insertBlock(
+	blockId: string,
+	blockName: string,
+	blockContent: string,
+	artboardId: string,
+	x: number,
+	y: number
+): string[] {
+	try {
+		// Parse block content JSON
+		const content = JSON.parse(blockContent);
+
+		// Convert block content to canvas elements
+		const elements: CanvasElement[] = [];
+
+		// Handle different block structures
+		if (Array.isArray(content)) {
+			// Block contains multiple elements
+			content.forEach((item, index) => {
+				const elementId = generateId('element');
+				elements.push({
+					id: elementId,
+					type: item.type || 'box',
+					artboardId,
+					x: x + (item.x || 0),
+					y: y + (item.y || (index * 100)),
+					width: item.width || 200,
+					height: item.height || 100
+				});
+			});
+		} else if (content.type) {
+			// Single element block
+			const elementId = generateId('element');
+			elements.push({
+				id: elementId,
+				type: content.type || 'box',
+				artboardId,
+				x: x + (content.x || 0),
+				y: y + (content.y || 0),
+				width: content.width || 200,
+				height: content.height || 100
+			});
+		} else {
+			// Fallback: create a placeholder element
+			const elementId = generateId('element');
+			elements.push({
+				id: elementId,
+				type: 'box',
+				artboardId,
+				x,
+				y,
+				width: 200,
+				height: 100
+			});
+		}
+
+		// Dispatch block inserted event
+		addEvent({
+			type: 'BLOCK_INSERTED',
+			blockId,
+			blockName,
+			artboardId,
+			x,
+			y,
+			elements
+		});
+
+		// Increment usage count via API
+		incrementBlockUsage(blockId).catch(console.error);
+
+		return elements.map(el => el.id);
+	} catch (error) {
+		console.error('Failed to insert block:', error);
+		return [];
+	}
+}
+
+async function incrementBlockUsage(blockId: string): Promise<void> {
+	const token = localStorage.getItem('access_token');
+	if (!token) return;
+
+	try {
+		await fetch(`/api/content-blocks/${blockId}/increment`, {
+			method: 'POST',
+			headers: { Authorization: `Bearer ${token}` }
+		});
+	} catch (error) {
+		console.error('Failed to increment block usage:', error);
+	}
 }
 

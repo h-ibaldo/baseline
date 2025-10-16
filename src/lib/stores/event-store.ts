@@ -36,10 +36,10 @@ function generateEventId(): string {
 /**
  * Add a new event to history
  * If we're in the middle of history (after undo), this will truncate future events
- * 
+ *
  * @param event - Event to add (without id and timestamp)
  */
-export function addEvent(event: Omit<DesignEvent, 'id' | 'timestamp'> & { type: DesignEvent['type'] }): void {
+export function addEvent(event: any): void {
 	eventHistory.update((history) => {
 		const newEvent: DesignEvent = {
 			...event,

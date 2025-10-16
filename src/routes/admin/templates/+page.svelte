@@ -20,7 +20,14 @@
 	let templates: Template[] = [];
 	let loading = true;
 	let error = '';
+	let success = '';
 	let deleteConfirmTemplate: Template | null = null;
+	let useTemplate: Template | null = null;
+	let applyForm = {
+		slug: '',
+		title: ''
+	};
+	let applying = false;
 
 	onMount(() => {
 		loadTemplates();
@@ -78,6 +85,48 @@
 		}
 	}
 
+	async function applyTemplate() {
+		if (!useTemplate) return;
+
+		const token = localStorage.getItem('access_token');
+		applying = true;
+		error = '';
+		success = '';
+
+		try {
+			const response = await fetch(`/api/templates/${useTemplate.id}/apply`, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					slug: applyForm.slug,
+					title: applyForm.title
+				})
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.error || 'Failed to create page from template');
+			}
+
+			success = `Page "${applyForm.title}" created successfully!`;
+			useTemplate = null;
+			applyForm = { slug: '', title: '' };
+
+			// Redirect to page manager after short delay
+			setTimeout(() => {
+				goto('/admin/pages');
+			}, 1500);
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Failed to create page from template';
+		} finally {
+			applying = false;
+		}
+	}
+
 	function formatDate(dateString: string): string {
 		return new Date(dateString).toLocaleDateString('en-US', {
 			year: 'numeric',
@@ -103,6 +152,13 @@
 			</button>
 		</div>
 	</header>
+
+	{#if success}
+		<div class="success-banner">
+			{success}
+			<button on:click={() => (success = '')}>✕</button>
+		</div>
+	{/if}
 
 	{#if error}
 		<div class="error-banner">
@@ -146,7 +202,9 @@
 						<div class="creator">By {template.creator.name}</div>
 					</div>
 					<div class="template-actions">
-						<button class="btn-secondary" title="Apply template">Use Template</button>
+						<button class="btn-secondary" on:click={() => (useTemplate = template)} title="Apply template">
+							Use Template
+						</button>
 						<button
 							class="btn-danger"
 							on:click={() => (deleteConfirmTemplate = template)}
@@ -160,6 +218,46 @@
 		</div>
 	{/if}
 </div>
+
+{#if useTemplate}
+	<div class="modal-overlay" on:click={() => (useTemplate = null)}>
+		<div class="modal" on:click|stopPropagation>
+			<h2>Create Page from Template</h2>
+			<p>Create a new page using the <strong>{useTemplate.name}</strong> template.</p>
+			<form on:submit|preventDefault={applyTemplate}>
+				<div class="form-group">
+					<label for="title">Page Title *</label>
+					<input
+						id="title"
+						type="text"
+						bind:value={applyForm.title}
+						placeholder="My New Page"
+						required
+					/>
+				</div>
+				<div class="form-group">
+					<label for="slug">Page Slug *</label>
+					<input
+						id="slug"
+						type="text"
+						bind:value={applyForm.slug}
+						placeholder="my-new-page"
+						required
+					/>
+					<p class="help-text">URL-friendly identifier (e.g., about-us)</p>
+				</div>
+				<div class="modal-actions">
+					<button type="button" class="btn-secondary" on:click={() => (useTemplate = null)}>
+						Cancel
+					</button>
+					<button type="submit" class="btn-primary" disabled={applying}>
+						{applying ? 'Creating...' : 'Create Page'}
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
 
 {#if deleteConfirmTemplate}
 	<div class="modal-overlay" on:click={() => (deleteConfirmTemplate = null)}>
@@ -243,6 +341,17 @@
 	.btn-danger {
 		background: #e53e3e;
 		color: white;
+	}
+
+	.success-banner {
+		max-width: 1400px;
+		margin: 24px auto;
+		padding: 12px 24px;
+		background: #c6f6d5;
+		color: #2f855a;
+		border-radius: 6px;
+		display: flex;
+		justify-content: space-between;
 	}
 
 	.error-banner {
@@ -387,5 +496,35 @@
 		gap: 12px;
 		justify-content: flex-end;
 		margin-top: 24px;
+	}
+
+	.form-group {
+		margin-bottom: 16px;
+	}
+
+	.form-group label {
+		display: block;
+		margin-bottom: 8px;
+		font-weight: 500;
+		color: #1a202c;
+	}
+
+	.form-group input {
+		width: 100%;
+		padding: 10px 12px;
+		border: 2px solid #e2e8f0;
+		border-radius: 6px;
+		font-size: 14px;
+	}
+
+	.form-group input:focus {
+		outline: none;
+		border-color: #667eea;
+	}
+
+	.help-text {
+		margin: 6px 0 0 0;
+		font-size: 13px;
+		color: #718096;
 	}
 </style>

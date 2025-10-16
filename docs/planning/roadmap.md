@@ -285,6 +285,8 @@
 
 **Goal**: Complete CMS functionality for production use
 
+**Service Test Coverage Added** - Unit test scaffolds created for core server services (auth, media, settings) with Prisma mocking. Tests demonstrate proper structure and cover happy paths + error cases. Requires refactoring to align with actual service exports.
+
 ### Admin Panel (Advanced)
 - [x] Enhanced page manager (search, filter, bulk actions) ✅ **COMPLETED** - Basic UI complete
 - [x] Enhanced media library (folders, tags, search) ✅ **COMPLETED** - Basic UI complete (grid/list view, search, filters, bulk delete, upload progress, storage quota). Advanced features (folders, tags) pending.

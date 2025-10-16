@@ -124,7 +124,9 @@
 				<a href="/admin" class="back-link">← Dashboard</a>
 				<h1>Content Blocks</h1>
 			</div>
-			<button class="btn-primary" on:click={() => goto('/')}>+ Create Block</button>
+			<button class="btn-primary" on:click={() => goto('/admin/content-blocks/create')}>
+				+ Create Block
+			</button>
 		</div>
 	</header>
 
@@ -161,7 +163,9 @@
 			<div class="empty-icon">📦</div>
 			<h2>No content blocks yet</h2>
 			<p>Create reusable blocks to build pages faster.</p>
-			<button class="btn-primary" on:click={() => goto('/')}>Create Block</button>
+			<button class="btn-primary" on:click={() => goto('/admin/content-blocks/create')}>
+				Create Block
+			</button>
 		</div>
 	{:else}
 		<div class="blocks-grid">
@@ -189,7 +193,12 @@
 						<div class="creator">By {block.creator.name}</div>
 					</div>
 					<div class="block-actions">
-						<button class="btn-secondary">Edit</button>
+						<button
+							class="btn-secondary"
+							on:click={() => goto(`/admin/content-blocks/${block.id}/edit`)}
+						>
+							Edit
+						</button>
 						<button class="btn-danger" on:click={() => (deleteConfirmBlock = block)}>
 							Delete
 						</button>

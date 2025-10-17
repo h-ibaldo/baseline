@@ -59,13 +59,21 @@ model PageRevision {
   id           String   @id @default(uuid())
   pageId       String
   page         Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  // Revision content
+  version      Int      // Version number (1, 2, 3...)
+  title        String?  // Optional revision title/description
   designEvents String   // JSON string of events at this revision
+  metadata     String?  // JSON snapshot of page metadata (title, slug, SEO)
+
+  // Tracking
   createdBy    String
   creator      User     @relation(fields: [createdBy], references: [id])
   createdAt    DateTime @default(now())
 
   @@index([pageId])
   @@index([createdBy])
+  @@index([version])
 }
 
 // Page Templates - Reusable page layouts

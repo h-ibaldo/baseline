@@ -46,7 +46,42 @@ LineBasis is built as a modern web application using SvelteKit and TypeScript, d
   - Dashboard with statistics
   - Protected routes
 - **Publishing**: Design → Database → SSR pages on custom domain ✅
+- **Blog System**: Template-based blog with Notion-like editor ✅
+  - Design blog templates in designer
+  - Mark pages as blog templates
+  - Rich text editor for content
+  - Publish as page OR blog template
+- **SEO Tools**: Sitemap generation, robots.txt, meta management ✅
 - **Philosophy**: You own your data and server. Self-hosted, no vendor lock-in.
+
+### CMS Directory Structure
+```
+baseline/
+├── src/
+│   ├── routes/
+│   │   ├── admin/                  # CMS Admin Panel (SSR)
+│   │   │   ├── +layout.server.ts  # Auth guard
+│   │   │   ├── pages/             # Page manager
+│   │   │   ├── media/             # Media library
+│   │   │   ├── users/             # User management
+│   │   │   └── settings/          # Site settings
+│   │   ├── api/                    # REST API
+│   │   │   ├── pages/             # CRUD pages
+│   │   │   ├── media/             # Upload/manage media
+│   │   │   ├── auth/              # Login/logout
+│   │   │   └── publish/           # Publishing endpoints
+│   │   └── [...slug]/              # Published Pages (SSR)
+│   │       └── +page.server.ts    # Load from database
+│   ├── lib/
+│   │   ├── server/                 # Server-only code
+│   │   │   ├── db/                # Database layer
+│   │   │   ├── auth/              # Authentication
+│   │   │   └── services/          # Business logic
+│   │   └── components/            # Shared components
+│   └── hooks.server.ts            # SvelteKit hooks (auth, etc.)
+├── prisma/                         # Database schema
+└── static/uploads/                 # Uploaded media
+```
 
 **Optional Future: Cloud Sync**
 - **Sync Protocol**: Event-based sync (CRDTs for conflict resolution)
@@ -189,6 +224,62 @@ Designer Canvas (Multi-Page Viewport)
 - **Visual Management**: See all pages and their status at once
 - **Simple URLs**: Just define the slug, routing is automatic
 - **Live Preview**: Published pages immediately accessible
+
+## Theme Export System
+
+### Export Architecture
+- **Format**: `.baseline-theme` (ZIP file)
+- **Structure**: JSON + Svelte Components
+- **Portable**: Like WordPress themes, but better
+- **Editable**: Svelte files can be modified
+- **Versionable**: Git-friendly
+- **Extensible**: Add custom logic
+
+### Export Format
+```
+theme-name.baseline-theme/
+├── theme.json (structure & data)
+├── components/
+│   ├── BlogPost.svelte
+│   ├── BlogList.svelte
+│   └── Hero.svelte
+├── styles/
+│   ├── variables.css
+│   └── components.css
+└── assets/
+    └── images/
+```
+
+### Benefits
+- **Professional Sharing**: Exchange designs like Figma files
+- **Client Delivery**: Easy theme installation
+- **Version Control**: Track theme changes
+- **Customization**: Modify Svelte components
+- **Reusability**: Use themes across projects
+
+## Style Libraries (Figma-Style)
+
+### Library System
+- **Colors**: Primary, secondary, semantic palettes
+- **Typography**: Font families, sizes, line heights
+- **Spacing**: Margins, paddings, gaps
+- **Components**: Button styles, input styles, card styles
+
+### Features
+- **Library Management**: Create, edit, share libraries
+- **Component Inheritance**: Components inherit from libraries
+- **Global Updates**: Change library → all components update
+- **Import/Export**: Share libraries between projects
+- **Version Control**: Track library changes
+
+### Workflow
+```
+1. Create style library (colors, typography, spacing)
+2. Components inherit from library
+3. Update library → all components update automatically
+4. Export library for sharing
+5. Import library in other projects
+```
 
 ### 3. Code Generator
 - **Purpose**: Generate production-ready code from design

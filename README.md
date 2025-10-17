@@ -31,7 +31,54 @@ An open source project with huge ambition and expectations. The goal of this pro
    - Media library, SEO tools, blog system
    - True WordPress replacement with modern technology
 
-**Design Experience**: Clean, light, dynamic (multiple artboards), you design with the actual code of your actual page. Designer focused. Allows you to design a visual identity for the website with variables and components, templates and themes. Allows you to design based on a line basis grid. Aligns text to baseline grid like InDesign, appealing to demanding Graphic Designers. Built in animation system in the future.
+**Design Experience**: 
+- **Unified Interface**: Single designer for all design, editing, and publishing
+- **Multi-Page Canvas**: See all website pages at once (Figma-style)
+- **Component System**: Convert any design to reusable components
+- **Instant Publishing**: Right-click page → Publish with slug definition
+- **Blog Templates**: Design blog templates with Notion-like rich text editor
+- **Style Libraries**: Figma-style design system management
+- **Theme Export**: Share designs as professional themes (.baseline-theme)
+- **Baseline Grid**: InDesign-style typography alignment
+- **Real Code**: Design with actual HTML/CSS/Svelte components
+
+## Key Features
+
+### 🎨 **Unified Designer Interface**
+- **Multi-Page Canvas**: Design all website pages in one view
+- **Visual Page Management**: Add, remove, reorder pages visually
+- **Instant Publishing**: Figma-style workflow - right-click → publish
+- **No Context Switching**: Everything happens in one interface
+
+### 🧩 **Component System**
+- **Convert Designs to Components**: Select any design → right-click → "Convert to Component"
+- **Component Library**: Drag-and-drop reusable components
+- **Master Component Editing**: Edit once, update everywhere
+- **Style Inheritance**: Components inherit from style libraries
+
+### 📝 **Blog Template System**
+- **Design Blog Templates**: Create blog layouts in the designer
+- **Notion-like Editor**: Rich text editing with Novel Svelte
+- **Flexible Publishing**: Publish as regular page OR blog template
+- **Content Management**: Simple CMS for blog content
+
+### 🎨 **Style Libraries (Figma-Style)**
+- **Design System Management**: Colors, typography, spacing, components
+- **Global Updates**: Change library → all components update
+- **Library Sharing**: Import/export libraries between projects
+- **Version Control**: Track design system changes
+
+### 🚀 **Theme Export System**
+- **Professional Sharing**: Exchange designs like Figma files
+- **JSON + Svelte Components**: Editable, versionable themes
+- **One-Click Installation**: Import themes into any project
+- **Client Delivery**: Easy theme handoff to clients
+
+### 📐 **Baseline Grid System**
+- **InDesign-Style Typography**: Perfect text alignment
+- **Customizable Grid**: 4-32px baseline height
+- **Visual Grid Overlay**: Toggleable, customizable
+- **Snap-to-Baseline**: Real-time alignment during design
 
 **You own everything**: The code, the data, and the platform. Developers or curious designers can change anything. Extensible via plugin system, themes, and component libraries.
 

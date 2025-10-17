@@ -299,6 +299,35 @@
 - [x] Page templates system ✅ **COMPLETED** - Full template system with JSON storage, CRUD, admin UI, versioning, template application. Fixed: schema composition bug resolved, "Use Template" working. Advanced features (template marketplace) pending.
 - [x] Reusable content blocks ✅ **COMPLETED** - Full block system with database, CRUD API, admin UI (list/create/edit/delete), categories, public/private sharing, usage tracking, version control, JSON editor. **Page editor integration complete**: BlockPanel component, BLOCK_INSERTED event sourcing, insertBlock() design action, canvas integration with undo/redo support.
 - [x] Draft autosave ✅ **COMPLETED** - Automatic draft saving with debounced saves every 30s, visual status indicator (saving/unsaved/saved), last saved timestamp, non-blocking UX, draft loading on editor open, integration with event sourcing. Database: draftContent/lastSavedAt/hasUnsavedChanges fields. Service: drafts.ts with autosave/getDraft/clearDraft. API: /api/pages/[id]/autosave endpoints.
+
+### 🚀 **ARCHITECTURAL PIVOT** - Component System (Replacing Content Blocks)
+- [ ] **Component System** - Convert designs to reusable components (replaces content blocks)
+  - [ ] Component creation from design selections
+  - [ ] Component library with drag-and-drop
+  - [ ] Component inheritance from style libraries
+  - [ ] Master component editing (update all instances)
+- [ ] **Unified Designer Interface** - Single interface for design, editing, and publishing
+  - [ ] Multi-page canvas (see all pages at once)
+  - [ ] Visual page management (add/remove/reorder)
+  - [ ] Instant publishing workflow (Figma-style)
+  - [ ] Page state indicators (draft/published)
+- [ ] **Blog Template System** - Design blog templates with Notion-like editor
+  - [ ] Mark pages as blog templates
+  - [ ] Rich text component (Novel Svelte)
+  - [ ] Blog content management
+  - [ ] Publish as page OR blog template
+- [ ] **Style Libraries** - Figma-style design system management
+  - [ ] Color palettes and typography
+  - [ ] Spacing and component styles
+  - [ ] Library sharing and import/export
+  - [ ] Global style updates
+- [ ] **Theme Export System** - Professional theme sharing
+  - [ ] JSON + Svelte component export
+  - [ ] .baseline-theme ZIP format
+  - [ ] Theme installation and management
+  - [ ] Version control and sharing
+
+### Legacy Content Management (To Be Replaced)
 - [ ] Page revisions/version history
 - [ ] Scheduled publishing
 - [ ] Page duplication

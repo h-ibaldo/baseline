@@ -13,6 +13,9 @@
 	export let isSelected = false;
 	export let onSelect: ((shiftKey: boolean) => void) | undefined = undefined;
 	export let baselineConfig: BaselineConfig | undefined = undefined;
+	export let draggable = true;
+	export let onDragStart: ((elementId: string, event: DragEvent) => void) | undefined = undefined;
+	export let onDragEnd: ((elementId: string) => void) | undefined = undefined;
 
 	let isDragging = false;
 	let isResizing = false;
@@ -43,6 +46,38 @@
 		e.preventDefault();
 		// Stop event from reaching canvas (prevent deselection)
 		e.stopPropagation();
+	}
+
+	/**
+	 * Handle drag start for HTML5 drag and drop
+	 */
+	function handleDragStart(e: DragEvent) {
+		if (!draggable) {
+			e.preventDefault();
+			return;
+		}
+
+		if (onDragStart) {
+			onDragStart(element.id, e);
+		}
+
+		// Set drag data
+		e.dataTransfer!.setData('application/json', JSON.stringify({
+			type: 'element',
+			elementId: element.id,
+			element,
+		}));
+
+		e.dataTransfer!.effectAllowed = 'move';
+	}
+
+	/**
+	 * Handle drag end for HTML5 drag and drop
+	 */
+	function handleDragEnd(e: DragEvent) {
+		if (onDragEnd) {
+			onDragEnd(element.id);
+		}
 	}
 
 	/**
@@ -165,6 +200,7 @@
 	class:box={element.type === 'box'}
 	class:dragging={isDragging}
 	class:selected={isSelected}
+	class:draggable={draggable}
 	style="
 		left: {element.x}px;
 		top: {element.y}px;
@@ -175,7 +211,10 @@
 	"
 	data-element-id={element.id}
 	data-element-type={element.type}
+	draggable={draggable}
 	on:mousedown={handleMouseDown}
+	on:dragstart={handleDragStart}
+	on:dragend={handleDragEnd}
 	role="button"
 	tabindex="0"
 >
@@ -220,6 +259,18 @@
 		pointer-events: auto;
 		cursor: move;
 		user-select: none;
+	}
+
+	.element.draggable {
+		cursor: grab;
+	}
+
+	.element.draggable:hover {
+		cursor: grab;
+	}
+
+	.element.draggable:active {
+		cursor: grabbing;
 	}
 
 	/* Visual feedback while dragging */

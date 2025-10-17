@@ -298,7 +298,7 @@
 ### Content Management
 - [x] Page templates system ✅ **COMPLETED** - Full template system with JSON storage, CRUD, admin UI, versioning, template application. Fixed: schema composition bug resolved, "Use Template" working. Advanced features (template marketplace) pending.
 - [x] Reusable content blocks ✅ **COMPLETED** - Full block system with database, CRUD API, admin UI (list/create/edit/delete), categories, public/private sharing, usage tracking, version control, JSON editor. **Page editor integration complete**: BlockPanel component, BLOCK_INSERTED event sourcing, insertBlock() design action, canvas integration with undo/redo support.
-- [ ] Draft autosave
+- [x] Draft autosave ✅ **COMPLETED** - Automatic draft saving with debounced saves every 30s, visual status indicator (saving/unsaved/saved), last saved timestamp, non-blocking UX, draft loading on editor open, integration with event sourcing. Database: draftContent/lastSavedAt/hasUnsavedChanges fields. Service: drafts.ts with autosave/getDraft/clearDraft. API: /api/pages/[id]/autosave endpoints.
 - [ ] Page revisions/version history
 - [ ] Scheduled publishing
 - [ ] Page duplication

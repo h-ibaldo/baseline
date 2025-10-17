@@ -97,36 +97,98 @@ linebasis/
 
 ## Core Components
 
-### 1. Design Canvas
-- **Purpose**: Main design interface where you design with actual web code
+### 1. Unified Designer Interface
+- **Purpose**: Single interface for design, editing, and publishing
 - **Technology**: DOM-based approach using Svelte components (not Canvas API)
-- **Architecture**: Infinite canvas with multiple artboards (Figma/Illustrator style)
-- **Rationale**: What you see IS the code - eliminates design-to-code abstraction
+- **Architecture**: Multi-page canvas with instant publishing (Figma-style workflow)
+- **Rationale**: Eliminate context switching - everything happens in one place
 
-#### Canvas Hierarchy
+#### Multi-Page Canvas Hierarchy
 ```
-Canvas (Infinite Viewport)
-  ├─ Artboard 1 (e.g., Desktop 1920×1080)
-  │   └─ Elements (boxes, text, images)
-  ├─ Artboard 2 (e.g., Mobile 375×812)
+Designer Canvas (Multi-Page Viewport)
+  ├─ Page 1 (e.g., Homepage)
+  │   ├─ Artboard 1 (Desktop 1920×1080)
+  │   ├─ Artboard 2 (Mobile 375×812)
+  │   └─ Elements (boxes, text, images, components)
+  ├─ Page 2 (e.g., About Page)
+  │   ├─ Artboard 1 (Desktop 1920×1080)
   │   └─ Elements
-  └─ Loose Elements (outside artboards)
+  ├─ Page 3 (e.g., Services)
+  └─ Page N (unlimited pages)
 ```
 
 #### Features
-- **Infinite Canvas**: Pan and zoom around unlimited workspace
-- **Multiple Artboards**: Up to 10 artboards per canvas (performance monitored)
-- **Flexible Layout**: Elements can exist inside or outside artboards
-- **Per-Artboard Grid**: Each artboard has independent grid settings
-- **Direct Manipulation**: Real HTML/CSS elements, not rendered graphics
-- **Multi-Export**: Export selected artboards individually or in batch
-- **Real-time Preview**: It's already real HTML/CSS, no conversion needed
+- **Multi-Page Canvas**: See all website pages at once
+- **Visual Page Management**: Add/remove/reorder pages visually
+- **Instant Publishing**: Right-click page → Publish with slug definition
+- **Component Creation**: Convert any design selection to reusable component
+- **Component Library**: Drag-and-drop components from sidebar
+- **Live Site Preview**: Published pages automatically appear on live site
+- **Draft Management**: Visual indicators for published vs draft pages
 
-### 2. Component Library
-- **Purpose**: Reusable UI components
-- **Technology**: Svelte components with TypeScript
-- **Features**: Customizable, themeable, responsive
-- **Architecture**: Components are both design tools AND output code
+### 2. Component System
+- **Purpose**: Convert designs to reusable components (replaces content blocks)
+- **Technology**: Auto-generated from design selections
+- **Features**: Visual creation, automatic library, instant reuse
+- **Architecture**: Any design can become a component
+
+#### Component Workflow
+```
+1. Design in canvas → Select elements → Right-click "Convert to Component"
+2. Component automatically saved to library with thumbnail
+3. Drag component from library into any design
+4. Edit master component → All instances update automatically
+```
+
+## Architectural Evolution
+
+### Previous Architecture (Complex)
+```
+- Designer (visual design only)
+- Page Editor (content management)
+- Content Blocks (separate reusable content system)
+- Templates (page layout system)
+- Publishing System (complex workflow)
+```
+
+### New Architecture (Simplified) ✅ **CURRENT**
+```
+- Unified Designer Interface
+  ├── Multi-page canvas (all pages visible)
+  ├── Component creation (convert design to component)
+  ├── Component library (reusable components)
+  ├── Instant publishing (Figma-style workflow)
+  └── Live site management (published vs draft)
+```
+
+### What's Being Replaced
+- ❌ **Content Blocks System** → ✅ **Component System** (more intuitive)
+- ❌ **Separate Page Editor** → ✅ **Unified Designer** (no context switching)
+- ❌ **Template System** → ✅ **Page-based Design** (pages are just designs)
+- ❌ **Complex Publishing** → ✅ **Instant Publishing** (right-click → publish)
+- ❌ **Multiple Interfaces** → ✅ **Single Interface** (everything in designer)
+
+## Publishing Workflow (Figma-Style)
+
+### How Publishing Works
+```
+1. Design pages in multi-page canvas
+2. Select page to publish (right-click or select)
+3. Define slug (e.g., "/about", "/services/pricing")
+4. Click "Publish" → Page goes live immediately
+5. Published pages appear in live site navigation
+```
+
+### Page States
+- **Draft**: Visible in admin, not on live site
+- **Published**: Live on website with defined slug
+- **Unpublished**: Right-click → "Unpublish" to remove from live site
+
+### Benefits
+- **Instant Publishing**: No complex setup or configuration
+- **Visual Management**: See all pages and their status at once
+- **Simple URLs**: Just define the slug, routing is automatic
+- **Live Preview**: Published pages immediately accessible
 
 ### 3. Code Generator
 - **Purpose**: Generate production-ready code from design

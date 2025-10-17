@@ -8,6 +8,8 @@
   import PageManager from '$lib/components/design/PageManager.svelte';
   import PublishingPanel from '$lib/components/design/PublishingPanel.svelte';
   import ComponentCreationDialog from '$lib/components/design/ComponentCreationDialog.svelte';
+  import ContextMenu from '$lib/components/design/ContextMenu.svelte';
+  import KeyboardShortcuts from '$lib/components/design/KeyboardShortcuts.svelte';
   import { 
     canvasState, 
     addArtboard, 
@@ -39,10 +41,20 @@
   let showPageManager = true;
   let showPublishingPanel = false;
   let showComponentCreationDialog = false;
+  let showKeyboardShortcuts = false;
   let loading = true;
   let saving = false;
   let error = '';
   let success = '';
+
+  // Context menu state
+  let contextMenu = {
+    isOpen: false,
+    x: 0,
+    y: 0,
+    target: 'canvas' as 'page' | 'element' | 'canvas',
+    selectedElementIds: [] as string[]
+  };
 
   // Canvas configuration
   let canvasConfig: CanvasConfig = {
@@ -309,6 +321,81 @@
     }
   }
 
+  // Context menu functions
+  function handleContextMenu(event: MouseEvent, target: 'page' | 'element' | 'canvas', pageId?: string) {
+    event.preventDefault();
+    contextMenu = {
+      isOpen: true,
+      x: event.clientX,
+      y: event.clientY,
+      target,
+      selectedElementIds: target === 'element' ? selectedElementIds : []
+    };
+  }
+
+  function handleContextMenuAction(event: CustomEvent) {
+    const { action, target, selectedElementIds, currentPage } = event.detail;
+    
+    switch (action) {
+      case 'new-page':
+        createNewPage();
+        break;
+      case 'publish':
+        if (currentPage) {
+          showPublishingPanel = true;
+        }
+        break;
+      case 'unpublish':
+        if (currentPage) {
+          unpublishPage(currentPage.id);
+        }
+        break;
+      case 'duplicate':
+        if (target === 'page' && currentPage) {
+          duplicatePage(currentPage.id);
+        }
+        break;
+      case 'edit':
+        // TODO: Open page editor
+        break;
+      case 'toggle-blog-template':
+        if (currentPage) {
+          toggleBlogTemplate(currentPage.id);
+        }
+        break;
+      case 'delete':
+        if (target === 'page' && currentPage) {
+          deletePage(currentPage.id);
+        }
+        break;
+      case 'convert-to-component':
+        handleConvertToComponent();
+        break;
+      case 'bring-to-front':
+        // TODO: Implement bring to front
+        break;
+      case 'send-to-back':
+        // TODO: Implement send to back
+        break;
+      case 'copy':
+        // TODO: Implement copy
+        break;
+      case 'paste':
+        // TODO: Implement paste
+        break;
+      case 'select-all':
+        // TODO: Implement select all
+        break;
+      case 'deselect-all':
+        selectedElementIds = [];
+        break;
+    }
+  }
+
+  function closeContextMenu() {
+    contextMenu.isOpen = false;
+  }
+
   // Keyboard shortcuts
   function handleKeydown(event: KeyboardEvent) {
     if (event.ctrlKey || event.metaKey) {
@@ -329,7 +416,28 @@
           event.preventDefault();
           createNewPage();
           break;
+        case 'a':
+          event.preventDefault();
+          // TODO: Select all
+          break;
+        case 'c':
+          event.preventDefault();
+          // TODO: Copy
+          break;
+        case 'v':
+          event.preventDefault();
+          // TODO: Paste
+          break;
+        case '?':
+          event.preventDefault();
+          showKeyboardShortcuts = true;
+          break;
       }
+    }
+    
+    if (event.key === 'Escape') {
+      closeContextMenu();
+      showKeyboardShortcuts = false;
     }
   }
 </script>
@@ -369,6 +477,13 @@
           </svg>
           Convert to Component
         </button>
+        <div class="separator"></div>
+        <button type="button" on:click={() => showKeyboardShortcuts = true} title="Keyboard Shortcuts (Ctrl+?)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+          </svg>
+          Shortcuts
+        </button>
       </div>
     </div>
 
@@ -407,7 +522,10 @@
     {/if}
 
     <!-- Center - Canvas Area -->
-    <main class="canvas-area">
+    <main 
+      class="canvas-area"
+      on:contextmenu={(e) => handleContextMenu(e, 'canvas')}
+    >
       {#if loading}
         <div class="loading-state">
           <div class="loading-spinner"></div>
@@ -419,11 +537,13 @@
             <Artboard
               {artboard}
               bind:selectedElementIds
+              on:contextmenu={(e) => handleContextMenu(e, 'page', artboard.id)}
             >
               {#each currentPage.elements.filter(el => el.artboardId === artboard.id) as element (element.id)}
                 <Element
                   {element}
                   bind:selectedElementIds
+                  on:contextmenu={(e) => handleContextMenu(e, 'element')}
                 />
               {/each}
             </Artboard>
@@ -469,6 +589,24 @@
     isOpen={showComponentCreationDialog}
     onClose={() => showComponentCreationDialog = false}
     onCreate={handleComponentCreate}
+  />
+
+  <!-- Context Menu -->
+  <ContextMenu
+    isOpen={contextMenu.isOpen}
+    x={contextMenu.x}
+    y={contextMenu.y}
+    target={contextMenu.target}
+    selectedElementIds={contextMenu.selectedElementIds}
+    {currentPage}
+    on:action={handleContextMenuAction}
+    on:close={closeContextMenu}
+  />
+
+  <!-- Keyboard Shortcuts Modal -->
+  <KeyboardShortcuts
+    isOpen={showKeyboardShortcuts}
+    on:close={() => showKeyboardShortcuts = false}
   />
 
   <!-- Notifications -->

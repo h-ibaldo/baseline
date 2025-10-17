@@ -1,79 +1,162 @@
-/**
- * Posts API
- *
- * GET /api/posts - List all posts (requires auth)
- * POST /api/posts - Create new post (requires auth)
- */
-
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getPosts, createPost } from '../../services/posts';
-import { requireAuth } from '$lib/server/middleware/auth';
+import { prisma } from '$lib/server/db/client.js';
+import { requireAuth } from '$lib/server/middleware/auth.js';
 
-export const GET: RequestHandler = async (event) => {
-	// Require authentication
-	await requireAuth(event);
+export const GET: RequestHandler = async ({ url, locals }) => {
+  const session = await requireAuth(locals);
+  
+  const search = url.searchParams.get('search') || undefined;
+  const status = url.searchParams.get('status') as 'draft' | 'published' | undefined;
+  const categoryId = url.searchParams.get('categoryId') || undefined;
+  const limit = parseInt(url.searchParams.get('limit') || '50');
+  const offset = parseInt(url.searchParams.get('offset') || '0');
 
-	const status = event.url.searchParams.get('status') as
-		| 'draft'
-		| 'published'
-		| 'scheduled'
-		| 'archived'
-		| null;
-	const authorId = event.url.searchParams.get('authorId');
-	const categoryId = event.url.searchParams.get('categoryId');
-	const tagId = event.url.searchParams.get('tagId');
-	const search = event.url.searchParams.get('search');
-	const limit = parseInt(event.url.searchParams.get('limit') || '50');
-	const offset = parseInt(event.url.searchParams.get('offset') || '0');
+  try {
+    const where: any = {
+      authorId: session.user.id,
+    };
 
-	try {
-		const result = await getPosts({
-			status: status || undefined,
-			authorId: authorId || undefined,
-			categoryId: categoryId || undefined,
-			tagId: tagId || undefined,
-			search: search || undefined,
-			limit,
-			offset
-		});
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { content: { contains: search, mode: 'insensitive' } },
+        { excerpt: { contains: search, mode: 'insensitive' } },
+      ];
+    }
 
-		return json(result);
-	} catch (error) {
-		return json(
-			{ error: error instanceof Error ? error.message : 'Failed to fetch posts' },
-			{ status: 500 }
-		);
-	}
+    if (status) {
+      where.status = status;
+    }
+
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+
+    const posts = await prisma.blogPost.findMany({
+      where,
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: limit,
+      skip: offset,
+    });
+
+    return json({
+      success: true,
+      data: posts,
+    });
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    return json(
+      {
+        success: false,
+        error: 'Failed to fetch blog posts',
+      },
+      { status: 500 }
+    );
+  }
 };
 
-export const POST: RequestHandler = async (event) => {
-	// Require authentication
-	const user = await requireAuth(event);
+export const POST: RequestHandler = async ({ request, locals }) => {
+  const session = await requireAuth(locals);
+  
+  try {
+    const data = await request.json();
+    
+    // Validate required fields
+    if (!data.title || !data.content) {
+      return json(
+        {
+          success: false,
+          error: 'Title and content are required',
+        },
+        { status: 400 }
+      );
+    }
 
-	try {
-		const data = await event.request.json();
+    // Generate slug if not provided
+    const slug = data.slug || data.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
 
-		// Validate required fields
-		if (!data.slug || !data.title || !data.content) {
-			return json(
-				{ error: 'Missing required fields: slug, title, content' },
-				{ status: 400 }
-			);
-		}
+    // Check if slug already exists
+    const existingPost = await prisma.blogPost.findFirst({
+      where: { slug, authorId: session.user.id },
+    });
 
-		// Create post with authenticated user as author
-		const post = await createPost({
-			...data,
-			authorId: user.id,
-			scheduledFor: data.scheduledFor ? new Date(data.scheduledFor) : undefined
-		});
+    if (existingPost) {
+      return json(
+        {
+          success: false,
+          error: 'A post with this slug already exists',
+        },
+        { status: 400 }
+      );
+    }
 
-		return json(post, { status: 201 });
-	} catch (error) {
-		return json(
-			{ error: error instanceof Error ? error.message : 'Failed to create post' },
-			{ status: 500 }
-		);
-	}
+    const post = await prisma.blogPost.create({
+      data: {
+        title: data.title,
+        slug,
+        content: data.content,
+        excerpt: data.excerpt,
+        status: data.status || 'draft',
+        publishedAt: data.status === 'published' ? new Date() : null,
+        authorId: session.user.id,
+        categoryId: data.categoryId || null,
+        tags: data.tags || [],
+        featuredImage: data.featuredImage || null,
+        seoTitle: data.seoTitle || null,
+        seoDescription: data.seoDescription || null,
+      },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return json({
+      success: true,
+      data: post,
+    });
+  } catch (error) {
+    console.error('Error creating blog post:', error);
+    return json(
+      {
+        success: false,
+        error: 'Failed to create blog post',
+      },
+      { status: 500 }
+    );
+  }
 };

@@ -1,47 +1,116 @@
-/**
- * Categories API
- *
- * GET /api/categories - List all categories
- * POST /api/categories - Create new category (requires admin/editor auth)
- */
-
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getCategories, createCategory } from '../../services/categories';
-import { requireAuth, requireRole } from '$lib/server/middleware/auth';
+import { prisma } from '$lib/server/db/client.js';
+import { requireAuth } from '$lib/server/middleware/auth.js';
 
-export const GET: RequestHandler = async (event) => {
-	const includeEmpty = event.url.searchParams.get('includeEmpty') === 'true';
+export const GET: RequestHandler = async ({ url, locals }) => {
+  const session = await requireAuth(locals);
+  
+  const search = url.searchParams.get('search') || undefined;
+  const limit = parseInt(url.searchParams.get('limit') || '50');
+  const offset = parseInt(url.searchParams.get('offset') || '0');
 
-	try {
-		const categories = await getCategories({ includeEmpty });
-		return json({ categories });
-	} catch (error) {
-		return json(
-			{ error: error instanceof Error ? error.message : 'Failed to fetch categories' },
-			{ status: 500 }
-		);
-	}
+  try {
+    const where: any = {};
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const categories = await prisma.blogCategory.findMany({
+      where,
+      include: {
+        _count: {
+          select: {
+            posts: true,
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+      take: limit,
+      skip: offset,
+    });
+
+    return json({
+      success: true,
+      data: categories,
+    });
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return json(
+      {
+        success: false,
+        error: 'Failed to fetch categories',
+      },
+      { status: 500 }
+    );
+  }
 };
 
-export const POST: RequestHandler = async (event) => {
-	// Require editor or admin role
-	await requireRole(event, ['admin', 'editor']);
+export const POST: RequestHandler = async ({ request, locals }) => {
+  const session = await requireAuth(locals);
+  
+  try {
+    const data = await request.json();
+    
+    // Validate required fields
+    if (!data.name) {
+      return json(
+        {
+          success: false,
+          error: 'Name is required',
+        },
+        { status: 400 }
+      );
+    }
 
-	try {
-		const data = await event.request.json();
+    // Generate slug if not provided
+    const slug = data.slug || data.name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
 
-		// Validate required fields
-		if (!data.slug || !data.name) {
-			return json({ error: 'Missing required fields: slug, name' }, { status: 400 });
-		}
+    // Check if slug already exists
+    const existingCategory = await prisma.blogCategory.findFirst({
+      where: { slug },
+    });
 
-		const category = await createCategory(data);
-		return json(category, { status: 201 });
-	} catch (error) {
-		return json(
-			{ error: error instanceof Error ? error.message : 'Failed to create category' },
-			{ status: 500 }
-		);
-	}
+    if (existingCategory) {
+      return json(
+        {
+          success: false,
+          error: 'A category with this slug already exists',
+        },
+        { status: 400 }
+      );
+    }
+
+    const category = await prisma.blogCategory.create({
+      data: {
+        name: data.name,
+        slug,
+        description: data.description || null,
+        color: data.color || null,
+      },
+    });
+
+    return json({
+      success: true,
+      data: category,
+    });
+  } catch (error) {
+    console.error('Error creating category:', error);
+    return json(
+      {
+        success: false,
+        error: 'Failed to create category',
+      },
+      { status: 500 }
+    );
+  }
 };

@@ -1,105 +1,213 @@
-/**
- * Post Detail API
- *
- * GET /api/posts/[id] - Get post by ID
- * PATCH /api/posts/[id] - Update post
- * DELETE /api/posts/[id] - Delete post
- */
-
-import { json, error } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getPostById, updatePost, deletePost } from '../../../services/posts';
-import { requireAuth } from '$lib/server/middleware/auth';
+import { prisma } from '$lib/server/db/client.js';
+import { requireAuth } from '$lib/server/middleware/auth.js';
 
-export const GET: RequestHandler = async (event) => {
-	// Require authentication
-	await requireAuth(event);
+export const GET: RequestHandler = async ({ params, locals }) => {
+  const session = await requireAuth(locals);
+  
+  try {
+    const post = await prisma.blogPost.findFirst({
+      where: {
+        id: params.id,
+        authorId: session.user.id,
+      },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
 
-	const { id } = event.params;
+    if (!post) {
+      return json(
+        {
+          success: false,
+          error: 'Blog post not found',
+        },
+        { status: 404 }
+      );
+    }
 
-	try {
-		const post = await getPostById(id);
-
-		if (!post) {
-			throw error(404, 'Post not found');
-		}
-
-		return json(post);
-	} catch (err) {
-		if (err instanceof Error && 'status' in err) {
-			throw err;
-		}
-		return json(
-			{ error: err instanceof Error ? err.message : 'Failed to fetch post' },
-			{ status: 500 }
-		);
-	}
+    return json({
+      success: true,
+      data: post,
+    });
+  } catch (error) {
+    console.error('Error fetching blog post:', error);
+    return json(
+      {
+        success: false,
+        error: 'Failed to fetch blog post',
+      },
+      { status: 500 }
+    );
+  }
 };
 
-export const PATCH: RequestHandler = async (event) => {
-	// Require authentication
-	const user = await requireAuth(event);
+export const PUT: RequestHandler = async ({ params, request, locals }) => {
+  const session = await requireAuth(locals);
+  
+  try {
+    const data = await request.json();
+    
+    // Check if post exists and belongs to user
+    const existingPost = await prisma.blogPost.findFirst({
+      where: {
+        id: params.id,
+        authorId: session.user.id,
+      },
+    });
 
-	const { id } = event.params;
+    if (!existingPost) {
+      return json(
+        {
+          success: false,
+          error: 'Blog post not found',
+        },
+        { status: 404 }
+      );
+    }
 
-	try {
-		const data = await event.request.json();
+    // Validate required fields
+    if (!data.title || !data.content) {
+      return json(
+        {
+          success: false,
+          error: 'Title and content are required',
+        },
+        { status: 400 }
+      );
+    }
 
-		// Check if user is author or admin
-		const existingPost = await getPostById(id);
-		if (!existingPost) {
-			throw error(404, 'Post not found');
-		}
+    // Generate slug if not provided
+    const slug = data.slug || data.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
 
-		if (existingPost.authorId !== user.id && user.role !== 'admin') {
-			throw error(403, 'You do not have permission to edit this post');
-		}
+    // Check if slug already exists (excluding current post)
+    const slugExists = await prisma.blogPost.findFirst({
+      where: { 
+        slug, 
+        authorId: session.user.id,
+        id: { not: params.id },
+      },
+    });
 
-		// Update post
-		const post = await updatePost(id, {
-			...data,
-			scheduledFor: data.scheduledFor ? new Date(data.scheduledFor) : undefined
-		});
+    if (slugExists) {
+      return json(
+        {
+          success: false,
+          error: 'A post with this slug already exists',
+        },
+        { status: 400 }
+      );
+    }
 
-		return json(post);
-	} catch (err) {
-		if (err instanceof Error && 'status' in err) {
-			throw err;
-		}
-		return json(
-			{ error: err instanceof Error ? err.message : 'Failed to update post' },
-			{ status: 500 }
-		);
-	}
+    const post = await prisma.blogPost.update({
+      where: { id: params.id },
+      data: {
+        title: data.title,
+        slug,
+        content: data.content,
+        excerpt: data.excerpt,
+        status: data.status || existingPost.status,
+        publishedAt: data.status === 'published' && existingPost.status !== 'published' 
+          ? new Date() 
+          : existingPost.publishedAt,
+        categoryId: data.categoryId || null,
+        tags: data.tags || [],
+        featuredImage: data.featuredImage || null,
+        seoTitle: data.seoTitle || null,
+        seoDescription: data.seoDescription || null,
+        updatedAt: new Date(),
+      },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return json({
+      success: true,
+      data: post,
+    });
+  } catch (error) {
+    console.error('Error updating blog post:', error);
+    return json(
+      {
+        success: false,
+        error: 'Failed to update blog post',
+      },
+      { status: 500 }
+    );
+  }
 };
 
-export const DELETE: RequestHandler = async (event) => {
-	// Require authentication
-	const user = await requireAuth(event);
+export const DELETE: RequestHandler = async ({ params, locals }) => {
+  const session = await requireAuth(locals);
+  
+  try {
+    // Check if post exists and belongs to user
+    const existingPost = await prisma.blogPost.findFirst({
+      where: {
+        id: params.id,
+        authorId: session.user.id,
+      },
+    });
 
-	const { id } = event.params;
+    if (!existingPost) {
+      return json(
+        {
+          success: false,
+          error: 'Blog post not found',
+        },
+        { status: 404 }
+      );
+    }
 
-	try {
-		// Check if user is author or admin
-		const existingPost = await getPostById(id);
-		if (!existingPost) {
-			throw error(404, 'Post not found');
-		}
+    await prisma.blogPost.delete({
+      where: { id: params.id },
+    });
 
-		if (existingPost.authorId !== user.id && user.role !== 'admin') {
-			throw error(403, 'You do not have permission to delete this post');
-		}
-
-		await deletePost(id);
-
-		return json({ success: true });
-	} catch (err) {
-		if (err instanceof Error && 'status' in err) {
-			throw err;
-		}
-		return json(
-			{ error: err instanceof Error ? err.message : 'Failed to delete post' },
-			{ status: 500 }
-		);
-	}
+    return json({
+      success: true,
+      message: 'Blog post deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting blog post:', error);
+    return json(
+      {
+        success: false,
+        error: 'Failed to delete blog post',
+      },
+      { status: 500 }
+    );
+  }
 };

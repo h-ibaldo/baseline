@@ -82,61 +82,7 @@ model PageRevision {
   @@index([version])
 }
 
-// Page Templates - Reusable page layouts
-model Template {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  category    String?  @default("general") // general, landing, blog, etc.
-
-  // Template content (JSON design tree)
-  content     String   // JSON string of design tree/events
-  thumbnail   String?  // Preview image URL
-
-  // Metadata
-  createdBy   String
-  creator     User     @relation(fields: [createdBy], references: [id])
-  version     Int      @default(1)
-
-  // Timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([createdBy])
-  @@index([category])
-}
-
-// Content Blocks - Reusable modular components
-model ContentBlock {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  category    String   @default("custom") // text, image, button, card, hero, etc.
-
-  // Block content (JSON component data)
-  content     String   // JSON string of block structure
-  properties  String?  // JSON string of editable properties
-  thumbnail   String?  // Preview image URL
-
-  // Usage tracking
-  usageCount  Int      @default(0)
-
-  // Metadata
-  createdBy   String
-  creator     User     @relation(fields: [createdBy], references: [id])
-  isPublic    Boolean  @default(false) // shared across users or private
-  version     Int      @default(1)
-
-  // Timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([createdBy])
-  @@index([category])
-  @@index([isPublic])
-}
-
-// Components - Replaces ContentBlock system
+// Components - Reusable modular components
 model Component {
   id          String   @id @default(uuid())
   name        String
@@ -359,8 +305,6 @@ model User {
   // Relations
   pages         Page[]
   pageRevisions PageRevision[]
-  templates     Template[]
-  contentBlocks ContentBlock[]
   components    Component[]
   styleLibraries StyleLibrary[]
   themes        Theme[]

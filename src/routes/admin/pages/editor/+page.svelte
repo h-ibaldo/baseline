@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import BlockPanel from '$lib/components/ui/BlockPanel.svelte';
 	import Canvas from '$lib/components/canvas/Canvas.svelte';
 	import {
@@ -30,16 +30,34 @@
 	let pageId = $page.url.searchParams.get('id');
 	let loading = true;
 	let saving = false;
+	let autosaving = false;
 	let error = '';
 	let success = '';
 	let showBlockPanel = true;
 	let pageTitle = 'New Page';
 	let pageSlug = '';
 	let hasInitialArtboard = false;
+	let lastSavedAt: Date | null = null;
+	let hasUnsavedChanges = false;
+	let autosaveTimer: number | null = null;
+	let unsubscribeEvents: (() => void) | null = null;
+
+	const AUTOSAVE_DELAY = 30000; // 30 seconds
 
 	onMount(() => {
 		checkAuth();
 		initializeCanvas();
+		loadDraft();
+		watchForChanges();
+	});
+
+	onDestroy(() => {
+		if (autosaveTimer) {
+			clearTimeout(autosaveTimer);
+		}
+		if (unsubscribeEvents) {
+			unsubscribeEvents();
+		}
 	});
 
 	function checkAuth() {
@@ -66,6 +84,96 @@
 			});
 			hasInitialArtboard = true;
 		}
+	}
+
+	async function loadDraft() {
+		if (!pageId) return;
+
+		try {
+			const token = localStorage.getItem('access_token');
+			const response = await fetch(`/api/pages/${pageId}/autosave`, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				if (data.lastSavedAt) {
+					lastSavedAt = new Date(data.lastSavedAt);
+				}
+				hasUnsavedChanges = data.hasUnsavedChanges || false;
+			}
+		} catch (err) {
+			console.error('Failed to load draft:', err);
+		}
+	}
+
+	function watchForChanges() {
+		// Watch for changes in design events
+		unsubscribeEvents = currentEvents.subscribe((events) => {
+			if (events.length > 0 && pageId) {
+				hasUnsavedChanges = true;
+				scheduleAutosave();
+			}
+		});
+	}
+
+	function scheduleAutosave() {
+		if (!pageId) return;
+
+		if (autosaveTimer) {
+			clearTimeout(autosaveTimer);
+		}
+
+		autosaveTimer = window.setTimeout(() => {
+			performAutosave();
+		}, AUTOSAVE_DELAY);
+	}
+
+	async function performAutosave() {
+		if (!pageId || autosaving) return;
+
+		autosaving = true;
+
+		try {
+			const token = localStorage.getItem('access_token');
+			const response = await fetch(`/api/pages/${pageId}/autosave`, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					draftContent: JSON.stringify($canvasState)
+				})
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				lastSavedAt = new Date(data.lastSavedAt);
+				hasUnsavedChanges = false;
+			}
+		} catch (err) {
+			console.error('Autosave failed:', err);
+		} finally {
+			autosaving = false;
+		}
+	}
+
+	function formatLastSaved(): string {
+		if (!lastSavedAt) return 'Never';
+
+		const now = Date.now();
+		const diff = now - lastSavedAt.getTime();
+		const seconds = Math.floor(diff / 1000);
+		const minutes = Math.floor(seconds / 60);
+
+		if (minutes === 0) return 'Just now';
+		if (minutes === 1) return '1 minute ago';
+		if (minutes < 60) return `${minutes} minutes ago`;
+
+		const hours = Math.floor(minutes / 60);
+		if (hours === 1) return '1 hour ago';
+		return `${hours} hours ago`;
 	}
 
 	function handleBlockSelect(block: ContentBlock) {
@@ -224,6 +332,15 @@
 			>
 				📦 Blocks
 			</button>
+			<div class="autosave-status" class:unsaved={hasUnsavedChanges}>
+				{#if autosaving}
+					<span class="status-indicator saving">Saving...</span>
+				{:else if hasUnsavedChanges}
+					<span class="status-indicator unsaved">● Unsaved changes</span>
+				{:else}
+					<span class="status-indicator saved">✓ Saved {formatLastSaved()}</span>
+				{/if}
+			</div>
 		</div>
 
 		<div class="toolbar-right">
@@ -453,5 +570,29 @@
 		height: 100%;
 		color: #718096;
 		font-size: 14px;
+	}
+
+	/* Autosave Status */
+	.autosave-status {
+		padding: 6px 12px;
+		border-radius: 4px;
+		background: #f7fafc;
+	}
+
+	.status-indicator {
+		font-size: 13px;
+		font-weight: 500;
+	}
+
+	.status-indicator.saving {
+		color: #667eea;
+	}
+
+	.status-indicator.unsaved {
+		color: #f59e0b;
+	}
+
+	.status-indicator.saved {
+		color: #10b981;
 	}
 </style>

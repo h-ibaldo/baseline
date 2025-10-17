@@ -51,6 +51,39 @@ function generateId(prefix: string): string {
 }
 
 /**
+ * Convert selected elements to a component
+ * This extracts the selected elements and their properties for component creation
+ */
+export function convertSelectionToComponent(): {
+	elements: CanvasElement[];
+	artboardId: string;
+} | null {
+	const $selectedIds = get(selectedElementIds);
+	const $canvasState = get(canvasState);
+	
+	if ($selectedIds.length === 0) {
+		return null;
+	}
+	
+	// Get selected elements
+	const selectedElements = $canvasState.elements.filter(el => 
+		$selectedIds.includes(el.id)
+	);
+	
+	if (selectedElements.length === 0) {
+		return null;
+	}
+	
+	// Get the artboard ID from the first selected element
+	const artboardId = selectedElements[0].artboardId;
+	
+	return {
+		elements: selectedElements,
+		artboardId
+	};
+}
+
+/**
  * Design Actions
  * These are the public API for modifying the canvas
  */

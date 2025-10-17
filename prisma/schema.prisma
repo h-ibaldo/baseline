@@ -31,6 +31,10 @@ model Page {
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
 
+  // Blog template system
+  isBlogTemplate Boolean @default(false) // Mark as blog template
+  blogTemplateType String? // post, list, category, author
+
   // SEO
   metaTitle       String?
   metaDescription String?
@@ -48,6 +52,8 @@ model Page {
 
   // Relations
   revisions PageRevision[]
+  blogPosts BlogPost[] // If this is a blog template
+  componentInstances ComponentInstance[] // Components used in this page
 
   @@index([slug])
   @@index([status])
@@ -130,6 +136,194 @@ model ContentBlock {
   @@index([isPublic])
 }
 
+// Components - Replaces ContentBlock system
+model Component {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  category    String   @default("custom") // text, image, button, card, hero, etc.
+
+  // Component content (JSON component data)
+  content     String   // JSON string of component structure
+  properties  String?  // JSON string of editable properties
+  thumbnail   String?  // Preview image URL
+
+  // Style inheritance
+  styleLibraryId String? // Inherit from style library
+  styleLibrary   StyleLibrary? @relation(fields: [styleLibraryId], references: [id])
+
+  // Usage tracking
+  usageCount  Int      @default(0)
+
+  // Metadata
+  createdBy   String
+  creator     User     @relation(fields: [createdBy], references: [id])
+  isPublic    Boolean  @default(false) // shared across users or private
+  version     Int      @default(1)
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  instances   ComponentInstance[] // Where this component is used
+
+  @@index([category])
+  @@index([createdBy])
+  @@index([isPublic])
+  @@index([styleLibraryId])
+}
+
+// Component Instances - Track where components are used
+model ComponentInstance {
+  id          String   @id @default(uuid())
+  componentId String
+  component   Component @relation(fields: [componentId], references: [id])
+  
+  // Where it's used
+  pageId      String?
+  page        Page?    @relation(fields: [pageId], references: [id])
+  
+  // Instance-specific overrides
+  overrides   String?  // JSON string of property overrides
+  
+  // Position in design
+  position    String?  // JSON string of position data
+  
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([componentId])
+  @@index([pageId])
+}
+
+// Style Libraries - Figma-style design system
+model StyleLibrary {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  
+  // Library content
+  colors      String?  // JSON string of color palette
+  typography  String?  // JSON string of typography system
+  spacing     String?  // JSON string of spacing system
+  components  String?  // JSON string of component styles
+  
+  // Metadata
+  createdBy   String
+  creator     User     @relation(fields: [createdBy], references: [id])
+  isPublic    Boolean  @default(false)
+  version     Int      @default(1)
+  
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  inheritedComponents  Component[] // Components that inherit from this library
+  
+  @@index([createdBy])
+  @@index([isPublic])
+}
+
+// Themes - Export/import system
+model Theme {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  version     String   @default("1.0.0")
+  
+  // Theme content
+  themeData   String   // JSON string of theme structure
+  components  String?  // JSON string of Svelte components
+  styles      String?  // JSON string of CSS styles
+  assets      String?  // JSON string of asset references
+  
+  // Metadata
+  createdBy   String
+  creator     User     @relation(fields: [createdBy], references: [id])
+  isPublic    Boolean  @default(false)
+  downloadCount Int    @default(0)
+  
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([createdBy])
+  @@index([isPublic])
+}
+
+// Blog Posts - Content for blog templates
+model BlogPost {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  content     String   // Rich text content (HTML/JSON)
+  excerpt     String?
+  
+  // Blog template reference
+  templateId  String
+  template    Page     @relation(fields: [templateId], references: [id])
+  
+  // Status
+  status      String   @default("draft") // draft, published, archived
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaImage       String?
+  
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+  
+  // Relations
+  categories  BlogCategory[]
+  tags        BlogTag[]
+  
+  @@index([slug])
+  @@index([status])
+  @@index([authorId])
+  @@index([templateId])
+}
+
+// Blog Categories
+model BlogCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  posts       BlogPost[]
+  
+  @@index([slug])
+}
+
+// Blog Tags
+model BlogTag {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  posts       BlogPost[]
+  
+  @@index([slug])
+}
+
 // Media Library
 model Media {
   id         String   @id @default(uuid())
@@ -167,6 +361,10 @@ model User {
   pageRevisions PageRevision[]
   templates     Template[]
   contentBlocks ContentBlock[]
+  components    Component[]
+  styleLibraries StyleLibrary[]
+  themes        Theme[]
+  blogPosts     BlogPost[]
   media         Media[]
   sessions      Session[]
   posts         Post[]

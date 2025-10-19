@@ -18,7 +18,7 @@
 </script>
 
 <svelte:head>
-  <title>Baseline - Professional Design Tool</title>
+  <title>Linebasis - Professional Design Tool</title>
   <meta name="description" content="Professional design tool that combines Figma, WordPress, and Webflow into one powerful system" />
 </svelte:head>
 
@@ -59,12 +59,12 @@
               <div class="control yellow"></div>
               <div class="control green"></div>
             </div>
-            <div class="window-title">Baseline Designer</div>
+            <div class="window-title">Linebasis Designer</div>
           </div>
           <div class="preview-content">
             <div class="canvas-preview">
               <div class="artboard-preview">
-                <div class="element-preview text">Welcome to Baseline</div>
+                <div class="element-preview text">Welcome to Linebasis</div>
                 <div class="element-preview button">Get Started</div>
                 <div class="element-preview image"></div>
               </div>
@@ -176,178 +176,323 @@
 
 <style>
   .landing-page {
-    @apply min-h-screen bg-gradient-to-br from-gray-50 to-gray-100;
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
     opacity: 0;
     transform: translateY(20px);
     transition: all 0.6s ease-out;
   }
 
   .landing-page.loaded {
-    @apply opacity-100;
+    opacity: 1;
     transform: translateY(0);
   }
 
   .hero {
-    @apply py-20 px-4;
+    padding: 5rem 1rem;
   }
 
   .hero-content {
-    @apply max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center;
+    max-width: 80rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-content {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 
   .hero-text {
-    @apply space-y-8;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
   }
 
   .hero-title {
-    @apply text-5xl lg:text-6xl font-bold text-gray-900 leading-tight;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.1;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-title {
+      font-size: 3.75rem;
+    }
   }
 
   .title-line {
-    @apply block;
+    display: block;
   }
 
   .title-line.highlight {
-    @apply text-blue-600;
+    color: #2563eb;
   }
 
   .hero-description {
-    @apply text-xl text-gray-600 leading-relaxed max-w-2xl;
+    font-size: 1.25rem;
+    color: #6b7280;
+    line-height: 1.6;
+    max-width: 42rem;
   }
 
   .hero-actions {
-    @apply flex flex-col sm:flex-row gap-4;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .hero-actions {
+      flex-direction: row;
+    }
   }
 
   .cta-button {
-    @apply inline-flex items-center gap-3 px-6 py-3 rounded-lg font-semibold transition-all duration-200;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
   }
 
   .cta-button.primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5;
+    background-color: #2563eb;
+    color: white;
+  }
+
+  .cta-button.primary:hover {
+    background-color: #1d4ed8;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
   }
 
   .cta-button.secondary {
-    @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:shadow-md;
+    background-color: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+
+  .cta-button.secondary:hover {
+    background-color: #f9fafb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   }
 
   .cta-button.large {
-    @apply px-8 py-4 text-lg;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
   }
 
   .hero-preview {
-    @apply flex justify-center;
+    display: flex;
+    justify-content: center;
   }
 
   .preview-window {
-    @apply bg-white rounded-lg shadow-2xl overflow-hidden w-full max-w-2xl;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    width: 100%;
+    max-width: 42rem;
   }
 
   .window-header {
-    @apply bg-gray-100 px-4 py-3 flex items-center gap-3;
+    background-color: #f3f4f6;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   .window-controls {
-    @apply flex gap-2;
+    display: flex;
+    gap: 0.5rem;
   }
 
   .control {
-    @apply w-3 h-3 rounded-full;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
   }
 
   .control.red {
-    @apply bg-red-500;
+    background-color: #ef4444;
   }
 
   .control.yellow {
-    @apply bg-yellow-500;
+    background-color: #eab308;
   }
 
   .control.green {
-    @apply bg-green-500;
+    background-color: #22c55e;
   }
 
   .window-title {
-    @apply text-sm font-medium text-gray-600;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
   }
 
   .preview-content {
-    @apply p-8 bg-gray-50;
+    padding: 2rem;
+    background-color: #f9fafb;
   }
 
   .canvas-preview {
-    @apply bg-white rounded-lg shadow-sm p-8;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 2rem;
   }
 
   .artboard-preview {
-    @apply relative bg-white border border-gray-200 rounded-lg p-8 min-h-64;
+    position: relative;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    min-height: 16rem;
   }
 
   .element-preview {
-    @apply absolute rounded-lg;
+    position: absolute;
+    border-radius: 0.5rem;
   }
 
   .element-preview.text {
-    @apply top-8 left-8 text-2xl font-bold text-gray-900;
+    top: 2rem;
+    left: 2rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
   }
 
   .element-preview.button {
-    @apply top-16 left-8 bg-blue-600 text-white px-4 py-2 text-sm font-medium;
+    top: 4rem;
+    left: 2rem;
+    background-color: #2563eb;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
   }
 
   .element-preview.image {
-    @apply top-8 right-8 w-16 h-16 bg-gray-200 rounded-lg;
+    top: 2rem;
+    right: 2rem;
+    width: 4rem;
+    height: 4rem;
+    background-color: #e5e7eb;
+    border-radius: 0.5rem;
   }
 
   .features {
-    @apply py-20 px-4 bg-white;
+    padding: 5rem 1rem;
+    background-color: white;
   }
 
   .features-content {
-    @apply max-w-6xl mx-auto;
+    max-width: 72rem;
+    margin: 0 auto;
   }
 
   .features-title {
-    @apply text-4xl font-bold text-gray-900 text-center mb-16;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #111827;
+    text-align: center;
+    margin-bottom: 4rem;
   }
 
   .features-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .features-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .features-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 
   .feature-card {
-    @apply p-6 rounded-lg border border-gray-200 hover:shadow-lg transition-shadow;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    transition: box-shadow 0.2s;
+  }
+
+  .feature-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   }
 
   .feature-icon {
-    @apply w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-4;
+    width: 3rem;
+    height: 3rem;
+    background-color: #dbeafe;
+    color: #2563eb;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
   }
 
   .feature-title {
-    @apply text-xl font-semibold text-gray-900 mb-2;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
   }
 
   .feature-description {
-    @apply text-gray-600;
+    color: #6b7280;
   }
 
   .quick-start {
-    @apply py-20 px-4 bg-gray-900;
+    padding: 5rem 1rem;
+    background-color: #111827;
   }
 
   .quick-start-content {
-    @apply max-w-4xl mx-auto text-center;
+    max-width: 56rem;
+    margin: 0 auto;
+    text-align: center;
   }
 
   .quick-start-title {
-    @apply text-4xl font-bold text-white mb-4;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1rem;
   }
 
   .quick-start-description {
-    @apply text-xl text-gray-300 mb-8;
+    font-size: 1.25rem;
+    color: #d1d5db;
+    margin-bottom: 2rem;
   }
 
   .quick-start-actions {
-    @apply flex justify-center;
+    display: flex;
+    justify-content: center;
   }
 </style>

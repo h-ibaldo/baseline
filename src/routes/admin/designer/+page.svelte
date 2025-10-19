@@ -1,736 +1,257 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import Canvas from '$lib/components/canvas/Canvas.svelte';
-  import Artboard from '$lib/components/canvas/Artboard.svelte';
-  import Element from '$lib/components/canvas/Element.svelte';
-  import ComponentLibrary from '$lib/components/ui/ComponentLibrary.svelte';
-  import PageManager from '$lib/components/design/PageManager.svelte';
-  import PublishingPanel from '$lib/components/design/PublishingPanel.svelte';
-  import ComponentCreationDialog from '$lib/components/design/ComponentCreationDialog.svelte';
-  import ContextMenu from '$lib/components/design/ContextMenu.svelte';
-  import KeyboardShortcuts from '$lib/components/design/KeyboardShortcuts.svelte';
-  import { 
-    canvasState, 
-    addArtboard, 
-    insertBlock,
-    selectedElementIds,
-    convertSelectionToComponent
-  } from '$lib/stores/design-store';
-  import { currentEvents, undo, redo, canUndo, canRedo } from '$lib/stores/event-store';
-  import type { CanvasConfig, Artboard as ArtboardType, CanvasElement } from '$lib/types/canvas';
-  import type { ComponentWithLibrary } from '$lib/server/services/components.js';
 
-  // Page management
-  let pages: Array<{
-    id: string;
-    name: string;
-    slug: string;
-    status: 'draft' | 'published';
-    isBlogTemplate: boolean;
-    blogTemplateType?: string;
-    artboards: ArtboardType[];
-    elements: CanvasElement[];
-  }> = [];
-
-  let currentPageId: string | null = null;
-  let currentPage = $derived(pages.find(p => p.id === currentPageId));
-
-  // UI state
-  let showComponentLibrary = true;
-  let showPageManager = true;
-  let showPublishingPanel = false;
-  let showComponentCreationDialog = false;
-  let showKeyboardShortcuts = false;
   let loading = true;
-  let saving = false;
-  let error = '';
-  let success = '';
 
-  // Context menu state
-  let contextMenu = {
-    isOpen: false,
-    x: 0,
-    y: 0,
-    target: 'canvas' as 'page' | 'element' | 'canvas',
-    selectedElementIds: [] as string[]
-  };
-
-  // Canvas configuration
-  let canvasConfig: CanvasConfig = {
-    backgroundColor: '#f0f0f0',
-    maxArtboards: 10,
-    showPerformanceWarning: true
-  };
-
-  // Component library data
-  let components: ComponentWithLibrary[] = [];
-  let componentsLoading = false;
-
-  onMount(async () => {
-    await checkAuth();
-    await loadPages();
-    await loadComponents();
-    initializeCanvas();
+  onMount(() => {
+    loading = false;
   });
 
-  onDestroy(() => {
-    // Cleanup
-  });
-
-  async function checkAuth() {
-    // TODO: Implement auth check
+  function goToBlog() {
+    goto('/admin/blog');
   }
 
-  async function loadPages() {
-    try {
-      loading = true;
-      // TODO: Load pages from API
-      // For now, create a default page
-      if (pages.length === 0) {
-        const defaultPage = {
-          id: 'page-1',
-          name: 'Homepage',
-          slug: 'home',
-          status: 'draft' as const,
-          isBlogTemplate: false,
-          artboards: [
-            {
-              id: 'artboard-1',
-              name: 'Desktop',
-              x: 100,
-              y: 100,
-              width: 1200,
-              height: 800,
-              backgroundColor: '#ffffff',
-              showGrid: true,
-              gridSize: 20,
-              isPublishTarget: true
-            }
-          ],
-          elements: []
-        };
-        pages = [defaultPage];
-        currentPageId = defaultPage.id;
-      }
-    } catch (err) {
-      error = 'Failed to load pages';
-      console.error('Error loading pages:', err);
-    } finally {
-      loading = false;
-    }
-  }
-
-  async function loadComponents() {
-    try {
-      componentsLoading = true;
-      const response = await fetch('/api/components');
-      const result = await response.json();
-      if (result.success) {
-        components = result.data;
-      }
-    } catch (err) {
-      console.error('Error loading components:', err);
-    } finally {
-      componentsLoading = false;
-    }
-  }
-
-  function initializeCanvas() {
-    if (currentPage) {
-      // Set canvas state from current page
-      canvasState.set({
-        artboards: currentPage.artboards,
-        elements: currentPage.elements,
-        selectedElementIds: []
-      });
-    }
-  }
-
-  // Page management functions
-  function createNewPage() {
-    const newPage = {
-      id: `page-${Date.now()}`,
-      name: 'New Page',
-      slug: '',
-      status: 'draft' as const,
-      isBlogTemplate: false,
-      artboards: [
-        {
-          id: `artboard-${Date.now()}`,
-          name: 'Desktop',
-          x: 100,
-          y: 100,
-          width: 1200,
-          height: 800,
-          backgroundColor: '#ffffff',
-          showGrid: true,
-          gridSize: 20,
-          isPublishTarget: true
-        }
-      ],
-      elements: []
-    };
-    pages = [...pages, newPage];
-    currentPageId = newPage.id;
-    initializeCanvas();
-  }
-
-  function selectPage(pageId: string) {
-    currentPageId = pageId;
-    initializeCanvas();
-  }
-
-  function deletePage(pageId: string) {
-    if (pages.length <= 1) {
-      error = 'Cannot delete the last page';
-      return;
-    }
-    pages = pages.filter(p => p.id !== pageId);
-    if (currentPageId === pageId) {
-      currentPageId = pages[0]?.id || null;
-      initializeCanvas();
-    }
-  }
-
-  function duplicatePage(pageId: string) {
-    const pageToDuplicate = pages.find(p => p.id === pageId);
-    if (pageToDuplicate) {
-      const duplicatedPage = {
-        ...pageToDuplicate,
-        id: `page-${Date.now()}`,
-        name: `${pageToDuplicate.name} Copy`,
-        slug: '',
-        status: 'draft' as const,
-        artboards: pageToDuplicate.artboards.map(artboard => ({
-          ...artboard,
-          id: `artboard-${Date.now()}-${Math.random()}`,
-          x: artboard.x + 50,
-          y: artboard.y + 50
-        }))
-      };
-      pages = [...pages, duplicatedPage];
-    }
-  }
-
-  function updatePageName(pageId: string, name: string) {
-    pages = pages.map(p => p.id === pageId ? { ...p, name } : p);
-  }
-
-  function updatePageSlug(pageId: string, slug: string) {
-    pages = pages.map(p => p.id === pageId ? { ...p, slug } : p);
-  }
-
-  function toggleBlogTemplate(pageId: string) {
-    pages = pages.map(p => 
-      p.id === pageId 
-        ? { 
-            ...p, 
-            isBlogTemplate: !p.isBlogTemplate,
-            blogTemplateType: !p.isBlogTemplate ? 'post' : undefined
-          } 
-        : p
-    );
-  }
-
-  // Component functions
-  function handleComponentSelect(component: ComponentWithLibrary) {
-    // TODO: Insert component into current artboard
-    console.log('Selected component:', component);
-  }
-
-  function handleCreateComponent() {
-    showComponentCreationDialog = true;
-  }
-
-  function handleConvertToComponent() {
-    if (selectedElementIds.length === 0) {
-      error = 'Please select elements to convert to component';
-      return;
-    }
-    showComponentCreationDialog = true;
-  }
-
-  async function handleComponentCreate(componentData: {
-    name: string;
-    description: string;
-    category: string;
-    elements: CanvasElement[];
-  }) {
-    try {
-      saving = true;
-      const response = await fetch('/api/components/convert', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(componentData),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        success = 'Component created successfully';
-        showComponentCreationDialog = false;
-        // Refresh components list
-        await loadComponents();
-      } else {
-        error = result.error || 'Failed to create component';
-      }
-    } catch (err) {
-      error = 'Failed to create component';
-      console.error('Error creating component:', err);
-    } finally {
-      saving = false;
-    }
-  }
-
-  // Publishing functions
-  async function publishPage(pageId: string, slug: string) {
-    try {
-      saving = true;
-      // TODO: Implement publishing logic
-      pages = pages.map(p => 
-        p.id === pageId 
-          ? { ...p, status: 'published', slug } 
-          : p
-      );
-      success = 'Page published successfully';
-    } catch (err) {
-      error = 'Failed to publish page';
-      console.error('Error publishing page:', err);
-    } finally {
-      saving = false;
-    }
-  }
-
-  async function unpublishPage(pageId: string) {
-    try {
-      saving = true;
-      // TODO: Implement unpublishing logic
-      pages = pages.map(p => 
-        p.id === pageId 
-          ? { ...p, status: 'draft' } 
-          : p
-      );
-      success = 'Page unpublished successfully';
-    } catch (err) {
-      error = 'Failed to unpublish page';
-      console.error('Error unpublishing page:', err);
-    } finally {
-      saving = false;
-    }
-  }
-
-  // Context menu functions
-  function handleContextMenu(event: MouseEvent, target: 'page' | 'element' | 'canvas', pageId?: string) {
-    event.preventDefault();
-    contextMenu = {
-      isOpen: true,
-      x: event.clientX,
-      y: event.clientY,
-      target,
-      selectedElementIds: target === 'element' ? selectedElementIds : []
-    };
-  }
-
-  function handleContextMenuAction(event: CustomEvent) {
-    const { action, target, selectedElementIds, currentPage } = event.detail;
-    
-    switch (action) {
-      case 'new-page':
-        createNewPage();
-        break;
-      case 'publish':
-        if (currentPage) {
-          showPublishingPanel = true;
-        }
-        break;
-      case 'unpublish':
-        if (currentPage) {
-          unpublishPage(currentPage.id);
-        }
-        break;
-      case 'duplicate':
-        if (target === 'page' && currentPage) {
-          duplicatePage(currentPage.id);
-        }
-        break;
-      case 'edit':
-        // TODO: Open page editor
-        break;
-      case 'toggle-blog-template':
-        if (currentPage) {
-          toggleBlogTemplate(currentPage.id);
-        }
-        break;
-      case 'delete':
-        if (target === 'page' && currentPage) {
-          deletePage(currentPage.id);
-        }
-        break;
-      case 'convert-to-component':
-        handleConvertToComponent();
-        break;
-      case 'bring-to-front':
-        // TODO: Implement bring to front
-        break;
-      case 'send-to-back':
-        // TODO: Implement send to back
-        break;
-      case 'copy':
-        // TODO: Implement copy
-        break;
-      case 'paste':
-        // TODO: Implement paste
-        break;
-      case 'select-all':
-        // TODO: Implement select all
-        break;
-      case 'deselect-all':
-        selectedElementIds = [];
-        break;
-    }
-  }
-
-  function closeContextMenu() {
-    contextMenu.isOpen = false;
-  }
-
-  // Keyboard shortcuts
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.ctrlKey || event.metaKey) {
-      switch (event.key) {
-        case 'z':
-          event.preventDefault();
-          if (event.shiftKey) {
-            redo();
-          } else {
-            undo();
-          }
-          break;
-        case 's':
-          event.preventDefault();
-          // TODO: Save page
-          break;
-        case 'n':
-          event.preventDefault();
-          createNewPage();
-          break;
-        case 'a':
-          event.preventDefault();
-          // TODO: Select all
-          break;
-        case 'c':
-          event.preventDefault();
-          // TODO: Copy
-          break;
-        case 'v':
-          event.preventDefault();
-          // TODO: Paste
-          break;
-        case '?':
-          event.preventDefault();
-          showKeyboardShortcuts = true;
-          break;
-      }
-    }
-    
-    if (event.key === 'Escape') {
-      closeContextMenu();
-      showKeyboardShortcuts = false;
-    }
+  function goToPages() {
+    goto('/admin/pages');
   }
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:head>
+  <title>Designer - Linebasis</title>
+</svelte:head>
 
-<div class="unified-designer">
-  <!-- Top Navigation -->
-  <header class="designer-header">
-    <div class="header-left">
-      <h1 class="designer-title">Designer</h1>
-      <div class="page-selector">
-        <select bind:value={currentPageId} on:change={() => currentPageId && selectPage(currentPageId)}>
-          {#each pages as page}
-            <option value={page.id}>{page.name}</option>
-          {/each}
-        </select>
-      </div>
+<div class="designer-page">
+  {#if loading}
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading designer...</p>
     </div>
-    
-    <div class="header-center">
-      <div class="toolbar">
-        <button type="button" on:click={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">
+  {:else}
+    <div class="designer-header">
+      <div class="header-left">
+        <h1 class="designer-title">Unified Designer</h1>
+        <p class="designer-subtitle">Design, edit, and publish all in one interface</p>
+      </div>
+      <div class="header-actions">
+        <button class="action-button secondary" on:click={goToBlog}>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
+          Manage Blog
         </button>
-        <button type="button" on:click={redo} disabled={!canRedo} title="Redo (Ctrl+Shift+Z)">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
-          </svg>
-        </button>
-        <div class="separator"></div>
-        <button type="button" on:click={handleConvertToComponent} disabled={selectedElementIds.length === 0} title="Convert to Component">
+        <button class="action-button primary" on:click={goToPages}>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          Convert to Component
-        </button>
-        <div class="separator"></div>
-        <button type="button" on:click={() => showKeyboardShortcuts = true} title="Keyboard Shortcuts (Ctrl+?)">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-          </svg>
-          Shortcuts
+          Create Page
         </button>
       </div>
     </div>
 
-    <div class="header-right">
-      <button 
-        type="button" 
-        class="publish-button"
-        on:click={() => showPublishingPanel = true}
-        disabled={!currentPage}
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-        </svg>
-        Publish
-      </button>
-    </div>
-  </header>
-
-  <!-- Main Content -->
-  <div class="designer-content">
-    <!-- Left Sidebar - Page Manager -->
-    {#if showPageManager}
-      <aside class="sidebar left-sidebar">
-        <PageManager
-          {pages}
-          {currentPageId}
-          onPageSelect={selectPage}
-          onPageCreate={createNewPage}
-          onPageDelete={deletePage}
-          onPageDuplicate={duplicatePage}
-          onPageNameUpdate={updatePageName}
-          onPageSlugUpdate={updatePageSlug}
-          onToggleBlogTemplate={toggleBlogTemplate}
-        />
-      </aside>
-    {/if}
-
-    <!-- Center - Canvas Area -->
-    <main 
-      class="canvas-area"
-      on:contextmenu={(e) => handleContextMenu(e, 'canvas')}
-    >
-      {#if loading}
-        <div class="loading-state">
-          <div class="loading-spinner"></div>
-          <p>Loading designer...</p>
+    <div class="designer-content">
+      <div class="coming-soon">
+        <div class="coming-soon-icon">
+          <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+          </svg>
         </div>
-      {:else if currentPage}
-        <Canvas {config}>
-          {#each currentPage.artboards as artboard (artboard.id)}
-            <Artboard
-              {artboard}
-              bind:selectedElementIds
-              on:contextmenu={(e) => handleContextMenu(e, 'page', artboard.id)}
-            >
-              {#each currentPage.elements.filter(el => el.artboardId === artboard.id) as element (element.id)}
-                <Element
-                  {element}
-                  bind:selectedElementIds
-                  on:contextmenu={(e) => handleContextMenu(e, 'element')}
-                />
-              {/each}
-            </Artboard>
-          {/each}
-        </Canvas>
-      {:else}
-        <div class="empty-state">
-          <div class="empty-icon">🎨</div>
-          <h3>No page selected</h3>
-          <p>Create a new page to start designing</p>
-          <button type="button" on:click={createNewPage} class="create-page-button">
-            Create Page
+        <h2 class="coming-soon-title">Unified Designer Coming Soon</h2>
+        <p class="coming-soon-description">
+          The unified designer interface is being built. This will be a powerful tool that combines 
+          design, editing, and publishing in one seamless experience.
+        </p>
+        <div class="coming-soon-features">
+          <div class="feature-item">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+            </svg>
+            <span>Multi-page canvas</span>
+          </div>
+          <div class="feature-item">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <span>Component system</span>
+          </div>
+          <div class="feature-item">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+            <span>Instant publishing</span>
+          </div>
+          <div class="feature-item">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+            </svg>
+            <span>Style libraries</span>
+          </div>
+        </div>
+        <div class="coming-soon-actions">
+          <button class="action-button primary" on:click={goToPages}>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Start with Pages
           </button>
         </div>
-      {/if}
-    </main>
-
-    <!-- Right Sidebar - Component Library -->
-    {#if showComponentLibrary}
-      <aside class="sidebar right-sidebar">
-        <ComponentLibrary
-          {components}
-          loading={componentsLoading}
-          onComponentSelect={handleComponentSelect}
-          onCreateComponent={handleCreateComponent}
-        />
-      </aside>
-    {/if}
-  </div>
-
-  <!-- Publishing Panel Modal -->
-  {#if showPublishingPanel && currentPage}
-    <PublishingPanel
-      page={currentPage}
-      onPublish={publishPage}
-      onUnpublish={unpublishPage}
-      onClose={() => showPublishingPanel = false}
-    />
-  {/if}
-
-  <!-- Component Creation Dialog -->
-  <ComponentCreationDialog
-    isOpen={showComponentCreationDialog}
-    onClose={() => showComponentCreationDialog = false}
-    onCreate={handleComponentCreate}
-  />
-
-  <!-- Context Menu -->
-  <ContextMenu
-    isOpen={contextMenu.isOpen}
-    x={contextMenu.x}
-    y={contextMenu.y}
-    target={contextMenu.target}
-    selectedElementIds={contextMenu.selectedElementIds}
-    {currentPage}
-    on:action={handleContextMenuAction}
-    on:close={closeContextMenu}
-  />
-
-  <!-- Keyboard Shortcuts Modal -->
-  <KeyboardShortcuts
-    isOpen={showKeyboardShortcuts}
-    on:close={() => showKeyboardShortcuts = false}
-  />
-
-  <!-- Notifications -->
-  {#if error}
-    <div class="notification error">
-      <span>{error}</span>
-      <button type="button" on:click={() => error = ''}>×</button>
-    </div>
-  {/if}
-
-  {#if success}
-    <div class="notification success">
-      <span>{success}</span>
-      <button type="button" on:click={() => success = ''}>×</button>
+      </div>
     </div>
   {/if}
 </div>
 
 <style>
-  .unified-designer {
-    @apply h-screen flex flex-col bg-gray-100;
+  .designer-page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f9fafb;
   }
 
   .designer-header {
-    @apply flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200 shadow-sm;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   }
 
   .header-left {
-    @apply flex items-center gap-4;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 
   .designer-title {
-    @apply text-xl font-semibold text-gray-900;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
   }
 
-  .page-selector select {
-    @apply px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500;
+  .designer-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
   }
 
-  .header-center {
-    @apply flex-1 flex justify-center;
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
-  .toolbar {
-    @apply flex items-center gap-2;
+  .action-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
   }
 
-  .toolbar button {
-    @apply p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed;
+  .action-button.primary {
+    background-color: #2563eb;
+    color: white;
   }
 
-  .separator {
-    @apply w-px h-6 bg-gray-300 mx-2;
+  .action-button.primary:hover {
+    background-color: #1d4ed8;
   }
 
-  .header-right {
-    @apply flex items-center gap-2;
+  .action-button.secondary {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
   }
 
-  .publish-button {
-    @apply flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed;
+  .action-button.secondary:hover {
+    background-color: #e5e7eb;
   }
 
   .designer-content {
-    @apply flex-1 flex overflow-hidden;
-  }
-
-  .sidebar {
-    @apply w-80 bg-white border-r border-gray-200 flex flex-col;
-  }
-
-  .left-sidebar {
-    @apply border-r;
-  }
-
-  .right-sidebar {
-    @apply border-l;
-  }
-
-  .canvas-area {
-    @apply flex-1 overflow-hidden;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
   }
 
   .loading-state {
-    @apply flex flex-col items-center justify-center h-full text-gray-500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    height: 100%;
   }
 
   .loading-spinner {
-    @apply w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4;
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
   }
 
-  .empty-state {
-    @apply flex flex-col items-center justify-center h-full text-center;
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
-  .empty-icon {
-    @apply text-6xl mb-4;
+  .coming-soon {
+    text-align: center;
+    max-width: 32rem;
   }
 
-  .empty-state h3 {
-    @apply text-xl font-semibold text-gray-900 mb-2;
+  .coming-soon-icon {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
   }
 
-  .empty-state p {
-    @apply text-gray-500 mb-4;
+  .coming-soon-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
   }
 
-  .create-page-button {
-    @apply px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700;
+  .coming-soon-description {
+    font-size: 1.125rem;
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 2rem;
   }
 
-  .notification {
-    @apply fixed top-4 right-4 flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg z-50;
+  .coming-soon-features {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
   }
 
-  .notification.error {
-    @apply bg-red-100 text-red-800 border border-red-200;
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    font-size: 0.875rem;
+    color: #374151;
   }
 
-  .notification.success {
-    @apply bg-green-100 text-green-800 border border-green-200;
-  }
-
-  .notification button {
-    @apply text-lg font-bold hover:opacity-70;
+  .coming-soon-actions {
+    display: flex;
+    justify-content: center;
   }
 </style>

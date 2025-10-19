@@ -10,7 +10,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>Baseline - Professional Design Tool</title>
+	<title>Linebasis - Professional Design Tool</title>
 </svelte:head>
 
 <div class="app-layout">
@@ -23,7 +23,7 @@
 						<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
 						</svg>
-						<span class="brand-text">Baseline</span>
+						<span class="brand-text">Linebasis</span>
 					</button>
 				</div>
 				
@@ -81,52 +81,88 @@
 
 <style>
 	.app-layout {
-		@apply min-h-screen bg-gray-50;
+		min-height: 100vh;
+		background-color: #f9fafb;
 	}
 
 	.admin-nav {
-		@apply bg-white border-b border-gray-200 shadow-sm;
+		background-color: white;
+		border-bottom: 1px solid #e5e7eb;
+		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 	}
 
 	.nav-content {
-		@apply max-w-7xl mx-auto px-4 py-3;
+		max-width: 80rem;
+		margin: 0 auto;
+		padding: 0.75rem 1rem;
 	}
 
 	.nav-brand {
-		@apply flex items-center;
+		display: flex;
+		align-items: center;
 	}
 
 	.brand-link {
-		@apply flex items-center gap-2 text-gray-900 hover:text-blue-600 transition-colors;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: #111827;
+		text-decoration: none;
+		transition: color 0.2s;
+	}
+
+	.brand-link:hover {
+		color: #2563eb;
 	}
 
 	.brand-text {
-		@apply text-xl font-bold;
+		font-size: 1.25rem;
+		font-weight: 700;
 	}
 
 	.nav-links {
-		@apply flex items-center gap-1 mt-4 sm:mt-0;
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		margin-top: 1rem;
 	}
 
 	.nav-link {
-		@apply flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #6b7280;
+		text-decoration: none;
+		border-radius: 0.5rem;
+		transition: all 0.2s;
+	}
+
+	.nav-link:hover {
+		color: #111827;
+		background-color: #f3f4f6;
 	}
 
 	.nav-link.active {
-		@apply text-blue-600 bg-blue-50;
+		color: #2563eb;
+		background-color: #eff6ff;
 	}
 
 	.main-content {
-		@apply flex-1;
+		flex: 1;
 	}
 
 	@media (min-width: 640px) {
 		.nav-content {
-			@apply flex items-center justify-between;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
 		}
 		
 		.nav-links {
-			@apply mt-0;
+			margin-top: 0;
 		}
 	}
 </style>

@@ -1,401 +1,257 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
 
-	let user: any = null;
-	let stats = {
-		pages: 0,
-		media: 0,
-		storage: 0
-	};
-	let loading = true;
+  let loading = true;
+  let user = { name: 'Admin User' };
 
-	onMount(async () => {
-		// Check if user is logged in
-		const token = localStorage.getItem('access_token');
-		if (!token) {
-			goto('/admin/login');
-			return;
-		}
+  onMount(() => {
+    loading = false;
+  });
 
-		try {
-			// Fetch user info
-			const userResponse = await fetch('/api/auth/me', {
-				headers: {
-					Authorization: `Bearer ${token}`
-				}
-			});
+  function goToDesigner() {
+    goto('/admin/designer');
+  }
 
-			if (!userResponse.ok) {
-				throw new Error('Not authenticated');
-			}
+  function goToBlog() {
+    goto('/admin/blog');
+  }
 
-			user = await userResponse.json();
-
-			// Fetch stats
-			await loadStats();
-		} catch (error) {
-			localStorage.removeItem('access_token');
-			localStorage.removeItem('user');
-			goto('/admin/login');
-		} finally {
-			loading = false;
-		}
-	});
-
-	async function loadStats() {
-		const token = localStorage.getItem('access_token');
-
-		try {
-			// Get pages count
-			const pagesResponse = await fetch('/api/pages', {
-				headers: { Authorization: `Bearer ${token}` }
-			});
-			if (pagesResponse.ok) {
-				const pagesData = await pagesResponse.json();
-				stats.pages = pagesData.total || 0;
-			}
-
-			// Get media stats
-			const mediaResponse = await fetch('/api/media/stats', {
-				headers: { Authorization: `Bearer ${token}` }
-			});
-			if (mediaResponse.ok) {
-				const mediaData = await mediaResponse.json();
-				stats.media = mediaData.totalFiles || 0;
-				stats.storage = mediaData.totalSize || 0;
-			}
-		} catch (error) {
-			console.error('Failed to load stats:', error);
-		}
-	}
-
-	function formatBytes(bytes: number): string {
-		if (bytes === 0) return '0 Bytes';
-		const k = 1024;
-		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-	}
-
-	async function handleLogout() {
-		try {
-			await fetch('/api/auth/logout', { method: 'POST' });
-		} catch (error) {
-			console.error('Logout error:', error);
-		}
-
-		localStorage.removeItem('access_token');
-		localStorage.removeItem('user');
-		goto('/admin/login');
-	}
+  function goToPages() {
+    goto('/admin/pages');
+  }
 </script>
 
 <svelte:head>
-	<title>Admin Dashboard - LineBasis</title>
+  <title>Admin Dashboard - Linebasis</title>
 </svelte:head>
 
-{#if loading}
-	<div class="loading">Loading...</div>
-{:else if user}
-	<div class="admin-container">
-		<header class="header">
-			<div class="header-content">
-				<h1>LineBasis Admin</h1>
-				<div class="user-info">
-					<span class="user-name">{user.name}</span>
-					<span class="user-role">{user.role}</span>
-					<button class="btn-logout" on:click={handleLogout}>Logout</button>
-				</div>
-			</div>
-		</header>
+<div class="admin-page">
+  {#if loading}
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading dashboard...</p>
+    </div>
+  {:else}
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">Welcome back, {user.name}!</h1>
+        <p class="page-description">Manage your website and content</p>
+      </div>
+    </div>
 
-		<nav class="nav">
-			<a href="/admin" class="nav-link active">Dashboard</a>
-			<a href="/admin/pages" class="nav-link">Pages</a>
-			<a href="/admin/media" class="nav-link">Media</a>
-			<a href="/admin/users" class="nav-link">Users</a>
-			<a href="/admin/plugins" class="nav-link">Plugins</a>
-			<a href="/admin/settings" class="nav-link">Settings</a>
-			<a href="/" class="nav-link">Designer</a>
-		</nav>
+    <div class="page-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📄</div>
+          <div class="stat-value">0</div>
+          <div class="stat-label">Total Pages</div>
+        </div>
 
-		<main class="main">
-			<h2>Welcome back, {user.name}!</h2>
+        <div class="stat-card">
+          <div class="stat-icon">🖼️</div>
+          <div class="stat-value">0</div>
+          <div class="stat-label">Media Files</div>
+        </div>
 
-			<div class="stats-grid">
-				<div class="stat-card">
-					<div class="stat-icon">📄</div>
-					<div class="stat-value">{stats.pages}</div>
-					<div class="stat-label">Total Pages</div>
-				</div>
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div class="stat-value">0</div>
+          <div class="stat-label">Blog Posts</div>
+        </div>
+      </div>
 
-				<div class="stat-card">
-					<div class="stat-icon">🖼️</div>
-					<div class="stat-value">{stats.media}</div>
-					<div class="stat-label">Media Files</div>
-				</div>
+      <div class="quick-actions">
+        <h3 class="section-title">Quick Actions</h3>
+        <div class="action-grid">
+          <button class="action-card" on:click={goToDesigner}>
+            <div class="action-icon">✨</div>
+            <div class="action-title">Open Designer</div>
+            <div class="action-desc">Design pages and components</div>
+          </button>
 
-				<div class="stat-card">
-					<div class="stat-icon">💾</div>
-					<div class="stat-value">{formatBytes(stats.storage)}</div>
-					<div class="stat-label">Storage Used</div>
-				</div>
-			</div>
+          <button class="action-card" on:click={goToPages}>
+            <div class="action-icon">📋</div>
+            <div class="action-title">Manage Pages</div>
+            <div class="action-desc">View and edit all pages</div>
+          </button>
 
-			<div class="quick-actions">
-				<h3>Quick Actions</h3>
-				<div class="action-grid">
-					<a href="/" class="action-card">
-						<div class="action-icon">✨</div>
-						<div class="action-title">Create Page</div>
-						<div class="action-desc">Design a new page in LineBasis</div>
-					</a>
+          <button class="action-card" on:click={goToBlog}>
+            <div class="action-icon">📝</div>
+            <div class="action-title">Manage Blog</div>
+            <div class="action-desc">Create and edit blog posts</div>
+          </button>
+        </div>
+      </div>
 
-					<a href="/admin/media" class="action-card">
-						<div class="action-icon">📤</div>
-						<div class="action-title">Upload Media</div>
-						<div class="action-desc">Add images and files</div>
-					</a>
-
-					<a href="/admin/pages" class="action-card">
-						<div class="action-icon">📋</div>
-						<div class="action-title">Manage Pages</div>
-						<div class="action-desc">View and edit all pages</div>
-					</a>
-				</div>
-			</div>
-
-			<div class="info-box">
-				<h3>🎉 Phase 1.5 Complete!</h3>
-				<p>
-					LineBasis CMS is now functional! You can authenticate, upload media, and manage pages.
-					Check out the <a href="/">Designer</a> to create beautiful pages with the baseline grid
-					system.
-				</p>
-			</div>
-		</main>
-	</div>
-{/if}
+      <div class="info-box">
+        <h3 class="info-title">🎉 Linebasis CMS Ready!</h3>
+        <p class="info-description">
+          Your professional design tool is ready to use. Start by creating pages in the designer
+          or managing your blog content.
+        </p>
+      </div>
+    </div>
+  {/if}
+</div>
 
 <style>
-	:global(body) {
-		margin: 0;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-			sans-serif;
-	}
+  .admin-page {
+    min-height: 100vh;
+    background-color: #f9fafb;
+  }
 
-	.loading {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 100vh;
-		font-size: 18px;
-		color: #718096;
-	}
+  .page-header {
+    background-color: white;
+    padding: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
 
-	.admin-container {
-		min-height: 100vh;
-		background: #f7fafc;
-	}
+  .header-left {
+    max-width: 80rem;
+    margin: 0 auto;
+  }
 
-	.header {
-		background: white;
-		border-bottom: 1px solid #e2e8f0;
-		padding: 20px 0;
-	}
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
 
-	.header-content {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 0 24px;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
+  .page-description {
+    color: #6b7280;
+    margin: 0.5rem 0 0 0;
+  }
 
-	.header h1 {
-		margin: 0;
-		font-size: 24px;
-		font-weight: 700;
-		color: #1a202c;
-	}
+  .page-content {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 2rem;
+  }
 
-	.user-info {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-	}
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    height: 100vh;
+  }
 
-	.user-name {
-		font-weight: 500;
-		color: #2d3748;
-	}
+  .loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
 
-	.user-role {
-		background: #667eea;
-		color: white;
-		padding: 4px 12px;
-		border-radius: 12px;
-		font-size: 12px;
-		font-weight: 600;
-		text-transform: uppercase;
-	}
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 
-	.btn-logout {
-		padding: 8px 16px;
-		background: #e2e8f0;
-		border: none;
-		border-radius: 6px;
-		cursor: pointer;
-		font-weight: 500;
-		transition: all 0.2s;
-	}
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
 
-	.btn-logout:hover {
-		background: #cbd5e0;
-	}
+  .stat-card {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+  }
 
-	.nav {
-		background: white;
-		border-bottom: 1px solid #e2e8f0;
-		padding: 0 24px;
-		max-width: 1200px;
-		margin: 0 auto;
-		display: flex;
-		gap: 8px;
-	}
+  .stat-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
 
-	.nav-link {
-		padding: 12px 20px;
-		text-decoration: none;
-		color: #4a5568;
-		font-weight: 500;
-		border-bottom: 2px solid transparent;
-		transition: all 0.2s;
-	}
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
 
-	.nav-link:hover {
-		color: #667eea;
-	}
+  .stat-label {
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
 
-	.nav-link.active {
-		color: #667eea;
-		border-bottom-color: #667eea;
-	}
+  .quick-actions {
+    margin-bottom: 2rem;
+  }
 
-	.main {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 40px 24px;
-	}
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 1rem 0;
+  }
 
-	.main h2 {
-		margin: 0 0 32px 0;
-		font-size: 32px;
-		color: #1a202c;
-	}
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
 
-	.stats-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 24px;
-		margin-bottom: 48px;
-	}
+  .action-card {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    width: 100%;
+  }
 
-	.stat-card {
-		background: white;
-		border-radius: 12px;
-		padding: 24px;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-		text-align: center;
-	}
+  .action-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
 
-	.stat-icon {
-		font-size: 48px;
-		margin-bottom: 12px;
-	}
+  .action-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
 
-	.stat-value {
-		font-size: 36px;
-		font-weight: 700;
-		color: #1a202c;
-		margin-bottom: 8px;
-	}
+  .action-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
 
-	.stat-label {
-		font-size: 14px;
-		color: #718096;
-		font-weight: 500;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-	}
+  .action-desc {
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
 
-	.quick-actions h3 {
-		margin: 0 0 20px 0;
-		font-size: 20px;
-		color: #1a202c;
-	}
+  .info-box {
+    background-color: #eff6ff;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #dbeafe;
+  }
 
-	.action-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-		gap: 20px;
-		margin-bottom: 48px;
-	}
+  .info-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e40af;
+    margin: 0 0 0.5rem 0;
+  }
 
-	.action-card {
-		background: white;
-		border-radius: 12px;
-		padding: 24px;
-		text-decoration: none;
-		transition: all 0.2s;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	}
-
-	.action-card:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	}
-
-	.action-icon {
-		font-size: 32px;
-		margin-bottom: 12px;
-	}
-
-	.action-title {
-		font-size: 18px;
-		font-weight: 600;
-		color: #1a202c;
-		margin-bottom: 8px;
-	}
-
-	.action-desc {
-		font-size: 14px;
-		color: #718096;
-	}
-
-	.info-box {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		border-radius: 12px;
-		padding: 32px;
-	}
-
-	.info-box h3 {
-		margin: 0 0 16px 0;
-		font-size: 24px;
-	}
-
-	.info-box p {
-		margin: 0;
-		font-size: 16px;
-		line-height: 1.6;
-	}
-
-	.info-box a {
-		color: white;
-		font-weight: 600;
-		text-decoration: underline;
-	}
+  .info-description {
+    color: #1e40af;
+    margin: 0;
+  }
 </style>

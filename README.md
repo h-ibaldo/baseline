@@ -14,7 +14,7 @@ An open source project with huge ambition and expectations. The goal of this pro
 
 ## How we solve this:
 
-**Dual-Mode Architecture**: Baseline works in two ways:
+**Dual-Mode Architecture**: Linebasis works in two ways:
 
 1. **Designer Mode** (Browser-based, Local-First)
    - Design and build pages entirely in your browser
@@ -124,7 +124,7 @@ LineBasis is currently in early development and is **NOT accepting external cont
 - ✅ **Export System** - ZIP download with multiple presets and configuration options
 - ✅ **Testing Framework** - Vitest setup with 44 comprehensive tests
 
-**Phase 1 is complete!** You can now design in Baseline and export production-ready HTML/CSS.
+**Phase 1 is complete!** You can now design in Linebasis and export production-ready HTML/CSS.
 
 **✅ Phase 1.5 - CMS Foundation (COMPLETED):**
 - ✅ **Database Layer** - Complete Prisma ORM setup with SQLite, CRUD services for pages, users, media, and settings

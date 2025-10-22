@@ -1,35 +1,35 @@
 # Page Design Specifications
 
-This document outlines the detailed specifications for all admin pages in Linebasis, providing a clear framework for design and implementation.
+Detailed specifications for all pages in LineBasis.
 
-## 🎯 **Design Philosophy**
+## Design Philosophy
 
+- **Typography oriented** inspired by the International Design Style
 - **Minimalist** aesthetic with clean, uncluttered interfaces
 - **Detail-oriented** interactions with precise micro-interactions
-- **Consistent spacing** using 8px grid system
-- **Clear hierarchy** with well-defined typography scale
-- **Intuitive navigation** with breadcrumbs and clear CTAs
-- **Responsive design** with mobile-first approach
 
-## 📱 **Page Specifications**
+## Page Specifications
 
 ### **1. Home Dashboard** (`/admin`)
 **Purpose:** Overview and quick actions for the entire system
-**Layout:** 3-column grid with stats cards + quick actions
+**Layout:** Lists, text only.
 
-#### **Stats Cards (6 cards):**
+#### **Stats List:**
 - **Total Pages** (published + draft count)
 - **Blog Posts** (published + draft count) 
 - **Media Files** (total count)
 - **Components** (public + private count)
-- **Style Libraries** (active count)
-- **Recent Activity** (last 5 actions with timestamps)
+- **Stylesheets** (active count)
+- **Recent Activity** (last 5 actions with timestamps), e.g.:
+  1. Published "About Us" page (2024-06-13 10:22)
+  2. Uploaded "brand-logo.png" to Media (2024-06-13 09:58)
+  3. Edited "Home" page title (2024-06-13 09:35)
+  4. Created new Blog Post "Introducing Linebasis" (2024-06-13 08:47)
+  5. Deleted draft "Untitled Page" (2024-06-13 08:22)
 
 #### **Quick Actions (4 buttons):**
-- **Create New Page** (primary CTA)
-- **Write Blog Post** 
-- **Manage Media**
-- **Open Designer**
+- **New Page** (primary CTA)
+- **New Blog Post** 
 
 #### **Additional Elements:**
 - **Recent Activity Feed** (scrollable list with timestamps)
@@ -85,16 +85,16 @@ This document outlines the detailed specifications for all admin pages in Lineba
 
 ---
 
-### **4. Style Guides List** (`/admin/styleguides`)
+### **4. Stylesheets List** (`/admin/styleguides`)
 **Purpose:** Manage design systems and style libraries
-**Layout:** List view with style guide cards
+**Layout:** List view with Stylesheet cards
 
 #### **Header Section:**
-- **Style Guides Title** + **Description**
-- **Create New Style Guide** button (primary)
+- **Stylesheets Title** + **Description**
+- **Create New Stylesheet** button (primary)
 
-#### **Style Guide Cards:**
-- **Style Guide Name** + **Description**
+#### **Stylesheet Cards:**
+- **Stylesheet Name** + **Description**
 - **Design Token Preview** (color swatches, typography samples)
 - **Component Count** (X components)
 - **Last Modified** date
@@ -102,7 +102,7 @@ This document outlines the detailed specifications for all admin pages in Lineba
 
 ---
 
-### **5. Style Guide Editor** (`/admin/styleguides/[id]`)
+### **5. Stylesheet Editor** (`/admin/styleguides/[id]`)
 **Purpose:** Edit design tokens and component library
 **Layout:** Split view with sidebar + main content
 
@@ -165,7 +165,7 @@ This document outlines the detailed specifications for all admin pages in Lineba
 - **Import Theme** button
 - **Create New Theme** button (primary)
 
-#### **Theme Cards:**
+#### **Theme List:**
 - **Theme Preview** (screenshot/thumbnail)
 - **Theme Name** + **Description**
 - **Client/Project** name
@@ -209,35 +209,14 @@ This document outlines the detailed specifications for all admin pages in Lineba
 - **2xl:** 48px
 - **3xl:** 64px
 
-### **Component Specifications:**
-
-#### **Buttons:**
-- **Primary:** Blue background, white text, 8px border radius
-- **Secondary:** White background, blue border, blue text
-- **Ghost:** Transparent background, blue text
-- **Danger:** Red background, white text
-
-#### **Cards:**
-- **Background:** White
-- **Border:** 1px solid #e5e7eb
-- **Border Radius:** 8px
-- **Shadow:** 0 1px 3px rgba(0, 0, 0, 0.1)
-- **Padding:** 16px
-
-#### **Form Elements:**
-- **Input:** 8px border radius, 1px solid #d1d5db
-- **Focus State:** 2px solid #2563eb
-- **Label:** 14px, 500 weight, #374151
-- **Helper Text:** 12px, #6b7280
-
 ---
 
 ## 🚀 **Implementation Priority**
 
 1. **Home Dashboard** - Core overview page
 2. **Pages Management** - Primary content management
-3. **Style Guides List** - Design system foundation
-4. **Style Guide Editor** - Most complex, core functionality
+3. **Stylesheets List** - Design system foundation
+4. **Stylesheet Editor** - Most complex, core functionality
 5. **Templates Management** - Template system
 6. **Blog Management** - Content management
 7. **Theme Management** - Multi-theme system
@@ -275,8 +254,8 @@ This document outlines the detailed specifications for all admin pages in Lineba
 
 ### **Primary User Flows:**
 1. **Create New Page** → Design → Publish
-2. **Manage Style Guide** → Edit Tokens → Apply to Components
-3. **Switch Theme** → Edit Style Guide → Save Changes
+2. **Manage Stylesheet** → Edit Tokens → Apply to Components
+3. **Switch Theme** → Edit Stylesheet → Save Changes
 4. **Create Blog Post** → Write Content → Publish
 
 ### **Secondary User Flows:**

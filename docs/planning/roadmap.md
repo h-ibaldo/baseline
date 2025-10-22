@@ -1,15 +1,37 @@
 # LineBasis Development Roadmap
 
-## Phase 1: Foundation (Months 1-3)
+## Current Priority: Page Builder
+
+**Architecture Shift**: Everything is built with the page builder (admin pages, blog pages, landing pages) except the page builder itself, which is designed by Ibaldo.
+
+**Focus**: Build the page builder based on Ibaldo's designs before anything else.
+
+---
+
+## Immediate Next Steps
+
+### Page Builder Implementation (Based on Ibaldo's Designs)
+- [ ] Create page builder interface route (`/builder` or `/`)
+- [ ] Implement toolbar (top)
+- [ ] Implement left sidebar (pages/components panel)
+- [ ] Implement right sidebar (properties panel)
+- [ ] Implement canvas area with grid
+- [ ] Implement multi-page canvas view
+- [ ] Implement component drag-and-drop
+- [ ] Integrate event sourcing for undo/redo
+- [ ] Add keyboard shortcuts
+
+**Reference**: See [docs/planning/page-design-specifications.md](docs/planning/page-design-specifications.md) for design specs.
+
+---
+
+## Completed Foundations ✅
 
 ### Core Infrastructure
 - [x] Project setup with SvelteKit and TypeScript
 - [x] Git repository and GitHub integration
-- [x] Basic project structure and documentation
-- [x] Architecture documentation
-- [x] Cursor AI guidelines (.cursorrules)
+- [x] Documentation structure
 - [x] Testing framework setup (Vitest)
-- [ ] CI/CD pipeline configuration
 
 ### DOM-Based Canvas ✅ **COMPLETED**
 - [x] Infinite canvas with multiple artboards (Figma/Illustrator style)

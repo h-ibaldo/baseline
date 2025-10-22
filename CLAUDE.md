@@ -4,14 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**LineBasis** is an open-source design and CMS platform built to replace WordPress, Figma (for web), and Webflow. It offers a dual-mode architecture:
+**LineBasis** is an open-source design and CMS platform to replace WordPress, Figma (for web), and Webflow.
 
-1. **Designer Mode**: Browser-based, local-first design tool with actual DOM manipulation
-2. **CMS Mode**: Self-hosted full-stack CMS with authentication, media management, and publishing
+**Architecture**: All app pages are built using the page builder itself. The only exception is the page builder interface, which is designed externally by Ibaldo.
 
 **Tech Stack**: SvelteKit, TypeScript (strict mode), Prisma ORM, SQLite/PostgreSQL, Vitest
 
-**Status**: Early development - NOT accepting external contributions yet. Powered by AI-assisted development (ChatGPT, Claude, Copilot).
+**Current Priority**: Building the page builder based on Ibaldo's designs. Everything else depends on this foundation.
+
+**See**: [docs/planning/page-builder-spec.md](docs/planning/page-builder-spec.md) for page builder specification.
+
+**Status**: Early development - NOT accepting external contributions yet.
 
 ---
 
@@ -94,188 +97,83 @@ npm run migrate:plugins:check
 
 ## Architecture Overview
 
-### Dual-Mode Architecture
+### Page Builder-First Architecture
 
-**Mode 1: Designer Tool (Browser-Only)**
-- Local-first architecture using IndexedDB
-- Event sourcing for perfect undo/redo
-- DOM-based canvas (NOT Canvas API)
-- Real-time code generation via AST
-- Export to HTML/CSS/Svelte
+**Everything is built in the page builder** - admin pages, blog pages, landing pages - except the page builder itself.
 
-**Mode 2: CMS (Self-Hosted)**
-- Full-stack SvelteKit application
-- JWT-based authentication with role-based access
-- Media upload with Sharp optimization
-- Publishing system (design → live pages)
-- Admin panel with dashboard
-- Plugin architecture for extensibility
+**Page Builder** (designed in Figma):
+- DOM-based canvas with actual web components
+- Event sourcing for undo/redo
+- Local-first using IndexedDB
+- Multi-page canvas (Figma-style)
+- Component system with reusable elements
+- Export to production code
+
+**CMS Backend**:
+- SvelteKit + TypeScript
+- JWT authentication
+- Prisma ORM (SQLite/PostgreSQL)
+- Media management with Sharp
+- Plugin architecture
 
 ### Core Systems
 
-#### 1. Event Sourcing Architecture
-- All design changes captured as events
-- State derived from event history
-- Perfect undo/redo via event navigation
-- Persistence to IndexedDB with auto-save
-- Event replay reconstructs state on load
+#### 1. Page Builder (Priority)
+- DOM-based canvas with multi-page support
+- Event sourcing for undo/redo
+- Component system (convert designs to reusable components)
+- Baseline grid for typography alignment
+- IndexedDB persistence with auto-save
+- Code generation (HTML/CSS/Svelte)
 
-**Key files**:
-- `src/lib/stores/event-store.ts` - Event store with history
-- `src/lib/stores/design-store.ts` - Design state management
-- `src/lib/types/events.ts` - Event type definitions
+**Key files**: `src/lib/stores/event-store.ts`, `src/lib/stores/design-store.ts`
 
-#### 2. Baseline Grid System
-InDesign-style typography grid for precise alignment:
-- User-defined baseline height (4-32px)
-- Global snap-to-baseline toggle
-- Per-component override capability
-- Visual grid overlay (toggleable)
-- Comprehensive calculation utilities
-
-**Key files**:
-- `src/lib/utils/baseline.ts` - Grid calculations (7 core functions)
-- `src/lib/stores/baseline.ts` - Grid configuration store
-- `src/lib/components/baseline/` - Grid UI components
-
-#### 3. Plugin System
-**Architecture**: Dynamic plugin loading with schema composition
-- Plugins can add Prisma models (automatic schema merging)
-- API route registration
-- Admin UI page registration
-- Lifecycle hooks (install, activate, publish, etc.)
-- Per-plugin settings storage
-
-**Key files**:
-- `src/lib/core/plugins/` - Plugin system core
-  - `loader.ts` - Dynamic plugin loading
-  - `registry.ts` - Plugin registration
-  - `hooks.ts` - Lifecycle hook execution
-  - `types.ts` - Plugin interface definitions
-- `plugins/blog/` - Official blog plugin (reference implementation)
-- `scripts/build-schema.ts` - Schema composition script
+#### 2. Plugin System
+Plugins add database models, API routes, and admin pages without touching core code.
 
 **Plugin Development**:
-1. Create `plugins/[name]/` directory
-2. Add `manifest.ts` with plugin metadata
-3. Add `prisma/schema.prisma` for database models
-4. Run `npm run db:compose` to merge schemas
-5. Add API routes in `server/routes/`
-6. Add admin pages in `admin/`
+1. Create `plugins/[name]/` with `manifest.ts`
+2. Add `prisma/schema.prisma` for models
+3. Run `npm run db:compose` to merge schemas
+4. Add API routes and admin pages
 
-#### 4. Authentication System
-JWT-based authentication with bcrypt:
-- Access tokens (7-day expiry, Bearer header)
-- Refresh tokens (30-day expiry, HTTP-only cookies)
-- Role-based access control (admin, editor, author)
-- Session management in database
+**Key files**: `src/lib/core/plugins/`, `scripts/build-schema.ts`
 
-**Key files**:
-- `src/lib/server/services/auth.ts` - Auth service
-- `src/lib/server/middleware/auth.ts` - Auth middleware (`requireAuth`, `requireRole`, `requireAdmin`)
-- `src/routes/api/auth/*` - 6 auth endpoints
+#### 3. Authentication
+JWT-based auth with role-based access (admin/editor/author).
 
-#### 5. Media Management
-File upload with automatic image optimization:
-- Sharp-based image processing (resize, compress)
-- Support for images, PDFs, videos
-- Storage in `static/uploads/`
-- Metadata tracking (dimensions, size, mime type)
+**Key files**: `src/lib/server/services/auth.ts`, `src/lib/server/middleware/auth.ts`
 
-**Key files**:
-- `src/lib/server/services/upload.ts` - Upload service
-- `src/lib/server/services/media.ts` - Media CRUD
-- `src/routes/api/media/*` - Media API endpoints
+#### 4. Media Management
+File upload with Sharp image optimization to `static/uploads/`.
 
-#### 6. Code Generation (AST)
-Abstract Syntax Tree-based code generation:
-- Parse design tree → Generate AST
-- AST → Clean HTML/CSS/JS output
-- Multiple export formats (HTML, Svelte, JSX)
-- Runs in Web Worker for performance
-
-**Key files**:
-- `src/lib/utils/ast.ts` - AST generation
-- `src/lib/utils/export.ts` - Export system
-- `src/lib/workers/code-generator.ts` - Worker thread
+**Key files**: `src/lib/server/services/upload.ts`, `src/lib/server/services/media.ts`
 
 ### Project Structure
 
 ```
 src/
-├── routes/                    # SvelteKit routes
-│   ├── +page.svelte          # Designer tool (main app)
-│   ├── [slug]/               # Dynamic page rendering
-│   ├── admin/                # Admin panel pages
-│   │   ├── login/            # Login page
-│   │   ├── pages/            # Page manager
-│   │   ├── media/            # Media library
-│   │   ├── users/            # User management
-│   │   └── plugins/          # Plugin management
+├── routes/
+│   ├── +page.svelte          # Page builder interface
+│   ├── [slug]/               # Published pages
+│   ├── admin/                # Admin pages (built with page builder)
 │   └── api/                  # API endpoints
-│       ├── auth/             # Authentication
-│       ├── pages/            # Page CRUD
-│       ├── media/            # Media upload
-│       ├── users/            # User management
-│       └── plugins/          # Plugin management
 ├── lib/
 │   ├── components/           # UI components
-│   │   ├── canvas/           # Canvas components
-│   │   ├── design/           # Design components (9 types)
-│   │   ├── baseline/         # Grid components
-│   │   └── ui/               # General UI
-│   ├── stores/               # Svelte stores
-│   │   ├── event-store.ts    # Event sourcing
-│   │   ├── design-store.ts   # Design state
-│   │   ├── baseline.ts       # Grid config
-│   │   └── project-store.ts  # Project management
-│   ├── utils/                # Utility functions
-│   │   ├── baseline.ts       # Grid calculations
-│   │   ├── ast.ts            # Code generation
-│   │   ├── storage.ts        # IndexedDB wrapper
-│   │   └── export.ts         # Export system
-│   ├── types/                # TypeScript types
-│   ├── core/
-│   │   └── plugins/          # Plugin system
-│   └── server/               # Server-side code
-│       ├── db/
-│       │   └── client.ts     # Prisma client
-│       ├── services/         # Business logic
-│       │   ├── auth.ts       # Authentication
-│       │   ├── pages.ts      # Page CRUD
-│       │   ├── media.ts      # Media CRUD
-│       │   ├── upload.ts     # File upload
-│       │   ├── users.ts      # User management
-│       │   └── plugins.ts    # Plugin management
-│       └── middleware/
-│           └── auth.ts       # Auth middleware
-├── tests/
-│   └── setup.ts              # Vitest config
-└── app.d.ts                  # Global types
+│   ├── stores/               # Svelte stores (event-store, design-store)
+│   ├── utils/                # Utilities (baseline, ast, export)
+│   ├── core/plugins/         # Plugin system
+│   └── server/               # Server-side (services, middleware)
 
 prisma/
 ├── schema.core.prisma        # Core models
-└── schema.prisma             # Generated (composed)
+└── schema.prisma             # Generated (composed from core + plugins)
 
 plugins/
-└── blog/                     # Official blog plugin
-    ├── manifest.ts           # Plugin metadata
-    ├── prisma/
-    │   └── schema.prisma     # Blog models (Post, Category, Tag)
-    ├── server/               # API routes
-    └── admin/                # Admin pages
-
-scripts/
-├── build-schema.ts           # Schema composition
-├── setup-admin.ts            # Create admin user
-└── migrate-to-plugins.ts     # Migration utility
+└── blog/                     # Example plugin
 
 docs/
-├── planning/
-│   ├── roadmap.md            # Development roadmap
-│   ├── architecture.md       # Architecture details
-│   └── cms-architecture.md   # CMS specifics
-└── guides/                   # Development guides
+└── planning/                 # Roadmap, architecture
 ```
 
 ---
@@ -485,68 +383,18 @@ npm run db:generate
 
 ---
 
-## Important Implementation Details
+## Key Patterns
 
-### Event Sourcing Pattern
-All design changes are captured as events, not state mutations:
+### Event Sourcing
+Dispatch events, don't mutate state:
 ```typescript
-// Don't: Mutate state directly
-state.elements[id].x = 100;
-
-// Do: Dispatch event
-dispatch({ type: 'MOVE_ELEMENT', elementId: id, position: { x: 100, y: 50 } });
+dispatch({ type: 'MOVE_ELEMENT', elementId: id, position: { x, y } });
 ```
 
-State is derived from events via reducer:
+### Auth Middleware
 ```typescript
-const currentState = events.reduce(applyEvent, initialState);
-```
-
-### Baseline Grid Calculations
-Use utility functions for baseline conversions:
-```typescript
-import { snapToBaseline, toBaselineUnits } from '$lib/utils/baseline';
-
-// Snap value to nearest baseline
-const snapped = snapToBaseline(value, baselineHeight);
-
-// Convert pixels to baseline units
-const units = toBaselineUnits(pixels, baselineHeight);
-```
-
-### Authentication Middleware
-Protect routes with middleware:
-```typescript
-import { requireAuth, requireAdmin, requireRole } from '$lib/server/middleware/auth';
-
-// Any authenticated user
-export const GET = requireAuth(async ({ locals }) => {
-  const user = locals.user; // Available after auth
-  // ...
-});
-
-// Admin only
-export const DELETE = requireAdmin(async ({ locals }) => {
-  // Only admins can access
-});
-
-// Specific roles
-export const POST = requireRole(['admin', 'editor'], async ({ locals }) => {
-  // Admins and editors only
-});
-```
-
-### Media Upload Flow
-```typescript
-import { uploadFile } from '$lib/server/services/upload';
-
-// 1. Get file from form data
-const file = await request.formData().get('file');
-
-// 2. Upload and optimize
-const media = await uploadFile(file, userId);
-
-// 3. Returns { id, url, filename, size, width, height, ... }
+export const GET = requireAuth(async ({ locals }) => { /* locals.user available */ });
+export const DELETE = requireAdmin(async ({ locals }) => { /* admin only */ });
 ```
 
 ---
@@ -616,43 +464,13 @@ src/lib/utils/
 
 ---
 
-## AI Development Notes
-
-This project embraces AI-assisted development while maintaining human oversight:
-
-**AI is great for**:
-- Boilerplate generation
-- Type definitions
-- Documentation writing
-- Test scaffolding
-- Code organization
-
-**Human review required for**:
-- Architecture decisions
-- Security implementations
-- Performance optimizations
-- API design
-- Database schema changes
-
-**Process**:
-1. AI generates initial code
-2. Human reviews and tests
-3. Human refines and optimizes
-4. Human commits with AI credit
-
----
-
 ## Resources
 
-- **Roadmap**: `docs/planning/roadmap.md` - Current phase and tasks
-- **Architecture**: `docs/planning/architecture.md` - Detailed system design
-- **Cursor Rules**: `.cursorrules` - AI development guidelines
-- **SvelteKit Docs**: https://svelte.dev/docs/kit
-- **Prisma Docs**: https://prisma.io/docs
-- **Vitest Docs**: https://vitest.dev
+- [docs/planning/page-builder-spec.md](docs/planning/page-builder-spec.md) - Page builder specification (START HERE)
+- [docs/planning/page-design-specifications.md](docs/planning/page-design-specifications.md) - Detailed page specs
+- [docs/planning/roadmap.md](docs/planning/roadmap.md) - Development roadmap
 
 ---
 
-**Last Updated**: Phase 2 Complete (Plugin Architecture)
-**Current Phase**: Phase 3 - Advanced Features
-**Remember**: Read this file at the start of every session!
+**Current Phase**: Page Builder Development
+**Remember**: Everything is built with the page builder except the page builder itself!

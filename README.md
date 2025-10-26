@@ -1,198 +1,289 @@
 # LineBasis
 
-An open source project with huge ambition and expectations. The goal of this project is to fill a gap in the market of webdesign ecosystems replacing Wordpress, Figma (for web) and tools like Webflow. The success metric is to power 20% of the web in 5 years.
+**A self-hosted visual website builder with professional design tools and modern technology.**
 
-**Official Website:** [linebasis.org](https://linebasis.org) (linebasis.com redirects here)
+Design websites visually with real web components. Own your code, your data, your platform. No monthly fees. 100% open source.
 
-## The problems we're trying to solve:
+---
 
-1. **WordPress** allows full customization and you own the code. It's not platform dependent. But offers a poor and extremely outdated DX and UX and technology.
+## The Problem
 
-2. **Figma** is private sector. It's the best design experience (but still can be highly improved). Dynamic UX. However, you don't design directly with web components. A div is not a div. As a result, only complicated and stressful layers of abstraction are offered to bridge the gap between design and code.
+After shipping successful products like TidyCal, SendFox, and BreezeDoc at AppSumo Originals, I kept hitting the same wall when building websites:
 
-3. **Webflow and similar tools** are private sector. They allow you to design with the actual code of your website. But you have to pay high fees. You cannot change much of the tool itself. 
+**WordPress?** Free and self-hosted, but Gutenberg is a nightmare. You build React blocks that convert to PHP. It breaks constantly.
 
-## How we solve this:
+**Visual builders (Webflow, Framer)?** Beautiful editors, but you're paying $15-30/month per site to rent your own website. The code isn't really yours. You can't customize the platform.
 
-**Dual-Mode Architecture**: Linebasis works in two ways:
+**Figma + code it yourself?** Figma components aren't real web components. Divs aren't divs. The design-to-code handoff adds unnecessary abstraction layers.
 
-1. **Designer Mode** (Browser-based, Local-First)
-   - Design and build pages entirely in your browser
-   - No installation or server required
-   - Export clean code (HTML/CSS/Svelte)
-   - Perfect for prototyping, learning, or designing for clients
-   - Try it free at baseline.app
+And here's what really bugs me: graphic designers figured out typography and layout 100 years ago. Baseline grids, vertical rhythm, proper alignment—these aren't new problems. But most web design tools ignore them.
 
-2. **CMS Mode** (Self-Hosted, Full-Stack)
-   - Install on your own server (VPS, shared hosting, Docker)
-   - Design AND publish pages directly to your domain
-   - Full content management system
-   - Multi-user support with role-based permissions
-   - Media library, SEO tools, blog system
-   - True WordPress replacement with modern technology
+## The Solution
 
-**Design Experience**: 
-- **Unified Interface**: Single designer for all design, editing, and publishing
-- **Multi-Page Canvas**: See all website pages at once (Figma-style)
-- **Component System**: Convert any design to reusable components
-- **Instant Publishing**: Right-click page → Publish with slug definition
-- **Blog Templates**: Design blog templates with Notion-like rich text editor
-- **Style Libraries**: Figma-style design system management
-- **Theme Export**: Share designs as professional themes (.baseline-theme)
-- **Baseline Grid**: InDesign-style typography alignment
-- **Real Code**: Design with actual HTML/CSS/Svelte components
+LineBasis is the tool I wish existed:
+
+✅ **Visual website builder** with polished, modern UX
+✅ **Self-hosted and 100% open source** - Install once, use forever
+✅ **Design with real web elements** - Divs are divs, components are components
+✅ **Own everything** - Your code, your data, your platform
+✅ **No monthly fees** - Pay once for hosting, that's it
+✅ **Modern tech stack** - SvelteKit, TypeScript, Prisma
+✅ **Baseline grid support** - Because typography matters
+
+Build sites for friends, side projects, product landing pages—whatever you need. Customize it if you want. It's your platform.
+
+---
 
 ## Key Features
 
-### 🎨 **Unified Designer Interface**
-- **Multi-Page Canvas**: Design all website pages in one view
-- **Visual Page Management**: Add, remove, reorder pages visually
-- **Instant Publishing**: Figma-style workflow - right-click → publish
-- **No Context Switching**: Everything happens in one interface
+### 🎨 Professional Page Builder
+- **Illustrator-style interface**: Floating windows, infinite canvas, keyboard shortcuts
+- **3 atomic components**: Div (layout), Text (typography), Media (images/videos)
+- **Frames**: Multi-artboard canvas like Figma - design desktop, tablet, mobile in one view
+- **Baseline grid**: InDesign-style typography alignment with snap-to-grid
+- **Event sourcing**: Perfect undo/redo with complete design history
+- **Local-first**: Design in browser with IndexedDB, auto-save every 30 seconds
 
-### 🧩 **Component System**
-- **Convert Designs to Components**: Select any design → right-click → "Convert to Component"
-- **Component Library**: Drag-and-drop reusable components
-- **Master Component Editing**: Edit once, update everywhere
-- **Style Inheritance**: Components inherit from style libraries
+### 🧩 Reusable Blocks
+- **Convert designs to blocks**: Select elements → right-click → "Convert to Block"
+- **Master-instance system**: Edit master block → updates all instances across all pages
+- **Auto-detachment**: Edit an instance → automatically detaches for one-off customization
+- **Push to master**: Like your changes? Push them back to the master block
+- **Organized by source page**: Blocks grouped by the page where they were created
 
-### 📝 **Blog Template System**
-- **Design Blog Templates**: Create blog layouts in the designer
-- **Notion-like Editor**: Rich text editing with Novel Svelte
-- **Flexible Publishing**: Publish as regular page OR blog template
-- **Content Management**: Simple CMS for blog content
+### 📐 Design System (Tokens)
+- **Global tokens**: Colors, typography, spacing, effects
+- **Typography presets**: Heading 1-6, Body, Caption, Small
+- **Theme colors**: Primary, Secondary, Accent, Text, Muted
+- **Baseline grid**: Configure grid unit (4-32px), snap elements to rhythm
+- **One-click updates**: Change token → all components using it update
 
-### 🎨 **Style Libraries (Figma-Style)**
-- **Design System Management**: Colors, typography, spacing, components
-- **Global Updates**: Change library → all components update
-- **Library Sharing**: Import/export libraries between projects
-- **Version Control**: Track design system changes
+### 📝 Blog System (Plugin)
+- **Design blog templates**: Create layouts in page builder for homepage, single post, archives
+- **Notion-like editor**: Rich text with slash commands, inline formatting, media embeds
+- **PostContent block**: Special block that renders blog post content in templates
+- **Categories & Tags**: Organize posts with flexible taxonomy
+- **SEO-ready**: Meta tags, social preview images, automatic sitemaps
 
-### 🚀 **Theme Export System**
-- **Professional Sharing**: Exchange designs like Figma files
-- **JSON + Svelte Components**: Editable, versionable themes
-- **One-Click Installation**: Import themes into any project
-- **Client Delivery**: Easy theme handoff to clients
+### 🚀 Publishing & Export
+- **Server-side rendering**: Published pages render as Svelte components with SSR
+- **Responsive CSS**: Design breakpoints → generates mobile-first media queries
+- **Static export**: Download pages as pure HTML/CSS .zip for hosting anywhere
+- **Theme sharing**: Export/import entire sites (.baseline-theme files or API transfer)
 
-### 📐 **Baseline Grid System**
-- **InDesign-Style Typography**: Perfect text alignment
-- **Customizable Grid**: 4-32px baseline height
-- **Visual Grid Overlay**: Toggleable, customizable
-- **Snap-to-Baseline**: Real-time alignment during design
+### 👥 Multi-User & Permissions
+- **Role-based access**: Owner, Manager, Designer, Editor
+- **Team collaboration**: Invite members, assign roles, manage access
+- **JWT authentication**: Secure login with refresh tokens
+- **Per-resource permissions**: Fine-grained control over who can edit/publish/delete
 
-**You own everything**: The code, the data, and the platform. Developers or curious designers can change anything. Extensible via plugin system, themes, and component libraries.
+### 🔌 Plugin Architecture
+- **Extensible core**: Add features without touching core code
+- **Database integration**: Plugins add Prisma models via schema composition
+- **API routes**: Plugins register custom endpoints
+- **Admin UI**: Plugins add pages to admin panel
+- **Lifecycle hooks**: React to events (page publish, user create, etc.)
 
-**100% free and open-source.** Currently in early development - not accepting external contributions yet. Will open contributions once the core foundation is established.
+---
 
-## Development
+## Current Status
 
-This project is built with SvelteKit and TypeScript.
+**⚠️ Replanning Phase Complete - Implementation Starting**
 
-### Getting Started
+LineBasis is being rebuilt from the ground up with a clear, well-documented architecture.
 
-```sh
+### ✅ Planning Complete (October 2024)
+
+Complete technical specifications written (5,637 lines of documentation):
+
+- **[app.md](docs/planning/app.md)** - Application structure, routing, UI specifications
+- **[page-builder-spec.md](docs/planning/page-builder-spec.md)** - Designer interface specification
+- **[architecture.md](docs/planning/architecture.md)** - Technical architecture, database schema, event sourcing
+- **[workflows.md](docs/planning/workflows.md)** - User workflows and journeys
+- **[component-properties.md](docs/planning/components-properties.md)** - Component property specifications
+
+### 🚧 Next Steps (Implementation)
+
+1. Database schema setup (Prisma models)
+2. Authentication system (JWT + RBAC)
+3. Page builder UI (Svelte components)
+4. Event sourcing system (IndexedDB + undo/redo)
+5. Code generation pipeline (events → Svelte components)
+6. Publishing system (SSR rendering)
+
+**Not accepting external contributions yet.** Will open contributions once the core foundation is stable.
+
+---
+
+## Quick Start (For Developers)
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL (production) or SQLite (development)
+
+### Installation
+
+```bash
+# Clone repository
+git clone https://github.com/linebasis/linebasis.git
+cd linebasis
+
 # Install dependencies
 npm install
 
+# Configure environment
+cp .env.example .env
+# Edit .env with your database URL and JWT secret
+
+# Setup database and create admin user
+npm run setup
+
 # Start development server
+npm run dev
+```
+
+Visit `http://localhost:5173/admin/login` and log in with the admin account created during setup.
+
+### Development Commands
+
+```bash
+# Development server
 npm run dev
 
 # Build for production
 npm run build
+
+# Preview production build
+npm run preview
+
+# Run tests
+npm test
+
+# Type checking
+npm run check
+
+# Database migrations
+npm run db:migrate
+
+# Generate Prisma client
+npm run db:generate
 ```
 
-### Project Structure
+---
 
-- `src/routes/` - Application pages and routes
-- `src/lib/` - Reusable components and utilities
-- `static/` - Static assets
-- `docs/` - Project documentation and planning
+## Technology Stack
 
-### Current Status
+**Frontend:**
+- SvelteKit - Full-stack framework
+- Svelte - UI components
+- TypeScript - Type safety (strict mode)
+- IndexedDB - Local storage for designs
+- Tailwind CSS - Utility-first CSS
 
-**⚠️ Early Development Phase**
+**Backend:**
+- SvelteKit - API routes and SSR
+- Prisma ORM - Type-safe database access
+- PostgreSQL - Production database
+- SQLite - Development database
+- bcrypt - Password hashing
+- jsonwebtoken - JWT authentication
 
-LineBasis is currently in early development and is **NOT accepting external contributions** at this time.
+**Media:**
+- Sharp - Image optimization and processing
 
-**✅ Phase 1 - Designer Tool (COMPLETED):**
-- ✅ **DOM-based Canvas** - Infinite canvas with multiple artboards, drag-and-drop, selection, resize handles, multi-select
-- ✅ **Baseline Grid System** - InDesign-style baseline alignment with snap-to-grid, visual overlay, per-component overrides
-- ✅ **Event Sourcing** - Perfect undo/redo with complete event history and time-travel debugging
-- ✅ **IndexedDB Persistence** - Local-first architecture with auto-save, project management, and offline support
-- ✅ **Component Library** - 9 baseline-aware design components (Typography, Layout, Forms)
-- ✅ **AST Code Generation** - Complete code generation pipeline with HTML/CSS output
-- ✅ **Export System** - ZIP download with multiple presets and configuration options
-- ✅ **Testing Framework** - Vitest setup with 44 comprehensive tests
+**Testing:**
+- Vitest - Unit and integration tests
+- Testing Library - Component testing
 
-**Phase 1 is complete!** You can now design in Linebasis and export production-ready HTML/CSS.
+---
 
-**✅ Phase 1.5 - CMS Foundation (COMPLETED):**
-- ✅ **Database Layer** - Complete Prisma ORM setup with SQLite, CRUD services for pages, users, media, and settings
-- ✅ **Publishing System** - Full design-to-live-page workflow with API endpoints and SSR rendering
-- ✅ **Authentication & JWT** - User registration, login, JWT tokens, session management, role-based access
-- ✅ **Media Upload** - File upload with image optimization, storage management, validation
-- ✅ **Admin Panel** - Beautiful admin interface with dashboard, login page, and statistics
+## Architecture Highlights
 
-**Phase 1.5 is complete!** LineBasis is now a functional self-hosted CMS!
+### Local-First Design
+- Designer works entirely client-side (IndexedDB)
+- Zero server latency during design
+- Auto-save every 30 seconds
+- Publish when ready → sends events to server
 
-**✅ Phase 2 - CMS Core Features (COMPLETED):**
-- ✅ Enhanced admin panel (page manager, media library UI, user management)
-- ✅ Advanced publishing (preview, scheduling, revisions UI)
-- ✅ SEO tools and optimization
-- ✅ **Plugin Architecture** - Extensible plugin system with lifecycle hooks, schema composition, and dynamic loading
-- ✅ **Blog Plugin** - First official plugin with posts, categories, tags, and SEO support
+### Event Sourcing
+- Every design action is an event
+- Append-only event log
+- Perfect undo/redo (time travel through history)
+- Events replay to build current state
 
-**Phase 2 is complete!** LineBasis now has a powerful plugin architecture!
+### Code Generation
+- Design events → Component tree → AST → Svelte code
+- Clean, semantic HTML output
+- Mobile-first CSS with media queries
+- SEO-friendly structure
 
-**🔌 Plugin System:**
-- **Modular Architecture**: Extend LineBasis without touching core code
-- **Database Integration**: Plugins can add their own Prisma models via automatic schema composition
-- **API Routes**: Plugins register their own API endpoints
-- **Admin UI**: Plugins add custom admin pages and navigation
-- **Lifecycle Hooks**: React to core events (page publish, user create, etc.)
-- **Settings**: Each plugin can define configurable settings
-- **Blog Plugin**: Full-featured blog system as the first official plugin
+### Plugin System
+- Prisma schema composition (plugins add models)
+- Dynamic route registration
+- Lifecycle hooks
+- Admin UI extensions
 
-**🚀 Phase 3 - Advanced Features (IN PROGRESS):**
-- ✅ **SEO Tools** - Automatic XML sitemap + robots.txt generation
-- Theme system and marketplace
-- Component marketplace
-- Advanced SEO and analytics
-- Multi-language support
-- Custom post types framework
-- API documentation and GraphQL
+See **[architecture.md](docs/planning/architecture.md)** for complete technical details.
 
-Contributions will open once we have a stable foundation. Watch the repository for updates!
+---
 
-### Key Features
+## Documentation
 
-**Designer Tool:**
-- **Design with actual code**: DOM-based canvas, not Canvas API abstraction
-- **Baseline grid alignment**: Like InDesign, for demanding designers
-- **Local-first**: Your designs live in your browser (IndexedDB) with auto-save
-- **Event sourcing**: Perfect undo/redo and time-travel debugging
-- **Project management**: Create, save, load, and manage multiple design projects
-- **Component library**: 9 baseline-aware components ready to use
-- **Export code**: Generate clean HTML/CSS and download as ZIP
+### Planning Docs
+- **[project-vision.md](docs/planning/project-vision.md)** - Why LineBasis exists
+- **[app.md](docs/planning/app.md)** - Application structure and routing (720 lines)
+- **[page-builder-spec.md](docs/planning/page-builder-spec.md)** - Designer interface (830 lines)
+- **[architecture.md](docs/planning/architecture.md)** - Technical architecture (2,766 lines)
+- **[workflows.md](docs/planning/workflows.md)** - User journeys (1,321 lines)
+- **[component-properties.md](docs/planning/components-properties.md)** - Component specs (667 lines)
+- **[roadmap.md](docs/planning/roadmap.md)** - Development roadmap
 
-**CMS Mode (Available Now!):**
-- **Self-hosted**: Install on your own server, full control
-- **Authentication**: User registration, login, JWT tokens, sessions
-- **Media management**: Upload images/files with automatic optimization
-- **Publishing**: Design → Publish → Live on your domain (via API)
-- **Admin panel**: Beautiful interface for managing your CMS
-- **Plugin system**: Extend functionality without touching core code
-- **Blog plugin**: Full-featured blog with posts, categories, and tags
-- **SEO Ready**: Automatic XML sitemap + robots.txt generation
-- **Modern stack**: SvelteKit + TypeScript + SQLite/PostgreSQL
-- **Multi-user**: Role-based permissions (Admin, Editor, Author)
-- **You own everything**: Code, data, platform - no vendor lock-in
+### Developer Docs
+- **[CLAUDE.md](CLAUDE.md)** - Development guidelines for AI assistants
 
-**Quick Start:**
-```bash
-npm install
-npm run setup        # Create database & admin user
-npm run dev         # Start server
-# Visit http://localhost:5173/admin/login
-# Default: admin@linebasis.com / admin123
-```
+---
+
+## Project Philosophy
+
+This is a solo project by Ibaldo, built with deep focus on complex problems. I'm autistic, so I work best solo with sustained concentration. That's how Linux started. That's how Laravel started. And that's how I'm building this—one focused sprint at a time.
+
+The goal isn't just to build another website builder. It's to create a tool that respects designers' expertise (baseline grids, typography), respects developers' needs (real code, modern stack), and respects users' freedom (self-hosted, open source, no lock-in).
+
+It's ambitious. It's early. But after shipping multiple successful products, I know what it takes to build something people actually use.
+
+---
+
+## Contributing
+
+**Not accepting external contributions at this time.**
+
+LineBasis is in active early development with frequent architectural changes. External contributions would create coordination overhead that slows progress.
+
+Once the core foundation is stable and well-tested, contributions will be welcome. Watch the repository for updates.
+
+**Ways to help right now:**
+- ⭐ Star the repository to show support
+- 👀 Watch for release announcements
+- 💬 Share feedback in Discussions (coming soon)
+- 🐛 Report bugs in Issues (when alpha releases)
+
+---
+
+## License
+
+MIT License - See [LICENSE](LICENSE) for details.
+
+**You own everything you create with LineBasis.** The platform is yours to modify, extend, or fork.
+
+---
+
+## Contact
+
+- **Author**: Ibaldo
+- **Website**: [linebasis.org](https://linebasis.org)
+- **Repository**: [github.com/linebasis/linebasis](https://github.com/linebasis/linebasis)
+
+---
+
+Built with focus, shipped with care.

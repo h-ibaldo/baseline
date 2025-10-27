@@ -1,0 +1,226 @@
+// LineBasis Database Schema - Phase 1
+// Core models for page builder, authentication, and teams
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// TEAMS & USERS
+// ============================================
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  ownerId   String
+  owner     User     @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  members User[] @relation("TeamMembers")
+  pages   Page[]
+  blocks  Block[]
+  media   Media[]
+
+  @@index([slug])
+  @@index([ownerId])
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         String    @default("designer") // owner, manager, designer, editor
+  avatarUrl    String?
+  teamId       String?
+  team         Team?     @relation("TeamMembers", fields: [teamId], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+
+  // Relations
+  ownedTeams Team[]  @relation("TeamOwner")
+  sessions   Session[]
+  pages      Page[]
+  blocks     Block[]
+  media      Media[]
+
+  @@index([email])
+  @@index([teamId])
+  @@index([role])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// ============================================
+// PAGES & FRAMES
+// ============================================
+
+model Page {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  teamId      String
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+
+  // Design data (local-first, stored in IndexedDB on client)
+  // Server stores events only when published
+  designEvents String  @default("[]") // JSON array of design events
+
+  // Published output
+  publishedCode String? // Generated Svelte component
+  isPublished   Boolean @default(false)
+  publishedAt   DateTime?
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaImage       String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  frames Frame[]
+
+  @@index([slug])
+  @@index([teamId])
+  @@index([authorId])
+  @@index([isPublished])
+}
+
+model Frame {
+  id              String   @id @default(uuid())
+  pageId          String
+  page            Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  name            String   // e.g., "Desktop", "Tablet", "Mobile"
+  breakpointWidth Int      // Width in pixels (e.g., 1440, 768, 375)
+  order           Int      @default(0) // Display order on canvas
+
+  // Design events specific to this frame
+  designEvents String @default("[]") // JSON array of design events for this breakpoint
+
+  // Publishing
+  isPublished Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  blockInstances BlockInstance[]
+
+  @@index([pageId])
+  @@index([breakpointWidth])
+}
+
+// ============================================
+// BLOCKS (Reusable Components)
+// ============================================
+
+model Block {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  sourcePageId String?  // Page where this block was created (optional, for organization)
+  teamId       String
+  team         Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdBy    String
+  creator      User     @relation(fields: [createdBy], references: [id])
+
+  // Master block design (events that define the block)
+  designEvents String   @default("[]") // JSON array of design events
+
+  // Metadata
+  thumbnail    String?  // Preview image URL
+  category     String   @default("custom") // custom, layout, content, etc.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  instances BlockInstance[]
+
+  @@index([teamId])
+  @@index([createdBy])
+  @@index([sourcePageId])
+  @@index([category])
+}
+
+model BlockInstance {
+  id        String   @id @default(uuid())
+  blockId   String
+  block     Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  frameId   String
+  frame     Frame    @relation(fields: [frameId], references: [id], onDelete: Cascade)
+  elementId String   // ID of the root element in the frame that represents this instance
+
+  // Detachment support
+  isDetached      Boolean @default(false)
+  overrideEvents  String? // JSON array of events if detached from master
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([blockId])
+  @@index([frameId])
+  @@index([elementId])
+}
+
+// ============================================
+// MEDIA LIBRARY
+// ============================================
+
+model Media {
+  id         String   @id @default(uuid())
+  filename   String
+  path       String   // File path on disk
+  url        String   // Public URL
+  mimeType   String
+  size       Int      // File size in bytes
+  width      Int?     // Image width (if image)
+  height     Int?     // Image height (if image)
+  altText    String?
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  uploadedBy String
+  uploader   User     @relation(fields: [uploadedBy], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@index([teamId])
+  @@index([uploadedBy])
+  @@index([mimeType])
+}
+
+// ============================================
+// SETTINGS (Global Configuration)
+// ============================================
+
+model Setting {
+  key         String   @id
+  value       String
+  type        String   @default("string") // string, number, boolean, json
+  description String?
+  updatedAt   DateTime @updatedAt
+}

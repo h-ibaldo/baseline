@@ -88,38 +88,52 @@ Build sites for friends, side projects, product landing pages—whatever you nee
 
 ## Current Status
 
-**⚠️ Replanning Phase Complete - Implementation Starting**
+**🚧 Phase 1 Development - Milestone 1 Starting**
 
-LineBasis is being rebuilt from the ground up with a clear, well-documented architecture.
+LineBasis is being rebuilt from the ground up with a clear, well-documented architecture. The codebase has been completely reset (nuclear reset complete - October 2024) and we're starting Phase 1 implementation with a clean slate.
 
 ### ✅ Planning Complete (October 2024)
 
 Complete technical specifications written:
 
+- **[roadmap.md](docs/planning/roadmap.md)** - Phase 1 implementation roadmap with 15 milestones (721 lines)
 - **[app.md](docs/planning/app.md)** - Application structure, routing, UI specifications (720 lines)
 - **[page-builder-spec.md](docs/planning/page-builder-spec.md)** - Designer interface specification (1,196 lines)
 - **[architecture.md](docs/planning/architecture.md)** - Technical architecture, database schema, event sourcing (3,426 lines)
 - **[workflows.md](docs/planning/workflows.md)** - User workflows and journeys (1,321 lines)
 - **[component-properties.md](docs/planning/components-properties.md)** - Component property specifications (667 lines)
-- **[custom-blocks.md](docs/planning/custom-blocks.md)** - Custom block developer guide (Phase 2) (NEW)
+- **[custom-blocks.md](docs/planning/custom-blocks.md)** - Custom block developer guide (Phase 2)
 
-**Total**: 7,330+ lines of comprehensive documentation
+**Total**: 8,051 lines of comprehensive documentation
+
+### ✅ Nuclear Reset Complete (October 2024)
+
+- Removed 175+ legacy files (-33,840 lines of incompatible code)
+- Clean slate: Only infrastructure files remain (app.d.ts, app.html)
+- Fresh start aligned with comprehensive planning docs
 
 ### 🚀 Phased Release Strategy
 
-**Phase 1: Core Page Builder (MVP)** - Build in Public
-- ✅ Local-first designer (IndexedDB, auto-save)
-- ✅ 3 atomic components (Div, Text, Media)
-- ✅ Event sourcing (undo/redo)
-- ✅ User blocks (from design selections)
-- ✅ Multi-frame canvas (responsive breakpoints)
-- ✅ Design tokens (colors, typography, spacing)
-- ✅ Publishing (events → Svelte → SSR)
-- ✅ Authentication & teams (JWT + RBAC)
-- ✅ Media library
-- ✅ Theme export/import
+**Phase 1: Core Page Builder (MVP)** - Build in Public ⬅️ **Currently Here**
+- 🚧 **Milestone 1**: Foundation & Database (in progress)
+- ⏳ **Milestone 2**: Media Library
+- ⏳ **Milestone 3**: Design System (Tokens)
+- ⏳ **Milestone 4**: Event Sourcing Foundation
+- ⏳ **Milestone 5**: Page Builder Canvas (Basic)
+- ⏳ **Milestone 6**: Page Builder UI (Floating Windows)
+- ⏳ **Milestone 7**: User Blocks System
+- ⏳ **Milestone 8**: Baseline Grid & Snapping
+- ⏳ **Milestone 9**: Publishing System
+- ⏳ **Milestone 10**: Pages Management
+- ⏳ **Milestone 11**: Team & User Management
+- ⏳ **Milestone 12**: Theme Export/Import
+- ⏳ **Milestone 13**: Admin Dashboard & Navigation
+- ⏳ **Milestone 14**: Polish & Testing
+- ⏳ **Milestone 15**: Deployment & Launch
 
 **Focus**: Ship core fast, validate architecture, gather feedback
+
+**See [roadmap.md](docs/planning/roadmap.md) for detailed breakdown of all milestones.**
 
 **Phase 2: Custom Blocks** - Developer Extensibility
 - 🔲 Custom block system (coded Svelte components)
@@ -160,12 +174,16 @@ Complete technical specifications written:
 
 ## Quick Start (For Developers)
 
-### Prerequisites
+**⚠️ Phase 1 in active development - not yet installable**
+
+LineBasis is currently being built from scratch. The installation process below will be available once Milestone 1 (Foundation & Database) is complete.
+
+### Prerequisites (When Available)
 
 - Node.js 18+
 - PostgreSQL (production) or SQLite (development)
 
-### Installation
+### Installation (Coming Soon - Milestone 1)
 
 ```bash
 # Clone repository
@@ -186,12 +204,10 @@ npm run setup
 npm run dev
 ```
 
-Visit `http://localhost:5173/admin/login` and log in with the admin account created during setup.
-
-### Development Commands
+### Current Development Commands
 
 ```bash
-# Development server
+# Development server (currently empty app)
 npm run dev
 
 # Build for production
@@ -205,39 +221,42 @@ npm test
 
 # Type checking
 npm run check
-
-# Database migrations
-npm run db:migrate
-
-# Generate Prisma client
-npm run db:generate
 ```
+
+**Database commands coming in Milestone 1:**
+- `npm run db:migrate` - Create/apply database migrations
+- `npm run db:generate` - Generate Prisma client
+- `npm run setup` - Initial database setup + create admin user
 
 ---
 
 ## Technology Stack
 
-**Frontend:**
-- SvelteKit - Full-stack framework
-- Svelte - UI components
-- TypeScript - Type safety (strict mode)
-- IndexedDB - Local storage for designs
-- Tailwind CSS - Utility-first CSS
+**Core Framework:**
+- **SvelteKit** - Full-stack framework (SSR, routing, API)
+- **Svelte** - Reactive UI components
+- **TypeScript** - Type safety (strict mode enabled)
+- **Vite** - Build tool and dev server
 
-**Backend:**
-- SvelteKit - API routes and SSR
-- Prisma ORM - Type-safe database access
-- PostgreSQL - Production database
-- SQLite - Development database
-- bcrypt - Password hashing
-- jsonwebtoken - JWT authentication
+**Database (Milestone 1):**
+- **Prisma ORM** - Type-safe database access
+- **PostgreSQL** - Production database (recommended)
+- **SQLite** - Development database
 
-**Media:**
-- Sharp - Image optimization and processing
+**Client-Side (Milestone 4):**
+- **IndexedDB** - Local-first storage for design events
+- **Event Sourcing** - Append-only event log with undo/redo
+
+**Authentication (Milestone 1):**
+- **bcrypt** - Password hashing
+- **jsonwebtoken** - JWT authentication
+
+**Media (Milestone 2):**
+- **Sharp** - Image optimization and processing
 
 **Testing:**
-- Vitest - Unit and integration tests
-- Testing Library - Component testing
+- **Vitest** - Unit and integration tests
+- **@testing-library/svelte** - Component testing
 
 ---
 
@@ -273,17 +292,20 @@ See **[architecture.md](docs/planning/architecture.md)** for complete technical 
 
 ## Documentation
 
-### Planning Docs
-- **[project-vision.md](docs/planning/project-vision.md)** - Why LineBasis exists
+### Planning Docs (8,051 lines total)
+- **[roadmap.md](docs/planning/roadmap.md)** - Phase 1 implementation roadmap (15 milestones, 721 lines)
 - **[app.md](docs/planning/app.md)** - Application structure and routing (720 lines)
-- **[page-builder-spec.md](docs/planning/page-builder-spec.md)** - Designer interface (830 lines)
-- **[architecture.md](docs/planning/architecture.md)** - Technical architecture (2,766 lines)
-- **[workflows.md](docs/planning/workflows.md)** - User journeys (1,321 lines)
-- **[component-properties.md](docs/planning/components-properties.md)** - Component specs (667 lines)
-- **[roadmap.md](docs/planning/roadmap.md)** - Development roadmap
+- **[page-builder-spec.md](docs/planning/page-builder-spec.md)** - Designer interface (1,196 lines)
+- **[architecture.md](docs/planning/architecture.md)** - Technical architecture (3,426 lines)
+- **[workflows.md](docs/planning/workflows.md)** - User workflows and journeys (1,321 lines)
+- **[component-properties.md](docs/planning/components-properties.md)** - Component property specs (667 lines)
+- **[custom-blocks.md](docs/planning/custom-blocks.md)** - Custom block developer guide (Phase 2)
+- **[project-vision.md](docs/planning/project-vision.md)** - Why LineBasis exists
 
 ### Developer Docs
-- **[CLAUDE.md](CLAUDE.md)** - Development guidelines for AI assistants
+- **[CLAUDE.md](CLAUDE.md)** - Development guidelines and project overview
+- **[GIT_WORKFLOW.md](docs/GIT_WORKFLOW.md)** - Git workflow and best practices
+- **[PLUGIN_DEVELOPMENT.md](docs/PLUGIN_DEVELOPMENT.md)** - Plugin development guide (Phase 3)
 
 ---
 

@@ -6,7 +6,9 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import { dev } from '$app/environment';
+
+// Check if we're in development mode
+const isDev = process.env.NODE_ENV !== 'production';
 
 // Singleton pattern to prevent multiple Prisma Client instances
 const globalForPrisma = globalThis as unknown as {
@@ -14,15 +16,15 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 export const db = globalForPrisma.prisma ?? new PrismaClient({
-	log: dev ? ['query', 'error', 'warn'] : ['error']
+	log: isDev ? ['query', 'error', 'warn'] : ['error']
 });
 
-if (dev) {
+if (isDev) {
 	globalForPrisma.prisma = db;
 }
 
 // Graceful shutdown
-if (!dev) {
+if (!isDev) {
 	process.on('beforeExit', async () => {
 		await db.$disconnect();
 	});

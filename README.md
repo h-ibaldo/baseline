@@ -94,24 +94,67 @@ LineBasis is being rebuilt from the ground up with a clear, well-documented arch
 
 ### ✅ Planning Complete (October 2024)
 
-Complete technical specifications written (5,637 lines of documentation):
+Complete technical specifications written:
 
-- **[app.md](docs/planning/app.md)** - Application structure, routing, UI specifications
-- **[page-builder-spec.md](docs/planning/page-builder-spec.md)** - Designer interface specification
-- **[architecture.md](docs/planning/architecture.md)** - Technical architecture, database schema, event sourcing
-- **[workflows.md](docs/planning/workflows.md)** - User workflows and journeys
-- **[component-properties.md](docs/planning/components-properties.md)** - Component property specifications
+- **[app.md](docs/planning/app.md)** - Application structure, routing, UI specifications (720 lines)
+- **[page-builder-spec.md](docs/planning/page-builder-spec.md)** - Designer interface specification (1,196 lines)
+- **[architecture.md](docs/planning/architecture.md)** - Technical architecture, database schema, event sourcing (3,426 lines)
+- **[workflows.md](docs/planning/workflows.md)** - User workflows and journeys (1,321 lines)
+- **[component-properties.md](docs/planning/components-properties.md)** - Component property specifications (667 lines)
+- **[custom-blocks.md](docs/planning/custom-blocks.md)** - Custom block developer guide (Phase 2) (NEW)
 
-### 🚧 Next Steps (Implementation)
+**Total**: 7,330+ lines of comprehensive documentation
 
-1. Database schema setup (Prisma models)
-2. Authentication system (JWT + RBAC)
-3. Page builder UI (Svelte components)
-4. Event sourcing system (IndexedDB + undo/redo)
-5. Code generation pipeline (events → Svelte components)
-6. Publishing system (SSR rendering)
+### 🚀 Phased Release Strategy
 
-**Not accepting external contributions yet.** Will open contributions once the core foundation is stable.
+**Phase 1: Core Page Builder (MVP)** - Build in Public
+- ✅ Local-first designer (IndexedDB, auto-save)
+- ✅ 3 atomic components (Div, Text, Media)
+- ✅ Event sourcing (undo/redo)
+- ✅ User blocks (from design selections)
+- ✅ Multi-frame canvas (responsive breakpoints)
+- ✅ Design tokens (colors, typography, spacing)
+- ✅ Publishing (events → Svelte → SSR)
+- ✅ Authentication & teams (JWT + RBAC)
+- ✅ Media library
+- ✅ Theme export/import
+
+**Focus**: Ship core fast, validate architecture, gather feedback
+
+**Phase 2: Custom Blocks** - Developer Extensibility
+- 🔲 Custom block system (coded Svelte components)
+- 🔲 Property schema (auto-generated UI)
+- 🔲 Custom property editors
+- 🔲 Local blocks (`/blocks/` folder)
+- 🔲 Plugin block registration API
+
+**Focus**: Enable developers to build coded blocks (carousels, animations, client-specific features)
+
+**Phase 3: Plugin Ecosystem** - Community Growth
+- 🔲 Blog plugin (@linebasis/blog - PostContent block, admin UI, Post/Category/Tag models)
+- 🔲 Forms plugin (@linebasis/forms - FormBuilder block, submission handling)
+- 🔲 Plugin marketplace
+- 🔲 Plugin browser in admin
+- 🔲 Community plugins
+
+**Focus**: Blog/forms as example plugins, plugin marketplace, ecosystem
+
+**Phase 4+: Advanced Features** - Long-term Vision
+- 🔲 E-commerce plugin
+- 🔲 Comments system
+- 🔲 Multi-language support
+- 🔲 Advanced analytics
+- 🔲 A/B testing
+- 🔲 Collaboration (multi-user editing)
+
+**Benefits of Phased Approach**:
+- ✅ Ship Phase 1 faster (build momentum, early feedback)
+- ✅ Validate architecture before adding complexity
+- ✅ Blog/forms become "how to build plugins" examples
+- ✅ Developers can build custom blocks for client work
+- ✅ Core stays minimal and focused
+
+**Not accepting external contributions yet.** Will open contributions once Phase 1 is stable.
 
 ---
 

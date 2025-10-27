@@ -2738,3 +2738,689 @@ The architecture supports both LineBasis-hosted sites (dynamic Svelte components
 ---
 
 **Next Steps**: See `workflows.md` for detailed user workflows and `page-builder-spec.md` for complete page builder interface specification.
+
+## Custom Block System (Phase 2)
+
+**Status**: Planned for Phase 2 release (after core page builder)
+
+Custom blocks allow developers to create coded Svelte components that appear in the designer alongside user-created blocks. This enables advanced features like carousels, animations, interactive elements, and client-specific functionality.
+
+### Overview
+
+LineBasis supports three types of blocks:
+
+1. **User Blocks** - Created in designer by selecting elements → "Convert to Block"
+2. **Custom Blocks** - Developer-coded Svelte components (local or plugin-provided)
+3. **Plugin Blocks** - Custom blocks distributed via plugins (Phase 3)
+
+### Block Types Comparison
+
+| Type | How Created | Properties | Use Case |
+|------|-------------|------------|----------|
+| User Blocks | Designer UI | General properties | Reusable design patterns |
+| Custom Blocks | Coded (Svelte) | Custom schema | Complex interactions, animations |
+| Plugin Blocks | Plugin manifest | Custom schema | Distributable features (blog, forms) |
+
+---
+
+### Custom Block Structure
+
+Custom blocks are Svelte components with metadata that define their appearance and editable properties.
+
+#### Location Options
+
+**Option A: Local Blocks** (Quick, client-specific)
+```
+src/lib/components/blocks/
+├── Carousel.svelte
+├── FadeInSection.svelte
+└── CustomHero.svelte
+```
+
+**Option B: Plugin Blocks** (Recommended, portable)
+```
+plugins/
+└── custom-blocks/
+    ├── manifest.ts
+    └── blocks/
+        ├── Carousel.svelte
+        └── FadeInSection.svelte
+```
+
+**Recommendation**: Use plugins for:
+- Distributable blocks (marketplace, sharing)
+- Client projects (portability, versioning)
+- Best practices reference
+
+Use local blocks for:
+- Quick prototypes
+- One-off client-specific features
+- Testing before creating plugin
+
+---
+
+### Defining Custom Blocks
+
+Two methods supported:
+
+#### Method A: Manifest-Based (Separation of Concerns)
+
+```typescript
+// plugins/my-blocks/manifest.ts
+export const manifest: Plugin = {
+  id: '@myagency/custom-blocks',
+  name: 'Custom Blocks',
+  version: '1.0.0',
+  
+  blocks: [
+    {
+      id: 'carousel',
+      name: 'Image Carousel',
+      category: 'interactive',
+      component: './blocks/Carousel.svelte',
+      thumbnail: './assets/carousel.png',
+      description: 'Responsive image carousel with autoplay',
+      
+      // Property schema (auto-generates UI in Properties window)
+      properties: {
+        images: {
+          type: 'array',
+          itemType: 'media',
+          label: 'Carousel Images',
+          default: [],
+          description: 'Images to display in carousel'
+        },
+        autoplay: {
+          type: 'boolean',
+          label: 'Auto Play',
+          default: true
+        },
+        interval: {
+          type: 'number',
+          label: 'Slide Interval (ms)',
+          min: 1000,
+          max: 10000,
+          step: 1000,
+          default: 5000,
+          control: 'slider' // 'slider' or 'input'
+        },
+        transitionType: {
+          type: 'select',
+          label: 'Transition Effect',
+          options: ['fade', 'slide', 'zoom'],
+          default: 'slide'
+        }
+      },
+      
+      // Optional: Custom property editor component
+      propertyEditor: './editors/CarouselEditor.svelte'
+    }
+  ]
+};
+```
+
+#### Method B: Component-Based (All-in-One)
+
+```svelte
+<!-- plugins/my-blocks/blocks/Carousel.svelte -->
+<script context="module" lang="ts">
+  // Block metadata exported for designer
+  export const blockMeta = {
+    id: 'carousel',
+    name: 'Image Carousel',
+    category: 'interactive',
+    thumbnail: '../assets/carousel.png',
+    description: 'Responsive image carousel'
+  };
+  
+  // Property schema (generates UI automatically)
+  export const blockProperties = {
+    images: {
+      type: 'array',
+      itemType: 'media',
+      label: 'Images',
+      default: []
+    },
+    autoplay: {
+      type: 'boolean',
+      label: 'Auto Play',
+      default: true
+    },
+    interval: {
+      type: 'number',
+      label: 'Interval (ms)',
+      min: 1000,
+      max: 10000,
+      default: 5000
+    }
+  };
+</script>
+
+<script lang="ts">
+  import { onMount } from 'svelte';
+  
+  // Mode prop (all blocks must support this)
+  export let mode: 'editor' | 'live' = 'live';
+  
+  // Editable properties (match blockProperties schema)
+  export let images: string[] = [];
+  export let autoplay: boolean = true;
+  export let interval: number = 5000;
+  
+  // Internal state (not editable)
+  let currentSlide = 0;
+  let intervalId: number;
+  
+  onMount(() => {
+    if (autoplay && mode === 'live') {
+      intervalId = setInterval(() => {
+        currentSlide = (currentSlide + 1) % images.length;
+      }, interval);
+    }
+    
+    return () => clearInterval(intervalId);
+  });
+</script>
+
+{#if mode === 'editor'}
+  <!-- Editor preview (simplified) -->
+  <div class="carousel-editor">
+    {#if images.length === 0}
+      <div class="placeholder">Add images to carousel</div>
+    {:else}
+      <img src={images[0]} alt="Preview" />
+      <div class="badge">{images.length} images</div>
+    {/if}
+  </div>
+{:else}
+  <!-- Live production carousel -->
+  <div class="carousel">
+    {#each images as image, i}
+      <div class="slide" class:active={i === currentSlide}>
+        <img src={image} alt="Slide {i + 1}" />
+      </div>
+    {/each}
+    <!-- Carousel controls -->
+  </div>
+{/if}
+```
+
+---
+
+### Property Types
+
+Custom blocks can define various property types:
+
+```typescript
+interface PropertySchema {
+  // Basic types
+  text: { type: 'text', label: string, default?: string };
+  richtext: { type: 'richtext', label: string, default?: string };
+  number: { type: 'number', label: string, min?: number, max?: number, step?: number, default?: number };
+  boolean: { type: 'boolean', label: string, default?: boolean };
+  
+  // Selection
+  select: { type: 'select', label: string, options: string[], default?: string };
+  
+  // Media
+  media: { type: 'media', mediaType?: 'image' | 'video' | 'document', label: string };
+  
+  // Color
+  color: { type: 'color', label: string, default?: string };
+  
+  // URL
+  url: { type: 'url', label: string, default?: string };
+  
+  // Complex types
+  array: { type: 'array', itemType: PropertyType, label: string, default?: any[] };
+  object: { type: 'object', properties: Record<string, PropertyType>, label: string };
+}
+```
+
+**Auto-Generated UI**:
+- `text` → Text input
+- `richtext` → Rich text editor
+- `number` → Number input or slider (if control: 'slider')
+- `boolean` → Toggle switch
+- `select` → Dropdown
+- `media` → Media picker (opens media library)
+- `color` → Color picker
+- `url` → URL input with validation
+- `array` → List with add/remove buttons
+- `object` → Nested property group
+
+---
+
+### Custom Property Editors
+
+For complex property UI, blocks can define custom property editor components:
+
+```svelte
+<!-- plugins/my-blocks/editors/CarouselEditor.svelte -->
+<script lang="ts">
+  import type { CarouselProperties } from '../types';
+  import { createEventDispatcher } from 'svelte';
+  
+  // Current property values
+  export let properties: CarouselProperties;
+  
+  // Emit property updates
+  const dispatch = createEventDispatcher<{
+    update: { key: string; value: any };
+  }>();
+  
+  function updateProperty(key: string, value: any) {
+    dispatch('update', { key, value });
+  }
+  
+  function addImage() {
+    // Open media picker
+    openMediaPicker((media) => {
+      updateProperty('images', [...properties.images, media.url]);
+    });
+  }
+  
+  function removeImage(index: number) {
+    const newImages = properties.images.filter((_, i) => i !== index);
+    updateProperty('images', newImages);
+  }
+  
+  function reorderImages(fromIndex: number, toIndex: number) {
+    const newImages = [...properties.images];
+    const [moved] = newImages.splice(fromIndex, 1);
+    newImages.splice(toIndex, 0, moved);
+    updateProperty('images', newImages);
+  }
+</script>
+
+<div class="carousel-property-editor">
+  <h4>Carousel Configuration</h4>
+  
+  <!-- Visual image grid with drag & drop -->
+  <div class="image-grid">
+    {#each properties.images as image, i (image)}
+      <div 
+        class="image-item" 
+        draggable="true"
+        on:dragstart={(e) => handleDragStart(e, i)}
+        on:drop={(e) => handleDrop(e, i)}
+      >
+        <img src={image} alt="Slide {i + 1}" />
+        <button class="remove" on:click={() => removeImage(i)}>×</button>
+        <div class="order">{i + 1}</div>
+      </div>
+    {/each}
+    
+    <button class="add-image" on:click={addImage}>
+      + Add Image
+    </button>
+  </div>
+  
+  <!-- Settings -->
+  <div class="settings">
+    <label class="toggle">
+      <input 
+        type="checkbox" 
+        checked={properties.autoplay}
+        on:change={(e) => updateProperty('autoplay', e.target.checked)}
+      />
+      <span>Auto Play</span>
+    </label>
+    
+    <div class="slider-control">
+      <label>Slide Interval: {properties.interval}ms</label>
+      <input 
+        type="range" 
+        min="1000" 
+        max="10000" 
+        step="1000"
+        value={properties.interval}
+        on:input={(e) => updateProperty('interval', +e.target.value)}
+      />
+      <!-- Live preview animation -->
+      <div 
+        class="interval-preview" 
+        style="animation-duration: {properties.interval}ms"
+      />
+    </div>
+  </div>
+</div>
+
+<style>
+  .image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+  
+  .image-item {
+    position: relative;
+    aspect-ratio: 16/9;
+    cursor: move;
+  }
+  
+  .image-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    /* ... */
+  }
+</style>
+```
+
+---
+
+### Block Registration
+
+**For Local Blocks** (`src/lib/components/blocks/`):
+
+System automatically discovers blocks with `blockMeta` export:
+
+```typescript
+// src/lib/core/blocks/loader.ts
+export async function loadLocalBlocks(): Promise<CustomBlock[]> {
+  const blockModules = import.meta.glob('/src/lib/components/blocks/*.svelte', {
+    eager: true
+  });
+  
+  const blocks: CustomBlock[] = [];
+  
+  for (const [path, module] of Object.entries(blockModules)) {
+    if (module.blockMeta) {
+      blocks.push({
+        ...module.blockMeta,
+        component: module.default,
+        properties: module.blockProperties || {},
+        propertyEditor: module.propertyEditor
+      });
+    }
+  }
+  
+  return blocks;
+}
+```
+
+**For Plugin Blocks**:
+
+Loaded when plugin activated:
+
+```typescript
+// src/lib/core/plugins/loader.ts
+export async function loadPluginBlocks(plugin: Plugin): Promise<CustomBlock[]> {
+  if (!plugin.blocks) return [];
+  
+  const blocks: CustomBlock[] = [];
+  
+  for (const blockDef of plugin.blocks) {
+    // Load component
+    const component = await import(blockDef.component);
+    
+    // Load property editor (if specified)
+    const propertyEditor = blockDef.propertyEditor 
+      ? await import(blockDef.propertyEditor)
+      : null;
+    
+    blocks.push({
+      id: blockDef.id,
+      name: blockDef.name,
+      category: blockDef.category,
+      component: component.default,
+      properties: blockDef.properties,
+      propertyEditor: propertyEditor?.default,
+      thumbnail: blockDef.thumbnail,
+      pluginId: plugin.id
+    });
+  }
+  
+  return blocks;
+}
+```
+
+---
+
+### Using Custom Blocks in Designer
+
+**Blocks Window**:
+
+```
+┌─────────────────────────────┐
+│ Blocks                      │
+├─────────────────────────────┤
+│                             │
+│ ▼ Default Blocks            │
+│   [No default blocks yet]   │ ← Phase 1: Empty
+│                             │
+│ ▼ Custom Blocks             │
+│   📦 Carousel               │ ← Phase 2: Local blocks
+│   📦 Fade In Section        │
+│   📦 Custom Hero            │
+│                             │
+│ ▼ Blog Plugin               │ ← Phase 3: Plugin blocks
+│   📝 Post Content           │
+│                             │
+│ ▼ Forms Plugin              │
+│   📋 Form Builder           │
+│                             │
+│ ▼ User Blocks               │
+│   └─ Homepage               │
+│       📦 CTA Section        │ ← User-created blocks
+│       📦 Feature Card       │
+└─────────────────────────────┘
+```
+
+**Properties Window**:
+
+When custom block selected:
+
+```
+┌─────────────────────────────┐
+│ Properties                  │
+│ Carousel                    │
+├─────────────────────────────┤
+│                             │
+│ [Auto-generated from schema]│
+│                             │
+│ OR                          │
+│                             │
+│ [Custom property editor]    │
+│                             │
+└─────────────────────────────┘
+```
+
+---
+
+### Code Generation for Custom Blocks
+
+When page published, custom blocks are inlined into generated code:
+
+**Design Events**:
+```javascript
+[
+  {type: 'ADD_COMPONENT', componentType: 'div', id: 'hero'},
+  {type: 'INSERT_BLOCK', blockType: 'custom', blockId: 'carousel', id: 'carousel-1', 
+   properties: {images: [...], autoplay: true, interval: 5000}}
+]
+```
+
+**Generated Svelte Code**:
+```svelte
+<script>
+  import Carousel from '$lib/components/blocks/Carousel.svelte';
+</script>
+
+<div class="hero">
+  <Carousel 
+    mode="live"
+    images={['image1.jpg', 'image2.jpg']}
+    autoplay={true}
+    interval={5000}
+  />
+</div>
+```
+
+**For Plugin Blocks**:
+```svelte
+<script>
+  import PostContent from '$lib/plugins/blog/blocks/PostContent.svelte';
+</script>
+
+<PostContent mode="live" postContent={post.content} />
+```
+
+---
+
+### Development Workflow
+
+**Creating a Custom Block**:
+
+1. **Create Svelte Component**:
+   ```bash
+   # For local block
+   touch src/lib/components/blocks/Carousel.svelte
+   
+   # OR for plugin block
+   mkdir -p plugins/my-blocks/blocks
+   touch plugins/my-blocks/blocks/Carousel.svelte
+   ```
+
+2. **Define Block Metadata**:
+   ```svelte
+   <script context="module">
+     export const blockMeta = { /* ... */ };
+     export const blockProperties = { /* ... */ };
+   </script>
+   ```
+
+3. **Implement Component**:
+   - Add `mode` prop (editor/live)
+   - Add property exports matching schema
+   - Implement editor preview
+   - Implement live version
+
+4. **Test in Designer**:
+   - Open designer
+   - Block appears in Blocks window
+   - Drag to canvas
+   - Edit properties
+   - Preview and publish
+
+5. **Optional: Create Custom Property Editor**:
+   - Create separate editor component
+   - Reference in `blockMeta.propertyEditor`
+
+---
+
+### Plugin-Provided Blocks (Phase 3)
+
+**Blog Plugin Example**:
+
+```typescript
+// plugins/blog/manifest.ts
+export const manifest: Plugin = {
+  id: '@linebasis/blog',
+  name: 'Blog',
+  version: '1.0.0',
+  isCore: true, // Ships with LineBasis but can be disabled
+  
+  // Database models
+  schema: './prisma/schema.prisma',
+  
+  // Blocks
+  blocks: [
+    {
+      id: 'post-content',
+      name: 'Post Content',
+      category: 'blog',
+      component: './blocks/PostContent.svelte',
+      thumbnail: './assets/post-content.png',
+      description: 'Renders blog post rich text content (use in blog templates)',
+      
+      properties: {
+        // PostContent doesn't need user-editable properties
+        // Content comes from Post model at runtime
+      }
+    },
+    {
+      id: 'post-meta',
+      name: 'Post Metadata',
+      category: 'blog',
+      component: './blocks/PostMeta.svelte',
+      
+      properties: {
+        showAuthor: { type: 'boolean', label: 'Show Author', default: true },
+        showDate: { type: 'boolean', label: 'Show Date', default: true },
+        showCategories: { type: 'boolean', label: 'Show Categories', default: true },
+        dateFormat: { 
+          type: 'select', 
+          label: 'Date Format',
+          options: ['short', 'long', 'relative'],
+          default: 'short'
+        }
+      }
+    }
+  ],
+  
+  // Other plugin config (routes, admin pages, etc.)
+  // ...
+};
+```
+
+---
+
+### Release Strategy
+
+**Phase 1: Core (MVP)**
+- Page builder (designer UI)
+- 3 atomic components (Div, Text, Media)
+- User-created blocks (from design selections)
+- Publishing system (events → Svelte code)
+- Authentication & teams
+
+**Phase 2: Custom Blocks**
+- Custom block system
+- Local blocks support (`src/lib/components/blocks/`)
+- Property schema system
+- Auto-generated property UI
+- Custom property editors
+- Plugin block registration API
+
+**Phase 3: Default Plugins**
+- Blog plugin (@linebasis/blog)
+  - PostContent block
+  - PostMeta block
+  - Blog admin UI
+  - Post, Category, Tag models
+- Forms plugin (@linebasis/forms)
+  - FormBuilder block
+  - Custom form editor UI
+  - Form submission handling
+
+**Benefits of Phased Approach**:
+- ✅ Ship core faster (build in public, gather feedback)
+- ✅ Validate architecture before adding complexity
+- ✅ Blog/forms become examples of "how to build plugins"
+- ✅ Users can build custom blocks even before Phase 3
+- ✅ Core remains minimal and focused
+
+---
+
+## Summary: Custom Blocks
+
+Custom blocks enable developers to extend LineBasis with coded Svelte components while maintaining the visual editing experience:
+
+- **Two methods**: Manifest-based OR component-based metadata
+- **Two locations**: Local (`/blocks/`) OR plugin (`plugins/*/blocks/`)
+- **Auto-generated UI**: Property schema → automatic property editor
+- **Custom UI**: Optional custom property editor for complex controls
+- **Plugin support**: Blocks can be part of plugins for distribution
+- **Phase 2 feature**: Coming after core page builder release
+
+For complete development guide, see [custom-blocks.md](./custom-blocks.md) (Phase 2).
+

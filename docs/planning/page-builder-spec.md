@@ -828,3 +828,369 @@ The LineBasis page builder is a **professional design tool** combining:
 - **Modern UX**: Event sourcing, auto-save, undo/redo, live preview
 
 The interface prioritizes **designer workflows** while generating **production-ready code** automatically.
+
+---
+
+## Custom Blocks (Phase 2)
+
+**Status**: Planned for Phase 2 release
+
+Custom blocks are developer-coded Svelte components that appear in the designer alongside user-created blocks.
+
+### Blocks Window with Custom Blocks
+
+When custom blocks are available, they appear in organized sections:
+
+```
+┌─────────────────────────────────────┐
+│ Blocks                      [≡][×] │
+├─────────────────────────────────────┤
+│ [Search blocks...]                  │
+├─────────────────────────────────────┤
+│                                     │
+│ ▼ Custom Blocks                     │
+│   ┌─────┐                          │
+│   │[img]│  Carousel                │
+│   └─────┘                          │
+│   ┌─────┐                          │
+│   │[img]│  Fade In Section         │
+│   └─────┘                          │
+│   ┌─────┐                          │
+│   │[img]│  Custom Hero             │
+│   └─────┘                          │
+│                                     │
+│ ▼ User Blocks                       │
+│   └─ Homepage                       │
+│       ┌─────┐                      │
+│       │[img]│  CTA Section          │
+│       └─────┘                      │
+│       ┌─────┐                      │
+│       │[img]│  Feature Card         │
+│       └─────┘                      │
+│                                     │
+└─────────────────────────────────────┘
+```
+
+**Phase 1**: Only "User Blocks" section (blocks created from selections)
+
+**Phase 2**: Add "Custom Blocks" section (coded Svelte blocks from `/blocks/` folder)
+
+**Phase 3**: Add plugin-provided blocks (e.g., "Blog Plugin", "Forms Plugin" sections)
+
+### Custom Block Appearance
+
+**Block Item** (in Blocks window):
+- Thumbnail image (defined in block metadata)
+- Block name
+- Optional: Category badge ("Interactive", "Content", etc.)
+- Hover shows description tooltip
+
+### Using Custom Blocks
+
+**Drag to Canvas**:
+1. Find custom block in Blocks window
+2. Drag thumbnail to canvas
+3. Block instance appears at drop position
+4. Properties window shows block-specific properties
+
+**Properties Window for Custom Blocks**:
+
+When custom block selected, Properties window shows:
+
+**Auto-Generated UI** (from property schema):
+```
+┌─────────────────────────────────────┐
+│ Properties                          │
+│ Carousel                            │
+├─────────────────────────────────────┤
+│                                     │
+│ ▼ General                          │
+│   Name: Carousel                    │
+│   ID: carousel-1                    │
+│                                     │
+│ ▼ Carousel Settings                │
+│   Images:                           │
+│   ┌─────┐ ┌─────┐ ┌─────┐         │
+│   │[img]│ │[img]│ │[img]│ [+ Add] │
+│   └─────┘ └─────┘ └─────┘         │
+│                                     │
+│   Auto Play:  [✓]                  │
+│                                     │
+│   Interval: 5000ms                  │
+│   ┣━━━━━━━━━━━━━┫                 │
+│   1000        10000                 │
+│                                     │
+│   Transition:                       │
+│   [Slide      ▼]                   │
+│                                     │
+└─────────────────────────────────────┘
+```
+
+**OR Custom Property Editor** (if block provides one):
+```
+┌─────────────────────────────────────┐
+│ Properties                          │
+│ Carousel                            │
+├─────────────────────────────────────┤
+│                                     │
+│ [Custom UI designed by developer]   │
+│                                     │
+│ Visual image grid with drag & drop  │
+│ Live preview of interval timing     │
+│ Transition effect previews          │
+│ etc.                                │
+│                                     │
+└─────────────────────────────────────┘
+```
+
+### Custom Block Context Menu
+
+Right-click on custom block instance:
+
+- Rename
+- Duplicate
+- Delete
+- **Convert to User Block** (future) - Breaks link, becomes editable design
+- Copy/Paste
+- Lock/Unlock
+- Show/Hide
+
+**Note**: Cannot "Edit Block" like user blocks (custom blocks are coded, not designed)
+
+### Custom Block in Editor Mode
+
+Custom blocks render in editor mode with simplified preview:
+
+```svelte
+<!-- Carousel in editor mode -->
+<div class="carousel-editor-preview">
+  <img src={images[0]} alt="Preview" />
+  <div class="overlay">
+    <span>Carousel ({images.length} images)</span>
+  </div>
+</div>
+```
+
+**Editor Mode Features**:
+- Selection outline when clicked
+- Resize handles (if block supports resizing)
+- Drag to move
+- Properties editable in Properties window
+
+### Custom Block in Live Mode
+
+When user clicks "Preview" or publishes page, blocks render in live mode:
+
+```svelte
+<!-- Carousel in live mode -->
+<div class="carousel">
+  <!-- Full interactive carousel -->
+  <div class="slides">...</div>
+  <button class="prev">‹</button>
+  <button class="next">›</button>
+  <div class="dots">...</div>
+</div>
+```
+
+**Live Mode Features**:
+- Full interactivity (animations, transitions, events)
+- JavaScript functionality active
+- Production-ready code
+
+---
+
+## Phase 1 vs Phase 2 vs Phase 3 UI
+
+### Phase 1 (MVP): Core Page Builder
+
+**Toolbar**:
+- Tools: Move, Hand, Scale
+- **Components**: Div, Text, Media ← Only 3 atomic components
+- Actions: Save, Preview, Publish
+
+**Blocks Window**:
+```
+┌─────────────────────────────┐
+│ Blocks                      │
+├─────────────────────────────┤
+│ [Search blocks...]          │
+├─────────────────────────────┤
+│                             │
+│ ▼ User Blocks               │
+│   (Created from selections) │
+│                             │
+│   [Empty initially]         │
+│                             │
+└─────────────────────────────┘
+```
+
+**Properties Window**:
+- Shows properties for: Div, Text, Media, User Blocks
+
+**Focus**: Ship core designer, validate architecture
+
+### Phase 2: Custom Blocks
+
+**Toolbar**: Same as Phase 1
+
+**Blocks Window**:
+```
+┌─────────────────────────────┐
+│ Blocks                      │
+├────────────────────────���────┤
+│ ▼ Custom Blocks             │ ← NEW
+│   📦 Carousel               │
+│   📦 Fade In Section        │
+│                             │
+│ ▼ User Blocks               │
+│   ...                       │
+└─────────────────────────────┘
+```
+
+**Properties Window**:
+- Add: Auto-generated UI from property schemas
+- Add: Support for custom property editors
+
+**Focus**: Enable developers to create coded blocks
+
+### Phase 3: Plugin Ecosystem
+
+**Toolbar**: Same
+
+**Blocks Window**:
+```
+┌─────────────────────────────┐
+│ Blocks                      │
+├─────────────────────────────┤
+│ ▼ Blog Plugin               │ ← NEW (plugin blocks)
+│   📝 Post Content           │
+│   📊 Post Meta              │
+│                             │
+│ ▼ Forms Plugin              │ ← NEW (plugin blocks)
+│   📋 Form Builder           │
+│                             │
+│ ▼ Custom Blocks             │
+│   ...                       │
+│                             │
+│ ▼ User Blocks               │
+│   ...                       │
+└─────────────────────────────┘
+```
+
+**Admin Sidebar**:
+```
+Sidebar Navigation:
+- Dashboard
+- Pages
+- Blocks
+- Styles
+- Blog        ← NEW (from plugin)
+- Media
+- Themes
+- Plugins     ← NEW
+- Team
+- Settings
+```
+
+**Focus**: Plugin marketplace, blog/forms plugins, ecosystem growth
+
+---
+
+## Custom Block Development Experience
+
+**Developer Workflow** (Phase 2):
+
+1. **Create Block Component**:
+   ```bash
+   touch src/lib/components/blocks/Carousel.svelte
+   ```
+
+2. **Define Metadata & Properties**:
+   ```svelte
+   <script context="module">
+     export const blockMeta = {
+       id: 'carousel',
+       name: 'Carousel',
+       category: 'interactive'
+     };
+     
+     export const blockProperties = {
+       images: { type: 'array', itemType: 'media', ... },
+       autoplay: { type: 'boolean', ... }
+     };
+   </script>
+   ```
+
+3. **Implement Component**:
+   ```svelte
+   <script>
+     export let mode = 'live';
+     export let images = [];
+     export let autoplay = true;
+     // ... component logic
+   </script>
+   ```
+
+4. **Refresh Designer**:
+   - Block automatically appears in Blocks window
+   - Drag to canvas to test
+   - Edit properties
+   - Preview
+
+5. **Publish & Use**:
+   - Block inlined into generated code
+   - Works in published pages
+
+**No build step needed** - Hot module reload shows changes immediately
+
+---
+
+## Future: Plugin Marketplace (Phase 4+)
+
+**Plugin Browser** (in admin):
+```
+/admin/plugins/browse
+
+┌─────────────────────────────────────┐
+│ Plugin Marketplace                  │
+├─────────────────────────────────────┤
+│                                     │
+│ [Search plugins...]                 │
+│                                     │
+│ Featured Plugins:                   │
+│                                     │
+│ ┌─────────────────────────────┐   │
+│ │ E-commerce Plugin            │   │
+│ │ by @linebasis               │   │
+│ │                             │   │
+│ │ Blocks: ProductGrid,        │   │
+│ │   CartButton, Checkout      │   │
+│ │                             │   │
+│ │ [Install]                   │   │
+│ └─────────────────────────────┘   │
+│                                     │
+│ ┌─────────────────────────────┐   │
+│ │ Advanced Forms               │   │
+│ │ by @developer               │   │
+│ │                             │   │
+│ │ Blocks: MultiStepForm,      │   │
+│ │   ConditionalFields         │   │
+│ │                             │   │
+│ │ [Install]                   │   │
+│ └─────────────────────────────┘   │
+└─────────────────────────────────────┘
+```
+
+**Installing a Plugin**:
+1. Browse marketplace
+2. Click "Install"
+3. Plugin downloads
+4. Database schema composed
+5. Migrations run
+6. Blocks appear in Blocks window
+7. Admin pages added to sidebar
+
+---
+
+This completes the custom block system UI specification for the page builder.
+

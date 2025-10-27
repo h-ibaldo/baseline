@@ -1,20 +1,32 @@
-Linebasis is an ambitious project with a clear mission: to create the next free and open-source technology that will power half of the internet.
+# Why LineBasis Exists
 
-The problem
-WordPress is free and open source, but it is built on outdated technology and delivers poor design, development, and user experiences.
+I've shipped frontend and UX for TidyCal, SendFox, BreezeDoc, and other products at AppSumo Originals. I've built websites for friends, for side projects, for things I care about.
 
-Tools like Webflow and Framer provide polished, modern interfaces, but at the cost of freedom. You rent your own website, and the pricing is confusing and expensive.
+Every time, I face the same frustrating choice:
+Use WordPress? Free and self-hosted, but the developer experience is a nightmare. Gutenberg makes developers cry — you build React blocks that convert to PHP, it's a mess, and it breaks constantly.
 
-Meanwhile, we design websites in tools that are not truly web tools. In apps like Figma or Sketch, a div is not a div. Turning design into code demands layers of abstraction. At this point, learning to code is simpler than learning the workarounds.
+Use visual website builders? Beautiful editors, but I'm paying $15-30 per site per month to rent my own websites. The code isn't really mine. I can't customize the platform.
 
-On top of that, graphic designers solved core layout and typography problems a century ago, yet the web still ignores them. CSS only recently exposed baseline alignment, and almost nobody implements it.
 
-The solution
+Use Figma and code it myself? Figma components aren't real components. Divs aren't divs. The handoff process adds layers of abstraction that shouldn't exist.
 
-Linebasis is a platform that is 100% free and open source, built with advanced, ergonomic, and modern web technologies. It combines the best of visual design with real native web elements.
+And here's the thing that really bugs me: graphic designers figured out typography and layout 100 years ago. Baseline grids, vertical rhythm, proper alignment — these aren't new problems. But web design tools mostly ignore them.
 
-It’s something you can own, change, improve, collaborate on, and grow from.
+# What I'm Building
+LineBasis is the tool I wish existed:
+* Visual website builder with polished, modern UX
+* Self-hosted and 100% open source
+* Design with real web elements (divs are divs, components are components)
+* Own your code, your data, your platform
+* No monthly fees per site
+* Modern tech stack (SvelteKit, TypeScript)
+* Proper baseline grid support (because typography matters)
 
-And yes: it has a baseline grid.
+Build sites for friends, side projects, product landing pages—whatever you need. Install it once, use it forever. Customize it if you want.
 
-- Ibaldo, Oct. 2025
+It's ambitious. It's early. But after shipping multiple successful products, I know what it takes to build something people actually use.
+
+I'm autistic, so I work best solo with deep focus on complex problems. That's how Linux started. That's how Laravel started. And that's how I'm building this—one focused sprint at a time.
+
+- Ibaldo, October 2025
+- Edited by Claude AI

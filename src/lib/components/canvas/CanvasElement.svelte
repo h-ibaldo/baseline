@@ -57,6 +57,10 @@
 			height: element.size.height
 		};
 
+		// Initialize pending values to current values
+		pendingPosition = { x: element.position.x, y: element.position.y };
+		pendingSize = { width: element.size.width, height: element.size.height };
+
 		selectElement(element.id);
 		e.preventDefault();
 

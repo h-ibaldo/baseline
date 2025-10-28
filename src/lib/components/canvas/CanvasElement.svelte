@@ -87,6 +87,7 @@
 			let newHeight = elementStart.height;
 			let newX = elementStart.x;
 			let newY = elementStart.y;
+			let positionNeedsUpdate = false;
 
 			if (resizeHandle.includes('e')) {
 				newWidth = elementStart.width + deltaX;
@@ -94,6 +95,7 @@
 			if (resizeHandle.includes('w')) {
 				newWidth = elementStart.width - deltaX;
 				newX = elementStart.x + deltaX;
+				positionNeedsUpdate = true;
 			}
 			if (resizeHandle.includes('s')) {
 				newHeight = elementStart.height + deltaY;
@@ -101,6 +103,7 @@
 			if (resizeHandle.includes('n')) {
 				newHeight = elementStart.height - deltaY;
 				newY = elementStart.y + deltaY;
+				positionNeedsUpdate = true;
 			}
 
 			// Minimum size
@@ -108,7 +111,10 @@
 			newHeight = Math.max(20, newHeight);
 
 			pendingSize = { width: newWidth, height: newHeight };
-			pendingPosition = { x: newX, y: newY };
+			// Only update position if using N or W handles
+			if (positionNeedsUpdate) {
+				pendingPosition = { x: newX, y: newY };
+			}
 			// Force style recalculation
 			elementStyles = getElementStyles();
 		}
@@ -122,12 +128,17 @@
 				await moveElement(element.id, pendingPosition);
 			}
 		} else if (isResizing) {
-			// Check if element actually resized
-			if (pendingSize.width !== elementStart.width || pendingSize.height !== elementStart.height) {
+			// Check what changed
+			const sizeChanged = pendingSize.width !== elementStart.width || pendingSize.height !== elementStart.height;
+			const positionChanged = pendingPosition.x !== elementStart.x || pendingPosition.y !== elementStart.y;
+
+			// Note: Using N/W handles will create 2 events (size + position)
+			// Using S/E/SE handles will create only 1 event (size)
+			// This is acceptable - most users use SE handle which is 1 undo
+			if (sizeChanged) {
 				await resizeElement(element.id, pendingSize);
 			}
-			// Check if element also moved (from N/W handles)
-			if (pendingPosition.x !== elementStart.x || pendingPosition.y !== elementStart.y) {
+			if (positionChanged) {
 				await moveElement(element.id, pendingPosition);
 			}
 		}

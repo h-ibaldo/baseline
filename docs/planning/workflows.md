@@ -259,14 +259,13 @@ This document details the key user workflows and journeys through the LineBasis 
    - Select "Set as Default Breakpoint"
    - This frame shows first when page loads
 
-7. **Configure Publishing**
+7. **Publish Page**
    - Click "Publish" button
    - In publish modal:
-     - **Breakpoints to Publish**:
-       - ✓ Desktop (1920px)
-       - ✓ Tablet (768px)
-       - ✓ Mobile (375px)
-   - Click "Publish"
+     - Enter page slug
+     - Configure SEO settings
+     - Click "Publish"
+   - All breakpoints (frames) are published together as responsive design
 
 8. **System Generates Responsive CSS**
    ```css
@@ -290,8 +289,6 @@ This document details the key user workflows and journeys through the LineBasis 
    - Layout adjusts at breakpoints
 
 **Result**: Page responds to different screen sizes with optimized layouts.
-
-**Tip**: You can publish only certain breakpoints (e.g., desktop only) and add others later.
 
 ---
 

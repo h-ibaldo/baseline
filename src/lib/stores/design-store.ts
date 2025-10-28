@@ -453,8 +453,7 @@ export async function toggleFrame(
 	elementId: string,
 	isFrame: boolean,
 	frameName?: string,
-	breakpointWidth?: number,
-	isPublished?: boolean
+	breakpointWidth?: number
 ): Promise<void> {
 	await dispatch({
 		id: uuidv4(),
@@ -464,8 +463,7 @@ export async function toggleFrame(
 			elementId,
 			isFrame,
 			frameName,
-			breakpointWidth,
-			isPublished
+			breakpointWidth
 		}
 	});
 }

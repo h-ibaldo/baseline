@@ -10,6 +10,7 @@ import type {
 	DesignEvent,
 	DesignState,
 	Element,
+	Frame,
 	Page,
 	Component,
 	CreateElementEvent,
@@ -18,10 +19,14 @@ import type {
 	MoveElementEvent,
 	ResizeElementEvent,
 	ReorderElementEvent,
+	ToggleFrameEvent,
 	UpdateStylesEvent,
 	UpdateTypographyEvent,
 	UpdateSpacingEvent,
-	ToggleFrameEvent,
+	CreateFrameEvent,
+	UpdateFrameEvent,
+	DeleteFrameEvent,
+	ResizeFrameEvent,
 	CreatePageEvent,
 	UpdatePageEvent,
 	DeletePageEvent,
@@ -38,10 +43,12 @@ import type {
 export function getInitialState(): DesignState {
 	return {
 		pages: {},
+		frames: {},
 		elements: {},
 		components: {},
 		pageOrder: [],
 		currentPageId: null,
+		currentFrameId: null,
 		selectedElementIds: []
 	};
 }
@@ -77,6 +84,8 @@ export function reduceEvent(state: DesignState, event: DesignEvent): DesignState
 			return handleResizeElement(state, event);
 		case 'REORDER_ELEMENT':
 			return handleReorderElement(state, event);
+		case 'TOGGLE_FRAME':
+			return handleToggleFrame(state, event);
 
 		// Style operations
 		case 'UPDATE_STYLES':
@@ -85,8 +94,16 @@ export function reduceEvent(state: DesignState, event: DesignEvent): DesignState
 			return handleUpdateTypography(state, event);
 		case 'UPDATE_SPACING':
 			return handleUpdateSpacing(state, event);
-		case 'TOGGLE_FRAME':
-			return handleToggleFrame(state, event);
+
+		// Frame operations
+		case 'CREATE_FRAME':
+			return handleCreateFrame(state, event);
+		case 'UPDATE_FRAME':
+			return handleUpdateFrame(state, event);
+		case 'DELETE_FRAME':
+			return handleDeleteFrame(state, event);
+		case 'RESIZE_FRAME':
+			return handleResizeFrame(state, event);
 
 		// Page operations
 		case 'CREATE_PAGE':
@@ -118,14 +135,14 @@ export function reduceEvent(state: DesignState, event: DesignEvent): DesignState
 // ============================================================================
 
 function handleCreateElement(state: DesignState, event: CreateElementEvent): DesignState {
-	const { elementId, parentId, pageId, elementType, position, size, styles, content } =
+	const { elementId, parentId, frameId, elementType, position, size, styles, content } =
 		event.payload;
 
 	const element: Element = {
 		id: elementId,
 		type: elementType,
 		parentId,
-		pageId,
+		frameId,
 		position,
 		size,
 		styles: styles || {},
@@ -147,19 +164,19 @@ function handleCreateElement(state: DesignState, event: CreateElementEvent): Des
 		};
 	}
 
-	// Add element to page's root elements if no parent
-	const newPages = { ...state.pages };
-	if (!parentId && newPages[pageId]) {
-		newPages[pageId] = {
-			...newPages[pageId],
-			elements: [...newPages[pageId].elements, elementId]
+	// Add element to frame's root elements if no parent
+	const newFrames = { ...state.frames };
+	if (!parentId && newFrames[frameId]) {
+		newFrames[frameId] = {
+			...newFrames[frameId],
+			elements: [...newFrames[frameId].elements, elementId]
 		};
 	}
 
 	return {
 		...state,
 		elements: newElements,
-		pages: newPages
+		frames: newFrames
 	};
 }
 
@@ -188,7 +205,7 @@ function handleDeleteElement(state: DesignState, event: DeleteElementEvent): Des
 	if (!element) return state;
 
 	const newElements = { ...state.elements };
-	const newPages = { ...state.pages };
+	const newFrames = { ...state.frames };
 
 	// Remove from parent's children
 	if (element.parentId && newElements[element.parentId]) {
@@ -198,11 +215,11 @@ function handleDeleteElement(state: DesignState, event: DeleteElementEvent): Des
 		};
 	}
 
-	// Remove from page's root elements
-	if (!element.parentId && newPages[element.pageId]) {
-		newPages[element.pageId] = {
-			...newPages[element.pageId],
-			elements: newPages[element.pageId].elements.filter((id) => id !== elementId)
+	// Remove from frame's root elements
+	if (!element.parentId && newFrames[element.frameId]) {
+		newFrames[element.frameId] = {
+			...newFrames[element.frameId],
+			elements: newFrames[element.frameId].elements.filter((id) => id !== elementId)
 		};
 	}
 
@@ -224,7 +241,7 @@ function handleDeleteElement(state: DesignState, event: DeleteElementEvent): Des
 	return {
 		...state,
 		elements: newElements,
-		pages: newPages,
+		frames: newFrames,
 		selectedElementIds: newSelectedElementIds
 	};
 }
@@ -274,7 +291,7 @@ function handleReorderElement(state: DesignState, event: ReorderElementEvent): D
 	if (!element) return state;
 
 	const newElements = { ...state.elements };
-	const newPages = { ...state.pages };
+	const newFrames = { ...state.frames };
 
 	// Remove from old parent
 	if (element.parentId && newElements[element.parentId]) {
@@ -282,10 +299,10 @@ function handleReorderElement(state: DesignState, event: ReorderElementEvent): D
 			...newElements[element.parentId],
 			children: newElements[element.parentId].children.filter((id) => id !== elementId)
 		};
-	} else if (!element.parentId && newPages[element.pageId]) {
-		newPages[element.pageId] = {
-			...newPages[element.pageId],
-			elements: newPages[element.pageId].elements.filter((id) => id !== elementId)
+	} else if (!element.parentId && newFrames[element.frameId]) {
+		newFrames[element.frameId] = {
+			...newFrames[element.frameId],
+			elements: newFrames[element.frameId].elements.filter((id) => id !== elementId)
 		};
 	}
 
@@ -304,11 +321,11 @@ function handleReorderElement(state: DesignState, event: ReorderElementEvent): D
 			...newElements[newParentId],
 			children
 		};
-	} else if (!newParentId && newPages[element.pageId]) {
-		const elements = [...newPages[element.pageId].elements];
+	} else if (!newParentId && newFrames[element.frameId]) {
+		const elements = [...newFrames[element.frameId].elements];
 		elements.splice(newIndex, 0, elementId);
-		newPages[element.pageId] = {
-			...newPages[element.pageId],
+		newFrames[element.frameId] = {
+			...newFrames[element.frameId],
 			elements
 		};
 	}
@@ -316,7 +333,7 @@ function handleReorderElement(state: DesignState, event: ReorderElementEvent): D
 	return {
 		...state,
 		elements: newElements,
-		pages: newPages
+		frames: newFrames
 	};
 }
 
@@ -388,7 +405,7 @@ function handleUpdateSpacing(state: DesignState, event: UpdateSpacingEvent): Des
 }
 
 function handleToggleFrame(state: DesignState, event: ToggleFrameEvent): DesignState {
-	const { elementId, isFrame, frameName, breakpointWidth, isPublished } = event.payload;
+	const { elementId, isFrame, frameName, breakpointWidth } = event.payload;
 	const element = state.elements[elementId];
 
 	if (!element) return state;
@@ -401,8 +418,123 @@ function handleToggleFrame(state: DesignState, event: ToggleFrameEvent): DesignS
 				...element,
 				isFrame,
 				frameName: frameName || element.frameName,
-				breakpointWidth: breakpointWidth || element.breakpointWidth || 1440,
-				isPublished: isPublished !== undefined ? isPublished : element.isPublished || false
+				breakpointWidth: breakpointWidth || element.breakpointWidth || 1440
+			}
+		}
+	};
+}
+
+// ============================================================================
+// Frame Handlers
+// ============================================================================
+
+function handleCreateFrame(state: DesignState, event: CreateFrameEvent): DesignState {
+	const { frameId, pageId, name, breakpointWidth, position, height } = event.payload;
+
+	const frame: Frame = {
+		id: frameId,
+		pageId,
+		name,
+		breakpointWidth,
+		position,
+		height: height || 900,
+		elements: []
+	};
+
+	// Add frame to state
+	const newFrames = { ...state.frames, [frameId]: frame };
+
+	// Add frame to page
+	const newPages = { ...state.pages };
+	if (newPages[pageId]) {
+		newPages[pageId] = {
+			...newPages[pageId],
+			frames: [...newPages[pageId].frames, frameId]
+		};
+	}
+
+	return {
+		...state,
+		frames: newFrames,
+		pages: newPages,
+		currentFrameId: state.currentFrameId || frameId // Set as current if first frame
+	};
+}
+
+function handleUpdateFrame(state: DesignState, event: UpdateFrameEvent): DesignState {
+	const { frameId, changes } = event.payload;
+	const frame = state.frames[frameId];
+
+	if (!frame) return state;
+
+	return {
+		...state,
+		frames: {
+			...state.frames,
+			[frameId]: {
+				...frame,
+				...changes
+			}
+		}
+	};
+}
+
+function handleDeleteFrame(state: DesignState, event: DeleteFrameEvent): DesignState {
+	const { frameId } = event.payload;
+	const frame = state.frames[frameId];
+
+	if (!frame) return state;
+
+	const newFrames = { ...state.frames };
+	delete newFrames[frameId];
+
+	// Delete all elements in this frame
+	const newElements = { ...state.elements };
+	Object.keys(newElements).forEach((elementId) => {
+		if (newElements[elementId].frameId === frameId) {
+			delete newElements[elementId];
+		}
+	});
+
+	// Remove from page
+	const newPages = { ...state.pages };
+	if (newPages[frame.pageId]) {
+		newPages[frame.pageId] = {
+			...newPages[frame.pageId],
+			frames: newPages[frame.pageId].frames.filter((id) => id !== frameId)
+		};
+	}
+
+	// Update current frame if deleted
+	let newCurrentFrameId = state.currentFrameId;
+	if (state.currentFrameId === frameId) {
+		const remainingFrames = Object.keys(newFrames);
+		newCurrentFrameId = remainingFrames.length > 0 ? remainingFrames[0] : null;
+	}
+
+	return {
+		...state,
+		frames: newFrames,
+		elements: newElements,
+		pages: newPages,
+		currentFrameId: newCurrentFrameId
+	};
+}
+
+function handleResizeFrame(state: DesignState, event: ResizeFrameEvent): DesignState {
+	const { frameId, width, height } = event.payload;
+	const frame = state.frames[frameId];
+
+	if (!frame) return state;
+
+	return {
+		...state,
+		frames: {
+			...state.frames,
+			[frameId]: {
+				...frame,
+				breakpointWidth: width,
+				...(height && { height })
 			}
 		}
 	};

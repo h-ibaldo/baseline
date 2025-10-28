@@ -22,6 +22,11 @@ export type EventType =
 	| 'UPDATE_STYLES'
 	| 'UPDATE_TYPOGRAPHY'
 	| 'UPDATE_SPACING'
+	// Frame operations
+	| 'CREATE_FRAME'
+	| 'UPDATE_FRAME'
+	| 'DELETE_FRAME'
+	| 'RESIZE_FRAME'
 	// Page operations
 	| 'CREATE_PAGE'
 	| 'UPDATE_PAGE'
@@ -49,7 +54,7 @@ export interface CreateElementEvent extends BaseEvent {
 	payload: {
 		elementId: string;
 		parentId: string | null; // null for root elements
-		pageId: string;
+		frameId: string; // Elements belong to frames, not pages
 		elementType: ElementType;
 		position: Position;
 		size: Size;
@@ -105,6 +110,16 @@ export interface ReorderElementEvent extends BaseEvent {
 	};
 }
 
+export interface ToggleFrameEvent extends BaseEvent {
+	type: 'TOGGLE_FRAME';
+	payload: {
+		elementId: string;
+		isFrame: boolean;
+		frameName?: string;
+		breakpointWidth?: number;
+	};
+}
+
 // ============================================================================
 // Style Events
 // ============================================================================
@@ -133,14 +148,48 @@ export interface UpdateSpacingEvent extends BaseEvent {
 	};
 }
 
-export interface ToggleFrameEvent extends BaseEvent {
-	type: 'TOGGLE_FRAME';
+// ============================================================================
+// Frame Events
+// ============================================================================
+
+export interface CreateFrameEvent extends BaseEvent {
+	type: 'CREATE_FRAME';
 	payload: {
-		elementId: string;
-		isFrame: boolean;
-		frameName?: string;
-		breakpointWidth?: number;
-		isPublished?: boolean;
+		frameId: string;
+		pageId: string; // Frames belong to pages
+		name: string;
+		breakpointWidth: number; // e.g., 1920, 768, 375
+		position: Position; // Position on canvas
+		height?: number; // Auto or fixed
+	};
+}
+
+export interface UpdateFrameEvent extends BaseEvent {
+	type: 'UPDATE_FRAME';
+	payload: {
+		frameId: string;
+		changes: {
+			name?: string;
+			breakpointWidth?: number;
+			position?: Position;
+			height?: number;
+		};
+	};
+}
+
+export interface DeleteFrameEvent extends BaseEvent {
+	type: 'DELETE_FRAME';
+	payload: {
+		frameId: string;
+	};
+}
+
+export interface ResizeFrameEvent extends BaseEvent {
+	type: 'RESIZE_FRAME';
+	payload: {
+		frameId: string;
+		width: number;
+		height?: number;
 	};
 }
 
@@ -237,10 +286,14 @@ export type DesignEvent =
 	| MoveElementEvent
 	| ResizeElementEvent
 	| ReorderElementEvent
+	| ToggleFrameEvent
 	| UpdateStylesEvent
 	| UpdateTypographyEvent
 	| UpdateSpacingEvent
-	| ToggleFrameEvent
+	| CreateFrameEvent
+	| UpdateFrameEvent
+	| DeleteFrameEvent
+	| ResizeFrameEvent
 	| CreatePageEvent
 	| UpdatePageEvent
 	| DeletePageEvent
@@ -339,7 +392,7 @@ export interface Element {
 	id: string;
 	type: ElementType;
 	parentId: string | null;
-	pageId: string;
+	frameId: string; // Elements belong to frames
 	position: Position;
 	size: Size;
 	styles: Partial<ElementStyles>;
@@ -352,18 +405,25 @@ export interface Element {
 	children: string[]; // Child element IDs
 	zIndex: number;
 	isFrame?: boolean; // Whether this div is a frame (page/breakpoint)
-	frameName?: string; // Frame name (for display)
-	breakpointWidth?: number; // Breakpoint width in pixels
-	isPublished?: boolean; // Whether frame is published
+	frameName?: string; // Name of the frame if isFrame is true
+	breakpointWidth?: number; // Width of the frame if isFrame is true
+}
+
+export interface Frame {
+	id: string;
+	pageId: string; // Frame belongs to a page
+	name: string; // e.g., "Desktop", "Mobile", "Tablet"
+	breakpointWidth: number; // e.g., 1920, 768, 375
+	position: Position; // Position on canvas
+	height: number; // Height in pixels (auto-grows with content)
+	elements: string[]; // Root element IDs
 }
 
 export interface Page {
 	id: string;
-	name: string;
-	slug: string;
-	width: number;
-	height: number;
-	elements: string[]; // Root element IDs
+	name: string; // e.g., "Homepage", "About"
+	slug: string; // URL slug
+	frames: string[]; // Frame IDs (different breakpoints)
 }
 
 export interface Component {
@@ -374,10 +434,12 @@ export interface Component {
 
 export interface DesignState {
 	pages: Record<string, Page>;
+	frames: Record<string, Frame>;
 	elements: Record<string, Element>;
 	components: Record<string, Component>;
 	pageOrder: string[];
 	currentPageId: string | null;
+	currentFrameId: string | null; // Currently selected frame
 	selectedElementIds: string[];
 }
 

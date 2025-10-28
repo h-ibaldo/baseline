@@ -6,7 +6,8 @@ This document defines the complete specification for the LineBasis page builder 
 
 - **Components**: The 3 atomic building blocks (Div, Text, Media) available in the toolbar
 - **Blocks**: User-created reusable design elements organized by source page
-- **Frames**: Artboards on the canvas representing different pages or breakpoints
+- **Canvas**: The design file for a page (each page has one canvas containing all breakpoints)
+- **Frames**: Artboards on the canvas representing breakpoints within a page
 - **Breakpoints**: Different frame sizes for responsive design (desktop, tablet, mobile)
 - **Properties**: Configurable attributes of components and blocks (see component-properties.md)
 
@@ -27,7 +28,6 @@ The page builder uses a **floating windows system** (Illustrator-style) with a f
                     Infinite Canvas
         ┌─────────────────────────┐
         │  Frame (Desktop)        │
-        │  Published: ✓           │
         │  Breakpoint: 1920px     │
         │  ┌───────────────────┐  │
         │  │ Div               │  │
@@ -126,13 +126,13 @@ The infinite canvas is where frames and design elements live. Users can pan, zoo
 
 ## Frames
 
-Frames are artboards on the canvas that represent pages or different breakpoints of the same page. Frames are special Div components with additional properties.
+Frames are artboards on the canvas that represent different breakpoints of a page. A canvas contains multiple frames, each representing a different responsive breakpoint. Frames are special Div components with additional properties.
 
 ### Frame Appearance
 
 ```
 ┌─────────────────────────────┐
-│ ✓ Homepage - Desktop        │ ← Frame header
+│ Homepage - Desktop          │ ← Frame header
 │ Breakpoint: 1920px          │
 ├─────────────────────────────┤
 │                             │
@@ -144,9 +144,6 @@ Frames are artboards on the canvas that represent pages or different breakpoints
 
 ### Frame Header
 
-- **Publish Toggle** (✓): Checkbox to publish/unpublish this frame
-  - Published frames → live on site URL
-  - Unpublished frames → drafts only
 - **Frame Name**: Editable name (click to rename)
 - **Breakpoint Size**: Shows current breakpoint width (e.g., "1920px")
 
@@ -160,8 +157,6 @@ Frames are artboards on the canvas that represent pages or different breakpoints
 - Frame Settings:
   - Input: Frame width (px)
   - Input: Frame height (auto or fixed px)
-  - Checkbox: Publish this frame
-  - Dropdown: Assign as template type (Blog Homepage, Single Post, etc.)
 
 ### Creating Frames
 
@@ -187,10 +182,7 @@ Frames are artboards on the canvas that represent pages or different breakpoints
 
 Users can define custom breakpoint sizes.
 
-**Publishing Logic**:
-- Only frames marked "Published" go live
-- If multiple breakpoints exist, responsive CSS generated automatically
-- Users can publish one breakpoint (e.g., desktop only) or all breakpoints
+**Note**: Publishing happens at the page level, not the frame level. When a page is published, all its frames (breakpoints) are published together as a responsive design.
 
 ---
 
@@ -563,7 +555,7 @@ When Div component selected:
 
 - Button group: Align children (start, center, end, space-between)
 - Button group: Direction (horizontal, vertical)
-- Button: Set as Frame (converts Div to Frame)
+- Button: Set as Frame (converts Div to Frame - creates a breakpoint)
 
 ### Media-Specific Actions
 
@@ -603,13 +595,6 @@ Appears when user clicks "Publish" button in toolbar.
   - Auto-generated from page name
   - Validation: lowercase, hyphens only, no special chars
   - Shows preview: `yourdomain.com/{slug}`
-
-**Breakpoints to Publish**:
-- Checkbox list of all frames:
-  - [ ] Desktop (1920px)
-  - [ ] Tablet (768px)
-  - [ ] Mobile (375px)
-- Note: "Select which breakpoints to publish. Unpublished breakpoints remain as drafts."
 
 **SEO Settings**:
 - Input: SEO title (default: page name)

@@ -17,7 +17,7 @@
 	$: isFrame = element.isFrame || false;
 
 	async function handleToggleFrame() {
-		await toggleFrame(element.id, !isFrame, `Frame ${element.id.slice(0, 8)}`, 1440, false);
+		await toggleFrame(element.id, !isFrame, `Frame ${element.id.slice(0, 8)}`, 1440);
 	}
 
 	// Background color

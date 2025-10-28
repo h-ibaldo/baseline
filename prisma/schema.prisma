@@ -122,9 +122,6 @@ model Frame {
   // Design events specific to this frame
   designEvents String @default("[]") // JSON array of design events for this breakpoint
 
-  // Publishing
-  isPublished Boolean @default(false)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

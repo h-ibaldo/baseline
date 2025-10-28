@@ -186,7 +186,7 @@ UI Re-renders
 ```
 User Clicks "Publish"
     |
-Publish Modal Opens (slug, SEO, breakpoints)
+Publish Modal Opens (slug, SEO)
     |
 Client Sends: POST /api/pages/publish
     {
@@ -430,9 +430,6 @@ model Frame {
   // Design data specific to this breakpoint
   designEvents    String  // JSON: Events for this frame
   
-  // Publishing
-  isPublished     Boolean @default(false)
-  
   // Timestamps
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -442,7 +439,6 @@ model Frame {
   
   @@index([pageId])
   @@index([breakpointWidth])
-  @@index([isPublished])
 }
 ```
 

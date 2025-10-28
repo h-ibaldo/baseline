@@ -20,6 +20,7 @@
 	} from '$lib/stores/design-store';
 
 	export let element: Element;
+	export let scale = 1; // Canvas viewport scale for accurate drag/resize
 
 	let isDragging = false;
 	let isResizing = false;
@@ -57,8 +58,9 @@
 	}
 
 	function handleMouseMove(e: MouseEvent) {
-		const deltaX = e.clientX - dragStart.x;
-		const deltaY = e.clientY - dragStart.y;
+		// Account for canvas zoom/scale
+		const deltaX = (e.clientX - dragStart.x) / scale;
+		const deltaY = (e.clientY - dragStart.y) / scale;
 
 		if (isDragging) {
 			// Move element
@@ -182,7 +184,7 @@
 	<!-- Render children recursively -->
 	{#each element.children as childId}
 		{#if $designState.elements[childId]}
-			<svelte:self element={$designState.elements[childId]} />
+			<svelte:self element={$designState.elements[childId]} {scale} />
 		{/if}
 	{/each}
 

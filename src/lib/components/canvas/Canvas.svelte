@@ -33,6 +33,8 @@
 	});
 
 	function setupEventListeners() {
+		if (typeof window === 'undefined') return;
+
 		// Mouse wheel for zoom
 		canvasElement.addEventListener('wheel', handleWheel, { passive: false });
 
@@ -42,6 +44,8 @@
 	}
 
 	onDestroy(() => {
+		if (typeof window === 'undefined') return;
+
 		canvasElement?.removeEventListener('wheel', handleWheel);
 		window.removeEventListener('keydown', handleKeyDown);
 		window.removeEventListener('keyup', handleKeyUp);
@@ -179,28 +183,34 @@
 			class="canvas-viewport"
 			style="transform: translate({viewport.x}px, {viewport.y}px) scale({viewport.scale});"
 		>
-			{#if $currentPage}
-				<!-- STYLE: Page container - white page on dark canvas -->
-				<div
-					class="page"
-					style="width: {$currentPage.width}px; height: {$currentPage.height}px;"
-				>
-					<!-- Baseline grid overlay -->
-					<BaselineGrid />
+			<!-- Baseline grid overlay across entire infinite canvas -->
+			<BaselineGrid />
 
-					<!-- Render all root elements on current page -->
-					{#each $currentPage.elements as elementId}
-						{#if $designState.elements[elementId]}
-							<CanvasElement element={$designState.elements[elementId]} />
-						{/if}
-					{/each}
-				</div>
-			{:else}
-				<!-- STYLE: Empty state - centered message -->
-				<div class="empty-state">
-					<p>No page selected. Create a page to get started.</p>
-				</div>
-			{/if}
+			<!-- Render all root elements (no parent) directly on infinite canvas -->
+			{#each Object.values($designState.elements).filter(el => el.parentId === null) as element}
+				<CanvasElement element={element} scale={viewport.scale} />
+			{/each}
+
+			<!-- Optional: Render pages as visual artboards (like Figma frames) -->
+			{#each $designState.pageOrder as pageId}
+				{#if $designState.pages[pageId]}
+					<!-- STYLE: Page artboard - visual container for organization -->
+					<div
+						class="page-artboard"
+						style="
+							position: absolute;
+							left: {getPagePosition($designState.pageOrder.indexOf(pageId)).x}px;
+							top: {getPagePosition($designState.pageOrder.indexOf(pageId)).y}px;
+							width: {$designState.pages[pageId].width}px;
+							height: {$designState.pages[pageId].height}px;
+						"
+					>
+						<div class="page-artboard-label">
+							{$designState.pages[pageId].name}
+						</div>
+					</div>
+				{/if}
+			{/each}
 		</div>
 	</div>
 </div>
@@ -259,19 +269,20 @@
 		will-change: transform;
 	}
 
-	.page {
-		background: white;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-		position: relative;
-		margin: 50px;
+	.page-artboard {
+		position: absolute;
+		border: 2px solid rgba(100, 100, 255, 0.3);
+		background: rgba(255, 255, 255, 0.02);
+		pointer-events: none;
 	}
 
-	.empty-state {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 400px;
-		color: #999;
-		font-size: 16px;
+	.page-artboard-label {
+		position: absolute;
+		top: -30px;
+		left: 0;
+		color: rgba(100, 100, 255, 0.8);
+		font-size: 14px;
+		font-weight: 500;
+		pointer-events: none;
 	}
 </style>

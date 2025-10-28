@@ -12,21 +12,13 @@
 	import { onMount } from 'svelte';
 	import Canvas from '$lib/components/canvas/Canvas.svelte';
 	import Toolbar from '$lib/components/canvas/Toolbar.svelte';
-	import { setupKeyboardShortcuts, createPage } from '$lib/stores/design-store';
+	import { setupKeyboardShortcuts } from '$lib/stores/design-store';
 
 	let cleanupKeyboard: (() => void) | undefined;
 
-	onMount(async () => {
+	onMount(() => {
 		// Setup keyboard shortcuts for undo/redo
 		cleanupKeyboard = setupKeyboardShortcuts();
-
-		// Create a default page if none exists
-		// TODO: Check if page exists first
-		try {
-			await createPage('Home', 'home');
-		} catch (error) {
-			console.log('Page might already exist:', error);
-		}
 
 		return () => {
 			if (cleanupKeyboard) cleanupKeyboard();

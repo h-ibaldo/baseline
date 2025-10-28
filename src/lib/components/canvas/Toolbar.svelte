@@ -15,13 +15,6 @@
 	let selectedTool: string | null = null;
 
 	async function createNewElement(elementType: Element['type']) {
-		const page = currentPage;
-		// @ts-ignore - accessing store value
-		if (!page || !page.id) {
-			alert('Please create a page first');
-			return;
-		}
-
 		selectedTool = elementType;
 
 		// Default position and size for new elements
@@ -54,11 +47,10 @@
 
 		try {
 			await createElement({
-				// @ts-ignore
-				pageId: page.id,
+				pageId: 'canvas', // Free-form canvas, no page restriction
 				parentId: null,
 				elementType,
-				position: { x: 100, y: 100 }, // TODO: Center on viewport
+				position: { x: 100, y: 100 }, // Start position on canvas
 				size,
 				content,
 				styles: {

@@ -211,7 +211,7 @@ LineBasis follows a **phased release strategy** to ship faster, validate archite
 
 ## Milestone 5: Page Builder Canvas (Basic)
 
-**Duration**: ~2-3 weeks (IN PROGRESS - 52% complete)
+**Duration**: ~2-3 weeks (IN PROGRESS - 71% complete)
 **Goal**: Infinite canvas with frames, element rendering, and basic interactions
 
 ### Tasks
@@ -247,23 +247,23 @@ LineBasis follows a **phased release strategy** to ship faster, validate archite
 - [x] Drag to move element (single element only)
 - [x] Resize handles (8 directions)
 - [x] Delete with keyboard (Backspace/Delete)
-- [ ] Copy/paste (Cmd/Ctrl + C/V)
-- [ ] Duplicate (Cmd/Ctrl + D)
+- [x] Copy/paste (Cmd/Ctrl + C/V)
+- [x] Duplicate (Cmd/Ctrl + D)
 - [ ] Multi-select drag/resize (selection box works, but can't move/resize multiple)
 
-**Note**: Single-element interactions work perfectly. Multi-element interactions need implementation.
+**Note**: Single-element interactions work perfectly. Multi-element drag/resize needs implementation.
 
 #### 5.5 Keyboard Shortcuts
 - [x] Undo: Cmd/Ctrl + Z
 - [x] Redo: Cmd/Ctrl + Shift + Z (and Cmd/Ctrl + Y)
-- [ ] Save: Cmd/Ctrl + S (trigger manual save)
+- [x] Save: Cmd/Ctrl + S (manual save for visual feedback)
 - [x] Delete: Backspace/Delete
-- [ ] Duplicate: Cmd/Ctrl + D
-- [ ] Select All: Cmd/Ctrl + A
+- [x] Duplicate: Cmd/Ctrl + D
+- [x] Select All: Cmd/Ctrl + A
 
 **Implementation**: In `/src/lib/stores/design-store.ts` (lines 582-624)
 
-**Deliverable**: 🚧 **IN PROGRESS** - Core canvas working, frame management and copy/paste pending
+**Deliverable**: 🚧 **IN PROGRESS** - Core canvas working, frame management pending
 
 **Completed Components**:
 - [x] Canvas.svelte - Main canvas with pan/zoom

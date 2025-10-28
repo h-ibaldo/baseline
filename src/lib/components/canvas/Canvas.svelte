@@ -199,6 +199,13 @@
 			const MIN_SIZE = 10; // Minimum size to create element
 			let newElementId: string;
 
+			// Get current page ID
+			const pageId = $designState.currentPageId;
+			if (!pageId) {
+				console.error('No current page ID');
+				return;
+			}
+
 			// If dragged less than MIN_SIZE, create default-sized element
 			if (drawPreview.width < MIN_SIZE || drawPreview.height < MIN_SIZE) {
 				// Click: create default size centered at click position
@@ -212,7 +219,7 @@
 
 				// Center element at click position
 				newElementId = await createElement({
-					pageId: 'canvas',
+					pageId,
 					parentId: null,
 					elementType: tool === 'text' ? 'p' : tool === 'media' ? 'img' : 'div',
 					position: {
@@ -229,7 +236,7 @@
 			} else {
 				// Drag: create element with drawn size
 				newElementId = await createElement({
-					pageId: 'canvas',
+					pageId,
 					parentId: null,
 					elementType: tool === 'text' ? 'p' : tool === 'media' ? 'img' : 'div',
 					position: { x: drawPreview.x, y: drawPreview.y },

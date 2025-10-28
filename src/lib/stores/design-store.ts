@@ -103,6 +103,20 @@ export async function initialize(): Promise<void> {
 		currentEventIndex: events.length - 1,
 		isInitialized: true
 	}));
+
+	// Create default page if none exists
+	if (Object.keys(designState.pages).length === 0) {
+		const pageId = await createPage('Untitled Page', 'untitled');
+		setCurrentPage(pageId);
+	} else {
+		// Set the first page as current if not set
+		if (!designState.currentPageId) {
+			const firstPageId = designState.pageOrder[0];
+			if (firstPageId) {
+				setCurrentPage(firstPageId);
+			}
+		}
+	}
 }
 
 /**
@@ -572,6 +586,21 @@ export async function importDesign(json: string): Promise<void> {
 }
 
 // ============================================================================
+// Manual Save
+// ============================================================================
+
+/**
+ * Trigger manual save (updates lastSavedAt for visual feedback)
+ * Note: Events are auto-saved to IndexedDB on dispatch, so this just updates the timestamp
+ */
+export function manualSave(): void {
+	storeState.update((s) => ({
+		...s,
+		lastSavedAt: Date.now()
+	}));
+}
+
+// ============================================================================
 // Copy/Paste/Duplicate
 // ============================================================================
 
@@ -699,6 +728,11 @@ export function setupKeyboardShortcuts(): (() => void) | undefined {
 			e.preventDefault();
 			redo();
 		}
+		// Cmd+S (save - visual feedback)
+		else if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+			e.preventDefault();
+			manualSave();
+		}
 		// Cmd+C (copy)
 		else if ((e.metaKey || e.ctrlKey) && e.key === 'c' && !isTyping) {
 			e.preventDefault();
@@ -724,10 +758,8 @@ export function setupKeyboardShortcuts(): (() => void) | undefined {
 			e.preventDefault();
 			const selected = get(selectedElements);
 			if (selected.length > 0) {
-				// Delete all selected elements
-				selected.forEach((element) => {
-					deleteElement(element.id);
-				});
+				// Delete all selected elements (await all deletions)
+				Promise.all(selected.map((element) => deleteElement(element.id)));
 			}
 		}
 	};

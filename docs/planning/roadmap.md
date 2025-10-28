@@ -1,7 +1,8 @@
 # LineBasis Development Roadmap
 
-**Last Updated**: October 2024
+**Last Updated**: October 28, 2024
 **Current Phase**: Phase 1 - Core Page Builder MVP
+**Current Milestone**: Milestone 5 - Page Builder Canvas (52% complete)
 
 ---
 
@@ -47,42 +48,42 @@ LineBasis follows a **phased release strategy** to ship faster, validate archite
 - [x] Configure Prisma with SQLite (dev) and PostgreSQL (prod)
 - [x] Set up Vitest for testing
 - [x] Configure ESLint and TypeScript strict mode
-- [ ] Create `.env.example` with all required variables
-- [ ] Write setup script (`npm run setup`) for first-time installation
+- [x] Create `.env.example` with all required variables
+- [x] Write setup script (`npm run setup`) for first-time installation
 
 #### 1.2 Database Schema (Core Models)
-- [ ] Implement `User` model (email, password, role, teamId)
-- [ ] Implement `Team` model (name, slug, ownerId)
-- [ ] Implement `Session` model (userId, refreshToken, expiresAt)
-- [ ] Implement `Page` model (title, slug, designEvents, publishedCode, teamId, authorId)
-- [ ] Implement `Frame` model (pageId, name, breakpointWidth, designEvents, order)
-- [ ] Implement `Block` model (name, designEvents, sourcePageId, teamId)
-- [ ] Implement `BlockInstance` model (blockId, frameId, elementId, isDetached, overrideEvents)
-- [ ] Implement `Media` model (filename, url, mimeType, size, uploaderId, teamId)
-- [ ] Implement `Setting` model (key, value, type)
-- [ ] Create initial migration
-- [ ] Write seed script for development data
+- [x] Implement `User` model (email, password, role, teamId)
+- [x] Implement `Team` model (name, slug, ownerId)
+- [x] Implement `Session` model (userId, refreshToken, expiresAt)
+- [x] Implement `Page` model (title, slug, designEvents, publishedCode, teamId, authorId)
+- [x] Implement `Frame` model (pageId, name, breakpointWidth, designEvents, order)
+- [x] Implement `Block` model (name, designEvents, sourcePageId, teamId)
+- [x] Implement `BlockInstance` model (blockId, frameId, elementId, isDetached, overrideEvents)
+- [x] Implement `Media` model (filename, url, mimeType, size, uploaderId, teamId)
+- [x] Implement `Setting` model (key, value, type)
+- [x] Create initial migration
+- [x] Write seed script for development data
 
 #### 1.3 Authentication Service
-- [ ] Install dependencies: `bcryptjs`, `jsonwebtoken`
-- [ ] Create `/src/lib/server/services/auth.ts`
-  - [ ] `register()` - Create user with hashed password
-  - [ ] `login()` - Verify credentials, issue JWT tokens
-  - [ ] `refresh()` - Refresh access token using refresh token
-  - [ ] `logout()` - Invalidate session
-- [ ] Create `/src/lib/server/middleware/auth.ts`
-  - [ ] `requireAuth()` - Verify JWT, attach user to locals
-  - [ ] `requireRole()` - Check user role (Owner/Manager/Designer/Editor)
-- [ ] Write unit tests for auth service
+- [x] Install dependencies: `bcryptjs`, `jsonwebtoken`
+- [x] Create `/src/lib/server/services/auth.ts`
+  - [x] `register()` - Create user with hashed password
+  - [x] `login()` - Verify credentials, issue JWT tokens
+  - [x] `refresh()` - Refresh access token using refresh token
+  - [x] `logout()` - Invalidate session
+- [x] Create `/src/lib/server/middleware/auth.ts`
+  - [x] `requireAuth()` - Verify JWT, attach user to locals
+  - [x] `requireRole()` - Check user role (Owner/Manager/Designer/Editor)
+- [x] Write unit tests for auth service
 
 #### 1.4 API Routes: Authentication
-- [ ] `POST /api/auth/register` - User registration
-- [ ] `POST /api/auth/login` - User login (returns access + refresh tokens)
-- [ ] `POST /api/auth/refresh` - Refresh access token
-- [ ] `POST /api/auth/logout` - Logout and invalidate session
-- [ ] `GET /api/auth/me` - Get current user info
+- [x] `POST /api/auth/register` - User registration
+- [x] `POST /api/auth/login` - User login (returns access + refresh tokens)
+- [x] `POST /api/auth/refresh` - Refresh access token
+- [x] `POST /api/auth/logout` - Logout and invalidate session
+- [x] `GET /api/auth/me` - Get current user info
 
-**Deliverable**: Working database, authentication, and user management
+**Deliverable**: ✅ **COMPLETED** - Working database, authentication, and user management
 
 ---
 
@@ -94,32 +95,32 @@ LineBasis follows a **phased release strategy** to ship faster, validate archite
 ### Tasks
 
 #### 2.1 Media Upload Service
-- [ ] Install `sharp` for image optimization
-- [ ] Create `/src/lib/server/services/media.ts`
-  - [ ] `uploadMedia()` - Handle file upload, optimize images, save to disk
-  - [ ] `getMedia()` - Retrieve media by ID
-  - [ ] `listMedia()` - List all media for a team (with pagination)
-  - [ ] `deleteMedia()` - Delete media file and database entry
-  - [ ] Image optimization: resize to max 2400px, compress to WebP
-- [ ] Configure upload directory: `static/uploads/`
-- [ ] Write unit tests for media service
+- [x] Install `sharp` for image optimization
+- [x] Create `/src/lib/server/services/media.ts`
+  - [x] `uploadMedia()` - Handle file upload, optimize images, save to disk
+  - [x] `getMedia()` - Retrieve media by ID
+  - [x] `listMedia()` - List all media for a team (with pagination)
+  - [x] `deleteMedia()` - Delete media file and database entry
+  - [x] Image optimization: resize to max 2400px, compress to WebP
+- [x] Configure upload directory: `static/uploads/`
+- [x] Write unit tests for media service
 
 #### 2.2 API Routes: Media
-- [ ] `POST /api/media/upload` - Upload file (multipart/form-data)
-- [ ] `GET /api/media` - List all media (with filters: type, date, search)
-- [ ] `GET /api/media/:id` - Get single media
-- [ ] `DELETE /api/media/:id` - Delete media (check permissions)
+- [x] `POST /api/media/upload` - Upload file (multipart/form-data)
+- [x] `GET /api/media` - List all media (with filters: type, date, search)
+- [x] `GET /api/media/:id` - Get single media
+- [x] `DELETE /api/media/:id` - Delete media (check permissions)
 
 #### 2.3 Admin UI: Media Library
-- [ ] Create `/src/routes/admin/media/+page.svelte`
-  - [ ] Grid view of all media
-  - [ ] Upload button with drag-and-drop
-  - [ ] Search/filter by name, type, date
-  - [ ] Delete media with confirmation
-  - [ ] Media details modal (filename, size, dimensions, URL)
-- [ ] Create reusable `MediaPicker` component for designer
+- [x] Create `/src/routes/admin/media/+page.svelte`
+  - [x] Grid view of all media
+  - [x] Upload button with drag-and-drop
+  - [x] Search/filter by name, type, date
+  - [x] Delete media with confirmation
+  - [x] Media details modal (filename, size, dimensions, URL)
+- [x] Create reusable `MediaPicker` component for designer
 
-**Deliverable**: Functional media library with upload, browse, and delete
+**Deliverable**: ✅ **COMPLETED** - Functional media library with upload, browse, and delete
 
 ---
 
@@ -131,33 +132,33 @@ LineBasis follows a **phased release strategy** to ship faster, validate archite
 ### Tasks
 
 #### 3.1 Token Data Model
-- [ ] Define token types: colors, typography, spacing, effects, baseline
-- [ ] Create `/src/lib/types/tokens.ts` with TypeScript interfaces
-- [ ] Implement token storage in `Setting` model (JSON format)
-- [ ] Default token presets (modern, minimal, classic themes)
+- [x] Define token types: colors, typography, spacing, effects, baseline
+- [x] Create `/src/lib/types/tokens.ts` with TypeScript interfaces
+- [x] Implement token storage in `Setting` model (JSON format)
+- [x] Default token presets (modern, minimal, classic themes)
 
 #### 3.2 Token Service
-- [ ] Create `/src/lib/server/services/tokens.ts`
-  - [ ] `getTokens()` - Get all design tokens for team
-  - [ ] `updateTokens()` - Update design tokens
-  - [ ] `resetTokens()` - Reset to defaults
+- [x] Create `/src/lib/server/services/tokens.ts`
+  - [x] `getTokens()` - Get all design tokens for team
+  - [x] `updateTokens()` - Update design tokens
+  - [x] `resetTokens()` - Reset to defaults
 
 #### 3.3 API Routes: Tokens
-- [ ] `GET /api/tokens` - Get design tokens
-- [ ] `PUT /api/tokens` - Update design tokens
-- [ ] `POST /api/tokens/reset` - Reset to defaults
+- [x] `GET /api/tokens` - Get design tokens
+- [x] `PUT /api/tokens` - Update design tokens
+- [x] `POST /api/tokens/reset` - Reset to defaults
 
 #### 3.4 Admin UI: Design System
-- [ ] Create `/src/routes/admin/styles/+page.svelte`
-  - [ ] **Colors**: Primary, Secondary, Accent, Text, Muted, Background
-  - [ ] **Typography**: Font families, Heading 1-6, Body, Caption, Small
-  - [ ] **Spacing**: Base unit, scale (4, 8, 16, 24, 32, 48, 64, 96)
-  - [ ] **Effects**: Border radius, shadows, transitions
-  - [ ] **Baseline Grid**: Grid unit (4-32px), line height multiplier
-  - [ ] Live preview of all tokens
-  - [ ] Export/import token JSON
+- [x] Create `/src/routes/admin/styles/+page.svelte`
+  - [x] **Colors**: Primary, Secondary, Accent, Text, Muted, Background
+  - [x] **Typography**: Font families, Heading 1-6, Body, Caption, Small
+  - [x] **Spacing**: Base unit, scale (4, 8, 16, 24, 32, 48, 64, 96)
+  - [x] **Effects**: Border radius, shadows, transitions
+  - [x] **Baseline Grid**: Grid unit (4-32px), line height multiplier
+  - [x] Live preview of all tokens
+  - [x] Export/import token JSON
 
-**Deliverable**: Working design system with token management UI
+**Deliverable**: ✅ **COMPLETED** - Working design system with token management UI
 
 ---
 
@@ -169,59 +170,59 @@ LineBasis follows a **phased release strategy** to ship faster, validate archite
 ### Tasks
 
 #### 4.1 Event Types
-- [ ] Create `/src/lib/types/events.ts`
-  - [ ] Define all event types (ELEMENT_ADDED, ELEMENT_MOVED, etc.)
-  - [ ] TypeScript discriminated unions for type safety
-  - [ ] Event metadata: id, timestamp, userId, frameId
+- [x] Create `/src/lib/types/events.ts`
+  - [x] Define all event types (ELEMENT_ADDED, ELEMENT_MOVED, etc.)
+  - [x] TypeScript discriminated unions for type safety
+  - [x] Event metadata: id, timestamp, userId, frameId
 
 #### 4.2 Event Store (IndexedDB)
-- [ ] Create `/src/lib/stores/event-store.ts`
-  - [ ] Initialize IndexedDB with `events` and `snapshots` stores
-  - [ ] `appendEvent()` - Add event to history
-  - [ ] `undo()` - Move cursor back
-  - [ ] `redo()` - Move cursor forward
-  - [ ] `getHistory()` - Get all events up to current cursor
-  - [ ] Auto-save to IndexedDB every 30 seconds
-  - [ ] Snapshot every 100 events for performance
+- [x] Create `/src/lib/stores/event-store.ts`
+  - [x] Initialize IndexedDB with `events` and `snapshots` stores
+  - [x] `appendEvent()` - Add event to history
+  - [x] `undo()` - Move cursor back
+  - [x] `redo()` - Move cursor forward
+  - [x] `getHistory()` - Get all events up to current cursor
+  - [x] Auto-save to IndexedDB every 30 seconds
+  - [x] Snapshot every 100 events for performance
 
 #### 4.3 Event Reducer
-- [ ] Create `/src/lib/utils/event-reducer.ts`
-  - [ ] `applyEvent()` - Pure function: (state, event) => newState
-  - [ ] Handle all element events (add, move, resize, update, delete)
-  - [ ] Handle frame events (add, update, delete)
-  - [ ] Handle style events (update text, colors, spacing)
-  - [ ] Immutable state updates
+- [x] Create `/src/lib/stores/event-reducer.ts`
+  - [x] `applyEvent()` - Pure function: (state, event) => newState
+  - [x] Handle all element events (add, move, resize, update, delete)
+  - [x] Handle frame events (add, update, delete)
+  - [x] Handle style events (update text, colors, spacing)
+  - [x] Immutable state updates
 
 #### 4.4 Design Store
-- [ ] Create `/src/lib/stores/design-store.ts`
-  - [ ] Derived store from event history
-  - [ ] Public API: `addElement()`, `moveElement()`, `updateElement()`, etc.
-  - [ ] All mutations dispatch events (never mutate state directly)
-  - [ ] Subscribe to changes for UI reactivity
+- [x] Create `/src/lib/stores/design-store.ts`
+  - [x] Derived store from event history
+  - [x] Public API: `addElement()`, `moveElement()`, `updateElement()`, etc.
+  - [x] All mutations dispatch events (never mutate state directly)
+  - [x] Subscribe to changes for UI reactivity
 
 #### 4.5 Testing
 - [ ] Write comprehensive tests for event reducer
 - [ ] Test undo/redo with complex event sequences
 - [ ] Test state immutability
 
-**Deliverable**: Working event sourcing system with undo/redo
+**Deliverable**: ✅ **COMPLETED** - Working event sourcing system with undo/redo (tests pending)
 
 ---
 
 ## Milestone 5: Page Builder Canvas (Basic)
 
-**Duration**: ~2-3 weeks
+**Duration**: ~2-3 weeks (IN PROGRESS - 52% complete)
 **Goal**: Infinite canvas with frames, element rendering, and basic interactions
 
 ### Tasks
 
 #### 5.1 Canvas Component
-- [ ] Create `/src/routes/admin/designer/[pageId]/+page.svelte`
-  - [ ] Infinite canvas with pan and zoom (mouse wheel, trackpad)
-  - [ ] Grid background (dots or lines)
-  - [ ] Render all frames on canvas
-  - [ ] Frame viewport (border, name, breakpoint width)
-  - [ ] Zoom controls (fit to screen, 100%, zoom in/out)
+- [x] Create `/src/routes/+page.svelte` (main canvas page)
+  - [x] Infinite canvas with pan and zoom (mouse wheel, trackpad)
+  - [x] Grid background (baseline grid with horizontal lines)
+  - [x] Render all pages as artboards on canvas
+  - [x] Page viewport (artboard display)
+  - [x] Zoom controls (in/out, reset, percentage display)
 
 #### 5.2 Frame Management
 - [ ] Add frame button (default: Desktop 1440px)
@@ -231,29 +232,54 @@ LineBasis follows a **phased release strategy** to ship faster, validate archite
 - [ ] Delete frame (with confirmation)
 - [ ] Duplicate frame (copy all elements and events)
 
+**Note**: Pages render as artboards but frame management UI not implemented
+
 #### 5.3 Element Rendering (3 Components)
-- [ ] **Div Component**: Render as `<div>` with styles (background, border, padding)
-- [ ] **Text Component**: Render as `<p>`, `<h1>-<h6>` with typography tokens
-- [ ] **Media Component**: Render as `<img>` or `<video>` from media library
+- [x] **Div Component**: Render as `<div>` with styles (background, border, padding)
+- [x] **Text Component**: Render as `<p>`, `<h1>-<h6>` with typography tokens
+- [x] **Media Component**: Render as `<img>` or `<video>` from media library
+
+**Implementation**: All in `/src/lib/components/canvas/CanvasElement.svelte`
 
 #### 5.4 Element Interactions (Basic)
-- [ ] Click to select element (highlight border)
-- [ ] Multi-select with Cmd/Ctrl + click
-- [ ] Drag to move element
-- [ ] Resize handles (8 directions)
-- [ ] Delete with keyboard (Backspace/Delete)
+- [x] Click to select element (highlight border)
+- [x] Multi-select with selection box (drag on canvas)
+- [x] Drag to move element (single element only)
+- [x] Resize handles (8 directions)
+- [x] Delete with keyboard (Backspace/Delete)
 - [ ] Copy/paste (Cmd/Ctrl + C/V)
 - [ ] Duplicate (Cmd/Ctrl + D)
+- [ ] Multi-select drag/resize (selection box works, but can't move/resize multiple)
+
+**Note**: Single-element interactions work perfectly. Multi-element interactions need implementation.
 
 #### 5.5 Keyboard Shortcuts
-- [ ] Undo: Cmd/Ctrl + Z
-- [ ] Redo: Cmd/Ctrl + Shift + Z
+- [x] Undo: Cmd/Ctrl + Z
+- [x] Redo: Cmd/Ctrl + Shift + Z (and Cmd/Ctrl + Y)
 - [ ] Save: Cmd/Ctrl + S (trigger manual save)
-- [ ] Delete: Backspace/Delete
+- [x] Delete: Backspace/Delete
 - [ ] Duplicate: Cmd/Ctrl + D
 - [ ] Select All: Cmd/Ctrl + A
 
-**Deliverable**: Functional canvas with frame and element management
+**Implementation**: In `/src/lib/stores/design-store.ts` (lines 582-624)
+
+**Deliverable**: 🚧 **IN PROGRESS** - Core canvas working, frame management and copy/paste pending
+
+**Completed Components**:
+- [x] Canvas.svelte - Main canvas with pan/zoom
+- [x] CanvasElement.svelte - Element renderer
+- [x] SelectionUI.svelte - Selection border + resize handles
+- [x] SelectionOverlay.svelte - Drag/resize interaction handler
+- [x] SelectionBox.svelte - Multi-select box
+- [x] BaselineGrid.svelte - Grid overlay
+- [x] Toolbar.svelte - Top toolbar (partial functionality)
+
+**Stores**:
+- [x] design-store.ts - Main store with CRUD operations
+- [x] event-store.ts - IndexedDB persistence
+- [x] event-reducer.ts - Event sourcing reducer
+- [x] interaction-store.ts - Live preview state
+- [x] tool-store.ts - Current tool state
 
 ---
 

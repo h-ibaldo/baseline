@@ -32,11 +32,8 @@
 
 	$: isSelected = $selectedElements.some((el) => el.id === element.id);
 
-	// Force re-render when dragging/resizing
+	// Reactive style computation - updates when element or pending values change
 	$: elementStyles = getElementStyles();
-	$: if (isDragging || isResizing) {
-		elementStyles = getElementStyles();
-	}
 
 	function handleMouseDown(e: MouseEvent) {
 		// Check if clicking on a resize handle
@@ -77,11 +74,13 @@
 		const deltaY = (e.clientY - dragStart.y) / scale;
 
 		if (isDragging) {
-			// Calculate new position but don't dispatch event yet
+			// Update pending position - this triggers reactive style update
 			pendingPosition = {
 				x: elementStart.x + deltaX,
 				y: elementStart.y + deltaY
 			};
+			// Force style recalculation
+			elementStyles = getElementStyles();
 		} else if (isResizing) {
 			// Calculate new size based on handle
 			let newWidth = elementStart.width;
@@ -110,15 +109,24 @@
 
 			pendingSize = { width: newWidth, height: newHeight };
 			pendingPosition = { x: newX, y: newY };
+			// Force style recalculation
+			elementStyles = getElementStyles();
 		}
 	}
 
 	async function handleMouseUp() {
-		// Only dispatch event once on mouseup (not every mousemove)
+		// Only dispatch event if position/size actually changed
 		if (isDragging) {
-			await moveElement(element.id, pendingPosition);
+			// Check if element actually moved
+			if (pendingPosition.x !== elementStart.x || pendingPosition.y !== elementStart.y) {
+				await moveElement(element.id, pendingPosition);
+			}
 		} else if (isResizing) {
-			await resizeElement(element.id, pendingSize);
+			// Check if element actually resized
+			if (pendingSize.width !== elementStart.width || pendingSize.height !== elementStart.height) {
+				await resizeElement(element.id, pendingSize);
+			}
+			// Check if element also moved (from N/W handles)
 			if (pendingPosition.x !== elementStart.x || pendingPosition.y !== elementStart.y) {
 				await moveElement(element.id, pendingPosition);
 			}

@@ -545,15 +545,13 @@ function handleResizeFrame(state: DesignState, event: ResizeFrameEvent): DesignS
 // ============================================================================
 
 function handleCreatePage(state: DesignState, event: CreatePageEvent): DesignState {
-	const { pageId, name, slug, width = 1440, height = 900 } = event.payload;
+	const { pageId, name, slug } = event.payload;
 
 	const page: Page = {
 		id: pageId,
 		name,
 		slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
-		width,
-		height,
-		elements: []
+		frames: []
 	};
 
 	return {
@@ -594,10 +592,17 @@ function handleDeletePage(state: DesignState, event: DeletePageEvent): DesignSta
 	const newPages = { ...state.pages };
 	delete newPages[pageId];
 
-	// Delete all elements on this page
+	// Delete all frames belonging to this page
+	const newFrames = { ...state.frames };
+	const framesToDelete = Object.keys(newFrames).filter((frameId) => newFrames[frameId].pageId === pageId);
+	framesToDelete.forEach((frameId) => {
+		delete newFrames[frameId];
+	});
+
+	// Delete all elements in those frames
 	const newElements = { ...state.elements };
 	Object.keys(newElements).forEach((elementId) => {
-		if (newElements[elementId].pageId === pageId) {
+		if (framesToDelete.includes(newElements[elementId].frameId)) {
 			delete newElements[elementId];
 		}
 	});
@@ -614,6 +619,7 @@ function handleDeletePage(state: DesignState, event: DeletePageEvent): DesignSta
 	return {
 		...state,
 		pages: newPages,
+		frames: newFrames,
 		elements: newElements,
 		pageOrder: newPageOrder,
 		currentPageId: newCurrentPageId
@@ -701,6 +707,13 @@ function handleInstanceComponent(
 	});
 
 	// Second pass: clone elements with updated IDs and references
+	// Note: Component instances need to be assigned to a frame
+	const currentFrame = state.currentFrameId ? state.frames[state.currentFrameId] : null;
+	if (!currentFrame) {
+		// Cannot instance component without a current frame
+		return state;
+	}
+
 	component.elementIds.forEach((oldId) => {
 		const oldElement = state.elements[oldId];
 		if (!oldElement) return;
@@ -712,7 +725,7 @@ function handleInstanceComponent(
 			...oldElement,
 			id: newId,
 			parentId: newParentId,
-			pageId,
+			frameId: currentFrame.id,
 			position: {
 				x: position.x + oldElement.position.x,
 				y: position.y + oldElement.position.y
@@ -721,22 +734,20 @@ function handleInstanceComponent(
 		};
 	});
 
-	// Add root elements to page
+	// Add root elements to current frame
 	const rootElementIds = component.elementIds
 		.filter((id) => !state.elements[id]?.parentId)
 		.map((id) => idMap.get(id)!);
 
-	const newPages = { ...state.pages };
-	if (newPages[pageId]) {
-		newPages[pageId] = {
-			...newPages[pageId],
-			elements: [...newPages[pageId].elements, ...rootElementIds]
-		};
-	}
+	const newFrames = { ...state.frames };
+	newFrames[currentFrame.id] = {
+		...currentFrame,
+		elements: [...currentFrame.elements, ...rootElementIds]
+	};
 
 	return {
 		...state,
 		elements: newElements,
-		pages: newPages
+		frames: newFrames
 	};
 }

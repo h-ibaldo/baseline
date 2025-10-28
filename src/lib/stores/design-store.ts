@@ -710,8 +710,14 @@ export function selectAll(): void {
 	const page = state.pages[pageId];
 	if (!page) return;
 
-	// Get all root elements on the page
-	const allElementIds = page.elements;
+	// Get all root elements from all frames in this page
+	const allElementIds: string[] = [];
+	page.frames.forEach((frameId) => {
+		const frame = state.frames[frameId];
+		if (frame) {
+			allElementIds.push(...frame.elements);
+		}
+	});
 
 	selectElements(allElementIds);
 }

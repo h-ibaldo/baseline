@@ -279,15 +279,6 @@
 	function resetZoom() {
 		viewport = { x: 0, y: 0, scale: 1 };
 	}
-
-	// Get page position on canvas (for multi-page layout)
-	function getPagePosition(pageIndex: number) {
-		const GAP = 100; // Gap between pages
-		return {
-			x: 0,
-			y: pageIndex * (($currentPage?.height || 900) + GAP)
-		};
-	}
 </script>
 
 <!-- STYLE: Canvas container - full viewport, overflow hidden -->
@@ -349,25 +340,22 @@
 				</div>
 			{/if}
 
-			<!-- Optional: Render pages as visual artboards (like Figma frames) -->
-			{#each $designState.pageOrder as pageId}
-				{#if $designState.pages[pageId]}
-					<!-- STYLE: Page artboard - visual container for organization -->
-					<div
-						class="page-artboard"
-						style="
-							position: absolute;
-							left: {getPagePosition($designState.pageOrder.indexOf(pageId)).x}px;
-							top: {getPagePosition($designState.pageOrder.indexOf(pageId)).y}px;
-							width: {$designState.pages[pageId].width}px;
-							height: {$designState.pages[pageId].height}px;
-						"
-					>
-						<div class="page-artboard-label">
-							{$designState.pages[pageId].name}
-						</div>
+			<!-- Render frames as visual artboards (breakpoints) -->
+			{#each Object.values($designState.frames) as frame}
+				<div
+					class="frame-artboard"
+					style="
+						position: absolute;
+						left: {frame.position.x}px;
+						top: {frame.position.y}px;
+						width: {frame.breakpointWidth}px;
+						height: {frame.height}px;
+					"
+				>
+					<div class="frame-artboard-label">
+						{frame.name} ({frame.breakpointWidth}px)
 					</div>
-				{/if}
+				</div>
 			{/each}
 		</div>
 
@@ -432,14 +420,14 @@
 		will-change: transform;
 	}
 
-	.page-artboard {
+	.frame-artboard {
 		position: absolute;
 		border: 2px solid rgba(100, 100, 255, 0.3);
 		background: rgba(255, 255, 255, 0.02);
 		pointer-events: none;
 	}
 
-	.page-artboard-label {
+	.frame-artboard-label {
 		position: absolute;
 		top: -30px;
 		left: 0;

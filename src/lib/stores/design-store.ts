@@ -358,7 +358,8 @@ export async function moveElement(
 
 export async function resizeElement(
 	elementId: string,
-	size: { width: number; height: number }
+	size: { width: number; height: number },
+	position?: { x: number; y: number }
 ): Promise<void> {
 	await dispatch({
 		id: uuidv4(),
@@ -366,7 +367,8 @@ export async function resizeElement(
 		timestamp: Date.now(),
 		payload: {
 			elementId,
-			size
+			size,
+			position
 		}
 	});
 }
@@ -577,7 +579,7 @@ export async function importDesign(json: string): Promise<void> {
  * Setup keyboard shortcuts for undo/redo
  * Call this in your root layout
  */
-export function setupKeyboardShortcuts(): void {
+export function setupKeyboardShortcuts(): (() => void) | undefined {
 	if (typeof window === 'undefined') return;
 
 	const handleKeyDown = (e: KeyboardEvent) => {
@@ -595,6 +597,21 @@ export function setupKeyboardShortcuts(): void {
 		else if ((e.metaKey || e.ctrlKey) && e.key === 'y') {
 			e.preventDefault();
 			redo();
+		}
+		// Delete or Backspace - delete selected elements
+		else if (e.key === 'Delete' || e.key === 'Backspace') {
+			// Don't delete if user is typing in an input/textarea
+			const target = e.target as HTMLElement;
+			if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+			e.preventDefault();
+			const selected = get(selectedElements);
+			if (selected.length > 0) {
+				// Delete all selected elements
+				selected.forEach((element) => {
+					deleteElement(element.id);
+				});
+			}
 		}
 	};
 

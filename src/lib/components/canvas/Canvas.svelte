@@ -12,15 +12,35 @@
 	 */
 
 	import { onMount, onDestroy } from 'svelte';
-	import { designState, currentPage, initialize } from '$lib/stores/design-store';
+	import {
+		designState,
+		currentPage,
+		initialize,
+		createElement,
+		selectElement,
+		clearSelection,
+		selectedElements
+	} from '$lib/stores/design-store';
+	import { currentTool } from '$lib/stores/tool-store';
 	import CanvasElement from './CanvasElement.svelte';
 	import BaselineGrid from './BaselineGrid.svelte';
+	import SelectionOverlay from './SelectionOverlay.svelte';
 
 	let canvasElement: HTMLDivElement;
 	let viewport = { x: 0, y: 0, scale: 1 };
 	let isDragging = false;
 	let dragStart = { x: 0, y: 0 };
 	let isPanning = false;
+
+	// Drawing state (for creating new elements)
+	let isDrawing = false;
+	let drawStart = { x: 0, y: 0 };
+	let drawPreview: {
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+	} | null = null;
 
 	// Zoom settings
 	const MIN_ZOOM = 0.1;
@@ -103,28 +123,133 @@
 	}
 
 	function handleMouseDown(e: MouseEvent) {
-		if (isPanning) {
+		// Only handle clicks on the canvas background (not on elements)
+		if (e.target !== e.currentTarget) return;
+
+		const tool = $currentTool;
+
+		// Hand tool or Space key = panning (check this FIRST, before move tool)
+		if (tool === 'hand' || isPanning) {
 			isDragging = true;
 			dragStart = { x: e.clientX - viewport.x, y: e.clientY - viewport.y };
 			canvasElement.style.cursor = 'grabbing';
+			e.preventDefault();
+			return;
+		}
+
+		// Move tool: clear selection when clicking canvas background
+		if (tool === 'move') {
+			clearSelection();
+			return;
+		}
+
+		// Drawing tools: div, text, media
+		if (tool === 'div' || tool === 'text' || tool === 'media') {
+			isDrawing = true;
+
+			// Convert screen coordinates to canvas coordinates (accounting for viewport)
+			const rect = canvasElement.getBoundingClientRect();
+			const canvasX = (e.clientX - rect.left - viewport.x) / viewport.scale;
+			const canvasY = (e.clientY - rect.top - viewport.y) / viewport.scale;
+
+			drawStart = { x: canvasX, y: canvasY };
+			drawPreview = { x: canvasX, y: canvasY, width: 0, height: 0 };
 			e.preventDefault();
 		}
 	}
 
 	function handleMouseMove(e: MouseEvent) {
-		if (isDragging && isPanning) {
+		// Panning
+		if (isDragging && !isDrawing) {
 			viewport = {
 				...viewport,
 				x: e.clientX - dragStart.x,
 				y: e.clientY - dragStart.y
 			};
+			return;
+		}
+
+		// Drawing preview
+		if (isDrawing && drawPreview) {
+			const rect = canvasElement.getBoundingClientRect();
+			const canvasX = (e.clientX - rect.left - viewport.x) / viewport.scale;
+			const canvasY = (e.clientY - rect.top - viewport.y) / viewport.scale;
+
+			// Calculate position and size supporting all 4 quadrants
+			const x = Math.min(drawStart.x, canvasX);
+			const y = Math.min(drawStart.y, canvasY);
+			const width = Math.abs(canvasX - drawStart.x);
+			const height = Math.abs(canvasY - drawStart.y);
+
+			drawPreview = { x, y, width, height };
 		}
 	}
 
-	function handleMouseUp() {
-		if (isDragging) {
+	async function handleMouseUp() {
+		// Finish panning
+		if (isDragging && !isDrawing) {
 			isDragging = false;
 			canvasElement.style.cursor = isPanning ? 'grab' : 'default';
+			return;
+		}
+
+		// Finish drawing and create element
+		if (isDrawing && drawPreview) {
+			const tool = $currentTool;
+			const MIN_SIZE = 10; // Minimum size to create element
+			let newElementId: string;
+
+			// If dragged less than MIN_SIZE, create default-sized element
+			if (drawPreview.width < MIN_SIZE || drawPreview.height < MIN_SIZE) {
+				// Click: create default size centered at click position
+				const defaultSizes = {
+					div: { width: 200, height: 200 },
+					text: { width: 300, height: 100 },
+					media: { width: 200, height: 200 }
+				};
+
+				const size = defaultSizes[tool as 'div' | 'text' | 'media'] || { width: 200, height: 200 };
+
+				// Center element at click position
+				newElementId = await createElement({
+					pageId: 'canvas',
+					parentId: null,
+					elementType: tool === 'text' ? 'p' : tool === 'media' ? 'img' : 'div',
+					position: {
+						x: drawStart.x - size.width / 2,
+						y: drawStart.y - size.height / 2
+					},
+					size,
+					content: tool === 'text' ? 'Text' : '',
+					styles: {
+						backgroundColor: tool === 'div' ? '#f5f5f5' : undefined,
+						color: '#000000'
+					}
+				});
+			} else {
+				// Drag: create element with drawn size
+				newElementId = await createElement({
+					pageId: 'canvas',
+					parentId: null,
+					elementType: tool === 'text' ? 'p' : tool === 'media' ? 'img' : 'div',
+					position: { x: drawPreview.x, y: drawPreview.y },
+					size: { width: drawPreview.width, height: drawPreview.height },
+					content: tool === 'text' ? 'Text' : '',
+					styles: {
+						backgroundColor: tool === 'div' ? '#f5f5f5' : undefined,
+						color: '#000000'
+					}
+				});
+			}
+
+			// Automatically select the newly created element
+			selectElement(newElementId);
+
+			// Reset drawing state (keep tool selected)
+			isDrawing = false;
+			drawPreview = null;
+
+			// Don't switch back to move tool - keep current tool selected
 		}
 	}
 
@@ -191,6 +316,28 @@
 				<CanvasElement element={element} scale={viewport.scale} />
 			{/each}
 
+			<!-- Drawing preview - actual element being drawn -->
+			{#if drawPreview && drawPreview.width > 0 && drawPreview.height > 0}
+				<div
+					class="element-preview"
+					style="
+						position: absolute;
+						left: {drawPreview.x}px;
+						top: {drawPreview.y}px;
+						width: {drawPreview.width}px;
+						height: {drawPreview.height}px;
+						background-color: {$currentTool === 'div' ? '#f5f5f5' : $currentTool === 'text' ? 'transparent' : '#e5e7eb'};
+						color: #000000;
+						border: 2px solid #3b82f6;
+						opacity: 0.8;
+					"
+				>
+					{#if $currentTool === 'text'}
+						<span style="padding: 8px; display: block;">Text</span>
+					{/if}
+				</div>
+			{/if}
+
 			<!-- Optional: Render pages as visual artboards (like Figma frames) -->
 			{#each $designState.pageOrder as pageId}
 				{#if $designState.pages[pageId]}
@@ -212,6 +359,9 @@
 				{/if}
 			{/each}
 		</div>
+
+		<!-- Selection Overlay - handles selection UI and interactions -->
+		<SelectionOverlay viewport={viewport} selectedElements={$selectedElements} />
 	</div>
 </div>
 
@@ -223,8 +373,10 @@
 		position: relative;
 		width: 100%;
 		height: 100vh;
+		padding-top: 60px; /* Space for top toolbar */
 		overflow: hidden;
 		background: #1a1a1a; /* Dark canvas background */
+		box-sizing: border-box;
 	}
 
 	.zoom-controls {
@@ -284,5 +436,12 @@
 		font-size: 14px;
 		font-weight: 500;
 		pointer-events: none;
+	}
+
+	/* Element preview while drawing */
+	.element-preview {
+		pointer-events: none;
+		z-index: 1000;
+		box-sizing: border-box;
 	}
 </style>

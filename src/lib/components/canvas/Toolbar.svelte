@@ -1,189 +1,205 @@
 <script lang="ts">
 	/**
-	 * Toolbar - Element creation tools
+	 * Toolbar - Top toolbar with tool selector and component tools
 	 *
-	 * Floating toolbar with buttons to create different element types:
-	 * - Text (h1, h2, p, span)
-	 * - Containers (div, section)
-	 * - Media (image)
-	 * - Interactive (button, link, input)
+	 * Layout:
+	 * - Left: Tool selector (Move/Hand/Scale) + Component tools (Div/Text/Media)
+	 * - Middle: Undo/Redo + Zoom + Page selector
+	 * - Right: Save/Preview/Publish
 	 */
 
-	import { createElement, currentPage, designState } from '$lib/stores/design-store';
-	import type { Element } from '$lib/types/events';
+	import { currentTool, type Tool } from '$lib/stores/tool-store';
+	import { undo, redo } from '$lib/stores/design-store';
 
-	let selectedTool: string | null = null;
-	let elementCounter = 0; // Counter to offset new elements
+	// Local variable bound to the store
+	let selectedTool: Tool = $currentTool;
 
-	async function createNewElement(elementType: Element['type']) {
-		selectedTool = elementType;
+	// Update store when local value changes
+	$: currentTool.set(selectedTool);
 
-		// Default position and size for new elements
-		const defaultSize = {
-			h1: { width: 300, height: 60 },
-			h2: { width: 300, height: 50 },
-			h3: { width: 300, height: 40 },
-			p: { width: 300, height: 100 },
-			span: { width: 150, height: 30 },
-			div: { width: 200, height: 200 },
-			section: { width: 400, height: 300 },
-			img: { width: 200, height: 200 },
-			button: { width: 120, height: 40 },
-			a: { width: 100, height: 30 },
-			input: { width: 200, height: 40 }
-		};
+	function selectTool(tool: Tool) {
+		selectedTool = tool;
+	}
 
-		const defaultContent = {
-			h1: 'Heading 1',
-			h2: 'Heading 2',
-			h3: 'Heading 3',
-			p: 'Paragraph text',
-			span: 'Text',
-			button: 'Button',
-			a: 'Link'
-		};
+	function handleUndo() {
+		undo();
+	}
 
-		const size = defaultSize[elementType as keyof typeof defaultSize] || { width: 200, height: 100 };
-		const content = defaultContent[elementType as keyof typeof defaultContent] || '';
-
-		// Offset new elements so they don't stack on top of each other
-		const offset = elementCounter * 30; // 30px offset per element
-		elementCounter++;
-
-		try {
-			await createElement({
-				pageId: 'canvas', // Free-form canvas, no page restriction
-				parentId: null,
-				elementType,
-				position: { x: 300 + offset, y: 200 + offset }, // Offset position
-				size,
-				content,
-				styles: {
-					backgroundColor: elementType === 'div' || elementType === 'section' ? '#f5f5f5' : undefined,
-					color: '#000000'
-				}
-			});
-
-			selectedTool = null;
-		} catch (error) {
-			console.error('Failed to create element:', error);
-			alert('Failed to create element');
-		}
+	function handleRedo() {
+		redo();
 	}
 </script>
 
-<!-- STYLE: Toolbar - floating left sidebar, sticky -->
+<!-- Top Toolbar - Fixed at top of viewport -->
 <div class="toolbar">
-	<div class="toolbar-section">
-		<h3>Text</h3>
-		<button on:click={() => createNewElement('h1')} class:active={selectedTool === 'h1'}>
-			H1
-		</button>
-		<button on:click={() => createNewElement('h2')} class:active={selectedTool === 'h2'}>
-			H2
-		</button>
-		<button on:click={() => createNewElement('h3')} class:active={selectedTool === 'h3'}>
-			H3
-		</button>
-		<button on:click={() => createNewElement('p')} class:active={selectedTool === 'p'}>
-			P
-		</button>
-		<button on:click={() => createNewElement('span')} class:active={selectedTool === 'span'}>
-			Span
-		</button>
-	</div>
+	<!-- Left Section: Tools -->
+	<div class="toolbar-left">
+		<!-- Tool Selector Dropdown -->
+		<select bind:value={selectedTool} class="tool-selector">
+			<option value="move">Move</option>
+			<option value="hand">Hand</option>
+			<option value="scale">Scale</option>
+		</select>
 
-	<div class="toolbar-section">
-		<h3>Containers</h3>
-		<button on:click={() => createNewElement('div')} class:active={selectedTool === 'div'}>
+		<!-- Component Tools -->
+		<button
+			on:click={() => selectTool('div')}
+			class="tool-btn"
+			class:active={selectedTool === 'div'}
+			title="Div (Container)"
+		>
 			Div
 		</button>
-		<button on:click={() => createNewElement('section')} class:active={selectedTool === 'section'}>
-			Section
+		<button
+			on:click={() => selectTool('text')}
+			class="tool-btn"
+			class:active={selectedTool === 'text'}
+			title="Text"
+		>
+			Text
+		</button>
+		<button
+			on:click={() => selectTool('media')}
+			class="tool-btn"
+			class:active={selectedTool === 'media'}
+			title="Media (Image/Video)"
+		>
+			Media
 		</button>
 	</div>
 
-	<div class="toolbar-section">
-		<h3>Media</h3>
-		<button on:click={() => createNewElement('img')} class:active={selectedTool === 'img'}>
-			Image
-		</button>
+	<!-- Middle Section: Canvas Controls -->
+	<div class="toolbar-middle">
+		<button class="tool-btn" on:click={handleUndo} title="Undo (Cmd+Z)">↶</button>
+		<button class="tool-btn" on:click={handleRedo} title="Redo (Cmd+Shift+Z)">↷</button>
+		<span class="separator"></span>
+		<select class="zoom-selector">
+			<option>100%</option>
+			<option>75%</option>
+			<option>50%</option>
+			<option>25%</option>
+			<option>125%</option>
+			<option>150%</option>
+			<option>200%</option>
+		</select>
 	</div>
 
-	<div class="toolbar-section">
-		<h3>Interactive</h3>
-		<button on:click={() => createNewElement('button')} class:active={selectedTool === 'button'}>
-			Button
-		</button>
-		<button on:click={() => createNewElement('a')} class:active={selectedTool === 'a'}>
-			Link
-		</button>
-		<button on:click={() => createNewElement('input')} class:active={selectedTool === 'input'}>
-			Input
-		</button>
+	<!-- Right Section: Actions -->
+	<div class="toolbar-right">
+		<span class="save-status">Saved</span>
+		<button class="tool-btn">Preview</button>
+		<button class="tool-btn primary">Publish</button>
 	</div>
 </div>
 
 <style>
-	/* STYLE: Add your design here! */
-	/* This is unstyled semantic HTML with functional logic */
-
+	/* Top Toolbar - Fixed at top */
 	.toolbar {
 		position: fixed;
-		left: 20px;
-		top: 80px;
-		width: 200px;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 60px;
 		background: white;
-		border-radius: 8px;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-		padding: 16px;
-		z-index: 100;
-		max-height: calc(100vh - 120px);
-		overflow-y: auto;
+		border-bottom: 1px solid #e5e7eb;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 16px;
+		z-index: 1000;
+		gap: 24px;
 	}
 
-	.toolbar-section {
-		margin-bottom: 24px;
+	/* Sections */
+	.toolbar-left,
+	.toolbar-middle,
+	.toolbar-right {
+		display: flex;
+		align-items: center;
+		gap: 8px;
 	}
 
-	.toolbar-section:last-child {
-		margin-bottom: 0;
+	.toolbar-middle {
+		flex: 1;
+		justify-content: center;
 	}
 
-	.toolbar-section h3 {
-		font-size: 12px;
-		font-weight: 600;
-		color: #666;
-		text-transform: uppercase;
-		margin: 0 0 8px 0;
-		letter-spacing: 0.5px;
-	}
-
-	.toolbar button {
-		display: block;
-		width: 100%;
+	/* Tool Selector Dropdown */
+	.tool-selector {
 		padding: 8px 12px;
-		margin-bottom: 4px;
-		border: 1px solid #ddd;
+		border: 1px solid #d1d5db;
+		border-radius: 6px;
 		background: white;
-		text-align: left;
-		cursor: pointer;
-		border-radius: 4px;
 		font-size: 14px;
+		cursor: pointer;
+		min-width: 100px;
 	}
 
-	.toolbar button:hover {
-		background: #f5f5f5;
-		border-color: #999;
+	.tool-selector:hover {
+		border-color: #9ca3af;
 	}
 
-	.toolbar button.active {
+	.tool-selector:focus {
+		outline: none;
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+	}
+
+	/* Tool Buttons */
+	.tool-btn {
+		padding: 8px 16px;
+		border: 1px solid #d1d5db;
+		border-radius: 6px;
+		background: white;
+		font-size: 14px;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.tool-btn:hover {
+		background: #f3f4f6;
+		border-color: #9ca3af;
+	}
+
+	.tool-btn.active {
 		background: #3b82f6;
 		color: white;
 		border-color: #3b82f6;
 	}
 
-	.toolbar button:last-child {
-		margin-bottom: 0;
+	.tool-btn.primary {
+		background: #3b82f6;
+		color: white;
+		border-color: #3b82f6;
+	}
+
+	.tool-btn.primary:hover {
+		background: #2563eb;
+	}
+
+	/* Zoom Selector */
+	.zoom-selector {
+		padding: 8px 12px;
+		border: 1px solid #d1d5db;
+		border-radius: 6px;
+		background: white;
+		font-size: 14px;
+		cursor: pointer;
+		min-width: 80px;
+	}
+
+	/* Save Status */
+	.save-status {
+		font-size: 14px;
+		color: #6b7280;
+		padding: 0 8px;
+	}
+
+	/* Separator */
+	.separator {
+		width: 1px;
+		height: 24px;
+		background: #e5e7eb;
+		margin: 0 4px;
 	}
 </style>

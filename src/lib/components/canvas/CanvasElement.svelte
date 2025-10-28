@@ -1,169 +1,46 @@
 <script lang="ts">
 	/**
-	 * CanvasElement - Draggable/resizable element on the canvas
+	 * CanvasElement - Pure presentational component
 	 *
-	 * Features:
-	 * - Drag to move
-	 * - Resize handles (8 directions)
-	 * - Selection visual feedback
-	 * - Renders actual HTML elements (not canvas drawings)
-	 * - Recursive children rendering
+	 * Responsibilities:
+	 * - Render element with correct styles
+	 * - Recursively render children
+	 * - NO selection or interaction logic (handled by SelectionOverlay)
 	 */
 
+	import { designState, selectElement } from '$lib/stores/design-store';
+	import { interactionState } from '$lib/stores/interaction-store';
 	import type { Element } from '$lib/types/events';
-	import {
-		designState,
-		moveElement,
-		resizeElement,
-		selectElement,
-		selectedElements
-	} from '$lib/stores/design-store';
 
 	export let element: Element;
-	export let scale = 1; // Canvas viewport scale for accurate drag/resize
 
-	let isDragging = false;
-	let isResizing = false;
-	let resizeHandle = '';
-	let dragStart = { x: 0, y: 0 };
-	let elementStart = { x: 0, y: 0, width: 0, height: 0 };
-	let pendingPosition = { x: 0, y: 0 };
-	let pendingSize = { width: 0, height: 0 };
-
-	$: isSelected = $selectedElements.some((el) => el.id === element.id);
-
-	// Reactive style computation - updates when element or pending values change
-	$: elementStyles = getElementStyles();
-
-	function handleMouseDown(e: MouseEvent) {
-		// Check if clicking on a resize handle
-		const target = e.target as HTMLElement;
-		if (target.classList.contains('resize-handle')) {
-			isResizing = true;
-			resizeHandle = target.dataset.handle || '';
-			e.stopPropagation();
-		} else {
-			isDragging = true;
-		}
-
-		dragStart = { x: e.clientX, y: e.clientY };
-		elementStart = {
-			x: element.position.x,
-			y: element.position.y,
-			width: element.size.width,
-			height: element.size.height
-		};
-
-		// Initialize pending values to current values
-		pendingPosition = { x: element.position.x, y: element.position.y };
-		pendingSize = { width: element.size.width, height: element.size.height };
-
+	// Allow clicking element to select it
+	function handleClick(e: MouseEvent) {
+		e.stopPropagation();
 		selectElement(element.id);
-		e.preventDefault();
-
-		// Add global mouse move/up listeners
-		document.addEventListener('mousemove', handleMouseMove);
-		document.addEventListener('mouseup', handleMouseUp);
 	}
 
-	function handleMouseMove(e: MouseEvent) {
-		if (!isDragging && !isResizing) return;
+	// Get display position/size (pending during interaction, or actual)
+	$: displayPosition =
+		$interactionState.activeElementId === element.id && $interactionState.pendingPosition
+			? $interactionState.pendingPosition
+			: element.position;
 
-		// Account for canvas zoom/scale
-		const deltaX = (e.clientX - dragStart.x) / scale;
-		const deltaY = (e.clientY - dragStart.y) / scale;
+	$: displaySize =
+		$interactionState.activeElementId === element.id && $interactionState.pendingSize
+			? $interactionState.pendingSize
+			: element.size;
 
-		if (isDragging) {
-			// Update pending position - this triggers reactive style update
-			pendingPosition = {
-				x: elementStart.x + deltaX,
-				y: elementStart.y + deltaY
-			};
-			// Force style recalculation
-			elementStyles = getElementStyles();
-		} else if (isResizing) {
-			// Calculate new size based on handle
-			let newWidth = elementStart.width;
-			let newHeight = elementStart.height;
-			let newX = elementStart.x;
-			let newY = elementStart.y;
-			let positionNeedsUpdate = false;
-
-			if (resizeHandle.includes('e')) {
-				newWidth = elementStart.width + deltaX;
-			}
-			if (resizeHandle.includes('w')) {
-				newWidth = elementStart.width - deltaX;
-				newX = elementStart.x + deltaX;
-				positionNeedsUpdate = true;
-			}
-			if (resizeHandle.includes('s')) {
-				newHeight = elementStart.height + deltaY;
-			}
-			if (resizeHandle.includes('n')) {
-				newHeight = elementStart.height - deltaY;
-				newY = elementStart.y + deltaY;
-				positionNeedsUpdate = true;
-			}
-
-			// Minimum size
-			newWidth = Math.max(20, newWidth);
-			newHeight = Math.max(20, newHeight);
-
-			pendingSize = { width: newWidth, height: newHeight };
-			// Only update position if using N or W handles
-			if (positionNeedsUpdate) {
-				pendingPosition = { x: newX, y: newY };
-			}
-			// Force style recalculation
-			elementStyles = getElementStyles();
-		}
-	}
-
-	async function handleMouseUp() {
-		// Only dispatch event if position/size actually changed
-		if (isDragging) {
-			// Check if element actually moved
-			if (pendingPosition.x !== elementStart.x || pendingPosition.y !== elementStart.y) {
-				await moveElement(element.id, pendingPosition);
-			}
-		} else if (isResizing) {
-			// Check what changed
-			const sizeChanged = pendingSize.width !== elementStart.width || pendingSize.height !== elementStart.height;
-			const positionChanged = pendingPosition.x !== elementStart.x || pendingPosition.y !== elementStart.y;
-
-			// Note: Using N/W handles will create 2 events (size + position)
-			// Using S/E/SE handles will create only 1 event (size)
-			// This is acceptable - most users use SE handle which is 1 undo
-			if (sizeChanged) {
-				await resizeElement(element.id, pendingSize);
-			}
-			if (positionChanged) {
-				await moveElement(element.id, pendingPosition);
-			}
-		}
-
-		isDragging = false;
-		isResizing = false;
-		resizeHandle = '';
-
-		document.removeEventListener('mousemove', handleMouseMove);
-		document.removeEventListener('mouseup', handleMouseUp);
-	}
-
-	// Generate inline styles from element styles
-	function getElementStyles(): string {
+	// Generate inline styles from element properties
+	$: elementStyles = (() => {
 		const styles: string[] = [];
 
-		// Position and size - use pending values if dragging/resizing
-		const pos = (isDragging || isResizing) ? pendingPosition : element.position;
-		const size = isResizing ? pendingSize : element.size;
-
+		// Position and size - use pending values during interaction
 		styles.push(`position: absolute`);
-		styles.push(`left: ${pos.x}px`);
-		styles.push(`top: ${pos.y}px`);
-		styles.push(`width: ${size.width}px`);
-		styles.push(`height: ${size.height}px`);
+		styles.push(`left: ${displayPosition.x}px`);
+		styles.push(`top: ${displayPosition.y}px`);
+		styles.push(`width: ${displaySize.width}px`);
+		styles.push(`height: ${displaySize.height}px`);
 
 		// Element styles
 		if (element.styles.backgroundColor) styles.push(`background-color: ${element.styles.backgroundColor}`);
@@ -197,19 +74,11 @@
 		if (element.spacing.paddingLeft) styles.push(`padding-left: ${element.spacing.paddingLeft}`);
 
 		return styles.join('; ');
-	}
+	})();
 </script>
 
-<!-- STYLE: Canvas element wrapper - absolutely positioned, interactive -->
-<div
-	class="canvas-element"
-	class:selected={isSelected}
-	style={elementStyles}
-	on:mousedown={handleMouseDown}
-	role="button"
-	tabindex="0"
-	aria-label="{element.type} element"
->
+<!-- Canvas element - absolutely positioned, clickable for selection -->
+<div class="canvas-element" style={elementStyles} on:click={handleClick}>
 	<!-- Render element content based on type -->
 	{#if element.type === 'img'}
 		<img src={element.src || ''} alt={element.alt || ''} style="width: 100%; height: 100%; object-fit: cover;" />
@@ -232,105 +101,14 @@
 			<svelte:self element={$designState.elements[childId]} {scale} />
 		{/if}
 	{/each}
-
-	<!-- STYLE: Selection outline - blue border when selected -->
-	{#if isSelected}
-		<div class="selection-outline"></div>
-
-		<!-- STYLE: Resize handles - 8 handles around element -->
-		<div class="resize-handle resize-n" data-handle="n"></div>
-		<div class="resize-handle resize-ne" data-handle="ne"></div>
-		<div class="resize-handle resize-e" data-handle="e"></div>
-		<div class="resize-handle resize-se" data-handle="se"></div>
-		<div class="resize-handle resize-s" data-handle="s"></div>
-		<div class="resize-handle resize-sw" data-handle="sw"></div>
-		<div class="resize-handle resize-w" data-handle="w"></div>
-		<div class="resize-handle resize-nw" data-handle="nw"></div>
-	{/if}
 </div>
 
 <style>
-	/* STYLE: Add your design here! */
-	/* This is unstyled semantic HTML with functional logic */
-
 	.canvas-element {
 		position: absolute;
-		cursor: move;
 		user-select: none;
 		box-sizing: border-box;
-		z-index: 10; /* Above baseline grid */
-	}
-
-	.canvas-element.selected {
-		outline: 2px solid #3b82f6;
-		outline-offset: 0;
-	}
-
-	.selection-outline {
-		position: absolute;
-		inset: -2px;
-		border: 2px solid #3b82f6;
-		pointer-events: none;
-	}
-
-	.resize-handle {
-		position: absolute;
-		width: 8px;
-		height: 8px;
-		background: white;
-		border: 1px solid #3b82f6;
-		z-index: 10;
-	}
-
-	.resize-n {
-		top: -4px;
-		left: 50%;
-		transform: translateX(-50%);
-		cursor: ns-resize;
-	}
-
-	.resize-ne {
-		top: -4px;
-		right: -4px;
-		cursor: nesw-resize;
-	}
-
-	.resize-e {
-		top: 50%;
-		right: -4px;
-		transform: translateY(-50%);
-		cursor: ew-resize;
-	}
-
-	.resize-se {
-		bottom: -4px;
-		right: -4px;
-		cursor: nwse-resize;
-	}
-
-	.resize-s {
-		bottom: -4px;
-		left: 50%;
-		transform: translateX(-50%);
-		cursor: ns-resize;
-	}
-
-	.resize-sw {
-		bottom: -4px;
-		left: -4px;
-		cursor: nesw-resize;
-	}
-
-	.resize-w {
-		top: 50%;
-		left: -4px;
-		transform: translateY(-50%);
-		cursor: ew-resize;
-	}
-
-	.resize-nw {
-		top: -4px;
-		left: -4px;
-		cursor: nwse-resize;
+		pointer-events: auto; /* Allow clicks for selection */
+		cursor: default;
 	}
 </style>

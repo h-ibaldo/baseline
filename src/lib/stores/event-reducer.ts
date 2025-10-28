@@ -245,7 +245,7 @@ function handleMoveElement(state: DesignState, event: MoveElementEvent): DesignS
 }
 
 function handleResizeElement(state: DesignState, event: ResizeElementEvent): DesignState {
-	const { elementId, size } = event.payload;
+	const { elementId, size, position } = event.payload;
 	const element = state.elements[elementId];
 
 	if (!element) return state;
@@ -256,7 +256,9 @@ function handleResizeElement(state: DesignState, event: ResizeElementEvent): Des
 			...state.elements,
 			[elementId]: {
 				...element,
-				size
+				size,
+				// Update position if provided (for N/W handles)
+				...(position && { position })
 			}
 		}
 	};

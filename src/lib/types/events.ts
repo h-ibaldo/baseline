@@ -91,6 +91,7 @@ export interface ResizeElementEvent extends BaseEvent {
 	payload: {
 		elementId: string;
 		size: Size;
+		position?: Position; // Optional: for N/W handles that also move the element
 	};
 }
 

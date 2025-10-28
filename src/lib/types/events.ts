@@ -1,0 +1,376 @@
+/**
+ * Event Sourcing Types for LineBasis Page Builder
+ *
+ * All design changes are stored as append-only events.
+ * The current design state is computed by reducing events.
+ */
+
+// ============================================================================
+// Core Event Types
+// ============================================================================
+
+export type EventType =
+	// Element operations
+	| 'CREATE_ELEMENT'
+	| 'UPDATE_ELEMENT'
+	| 'DELETE_ELEMENT'
+	| 'MOVE_ELEMENT'
+	| 'RESIZE_ELEMENT'
+	| 'REORDER_ELEMENT'
+	// Style operations
+	| 'UPDATE_STYLES'
+	| 'UPDATE_TYPOGRAPHY'
+	| 'UPDATE_SPACING'
+	// Page operations
+	| 'CREATE_PAGE'
+	| 'UPDATE_PAGE'
+	| 'DELETE_PAGE'
+	| 'REORDER_PAGES'
+	// Component operations
+	| 'CREATE_COMPONENT'
+	| 'UPDATE_COMPONENT'
+	| 'DELETE_COMPONENT'
+	| 'INSTANCE_COMPONENT';
+
+export interface BaseEvent {
+	id: string; // UUID for the event
+	type: EventType;
+	timestamp: number; // Unix timestamp in milliseconds
+	userId?: string; // User who performed the action (for collaboration)
+}
+
+// ============================================================================
+// Element Events
+// ============================================================================
+
+export interface CreateElementEvent extends BaseEvent {
+	type: 'CREATE_ELEMENT';
+	payload: {
+		elementId: string;
+		parentId: string | null; // null for root elements
+		pageId: string;
+		elementType: ElementType;
+		position: Position;
+		size: Size;
+		styles?: Partial<ElementStyles>;
+		content?: string; // For text elements
+	};
+}
+
+export interface UpdateElementEvent extends BaseEvent {
+	type: 'UPDATE_ELEMENT';
+	payload: {
+		elementId: string;
+		changes: {
+			content?: string;
+			alt?: string;
+			href?: string;
+			src?: string;
+		};
+	};
+}
+
+export interface DeleteElementEvent extends BaseEvent {
+	type: 'DELETE_ELEMENT';
+	payload: {
+		elementId: string;
+	};
+}
+
+export interface MoveElementEvent extends BaseEvent {
+	type: 'MOVE_ELEMENT';
+	payload: {
+		elementId: string;
+		position: Position;
+		snapToBaseline?: boolean;
+	};
+}
+
+export interface ResizeElementEvent extends BaseEvent {
+	type: 'RESIZE_ELEMENT';
+	payload: {
+		elementId: string;
+		size: Size;
+	};
+}
+
+export interface ReorderElementEvent extends BaseEvent {
+	type: 'REORDER_ELEMENT';
+	payload: {
+		elementId: string;
+		newParentId: string | null;
+		newIndex: number; // Z-index or child position
+	};
+}
+
+// ============================================================================
+// Style Events
+// ============================================================================
+
+export interface UpdateStylesEvent extends BaseEvent {
+	type: 'UPDATE_STYLES';
+	payload: {
+		elementId: string;
+		styles: Partial<ElementStyles>;
+	};
+}
+
+export interface UpdateTypographyEvent extends BaseEvent {
+	type: 'UPDATE_TYPOGRAPHY';
+	payload: {
+		elementId: string;
+		typography: Partial<TypographyStyle>;
+	};
+}
+
+export interface UpdateSpacingEvent extends BaseEvent {
+	type: 'UPDATE_SPACING';
+	payload: {
+		elementId: string;
+		spacing: Partial<SpacingStyle>;
+	};
+}
+
+// ============================================================================
+// Page Events
+// ============================================================================
+
+export interface CreatePageEvent extends BaseEvent {
+	type: 'CREATE_PAGE';
+	payload: {
+		pageId: string;
+		name: string;
+		slug?: string;
+		width?: number;
+		height?: number;
+	};
+}
+
+export interface UpdatePageEvent extends BaseEvent {
+	type: 'UPDATE_PAGE';
+	payload: {
+		pageId: string;
+		changes: {
+			name?: string;
+			slug?: string;
+			width?: number;
+			height?: number;
+		};
+	};
+}
+
+export interface DeletePageEvent extends BaseEvent {
+	type: 'DELETE_PAGE';
+	payload: {
+		pageId: string;
+	};
+}
+
+export interface ReorderPagesEvent extends BaseEvent {
+	type: 'REORDER_PAGES';
+	payload: {
+		pageIds: string[]; // New order
+	};
+}
+
+// ============================================================================
+// Component Events
+// ============================================================================
+
+export interface CreateComponentEvent extends BaseEvent {
+	type: 'CREATE_COMPONENT';
+	payload: {
+		componentId: string;
+		name: string;
+		elementIds: string[]; // Elements that make up this component
+	};
+}
+
+export interface UpdateComponentEvent extends BaseEvent {
+	type: 'UPDATE_COMPONENT';
+	payload: {
+		componentId: string;
+		changes: {
+			name?: string;
+		};
+	};
+}
+
+export interface DeleteComponentEvent extends BaseEvent {
+	type: 'DELETE_COMPONENT';
+	payload: {
+		componentId: string;
+	};
+}
+
+export interface InstanceComponentEvent extends BaseEvent {
+	type: 'INSTANCE_COMPONENT';
+	payload: {
+		componentId: string;
+		instanceId: string; // New element ID for the instance
+		pageId: string;
+		position: Position;
+	};
+}
+
+// ============================================================================
+// Union Type
+// ============================================================================
+
+export type DesignEvent =
+	| CreateElementEvent
+	| UpdateElementEvent
+	| DeleteElementEvent
+	| MoveElementEvent
+	| ResizeElementEvent
+	| ReorderElementEvent
+	| UpdateStylesEvent
+	| UpdateTypographyEvent
+	| UpdateSpacingEvent
+	| CreatePageEvent
+	| UpdatePageEvent
+	| DeletePageEvent
+	| ReorderPagesEvent
+	| CreateComponentEvent
+	| UpdateComponentEvent
+	| DeleteComponentEvent
+	| InstanceComponentEvent;
+
+// ============================================================================
+// Design State Types (computed from events)
+// ============================================================================
+
+export type ElementType =
+	| 'div'
+	| 'section'
+	| 'header'
+	| 'footer'
+	| 'article'
+	| 'aside'
+	| 'nav'
+	| 'main'
+	| 'h1'
+	| 'h2'
+	| 'h3'
+	| 'h4'
+	| 'h5'
+	| 'h6'
+	| 'p'
+	| 'span'
+	| 'a'
+	| 'button'
+	| 'img'
+	| 'video'
+	| 'form'
+	| 'input'
+	| 'textarea'
+	| 'label'
+	| 'ul'
+	| 'ol'
+	| 'li';
+
+export interface Position {
+	x: number;
+	y: number;
+}
+
+export interface Size {
+	width: number;
+	height: number;
+}
+
+export interface ElementStyles {
+	// Layout
+	display: 'block' | 'inline' | 'inline-block' | 'flex' | 'grid' | 'none';
+	position: 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky';
+	// Colors
+	backgroundColor: string;
+	color: string;
+	// Border
+	borderWidth: string;
+	borderStyle: string;
+	borderColor: string;
+	borderRadius: string;
+	// Effects
+	opacity: number;
+	boxShadow: string;
+	transform: string;
+	// Overflow
+	overflow: 'visible' | 'hidden' | 'scroll' | 'auto';
+}
+
+export interface TypographyStyle {
+	fontFamily: string;
+	fontSize: string;
+	fontWeight: string;
+	lineHeight: string;
+	letterSpacing: string;
+	textAlign: 'left' | 'center' | 'right' | 'justify';
+	textDecoration: string;
+	textTransform: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+}
+
+export interface SpacingStyle {
+	marginTop: string;
+	marginRight: string;
+	marginBottom: string;
+	marginLeft: string;
+	paddingTop: string;
+	paddingRight: string;
+	paddingBottom: string;
+	paddingLeft: string;
+}
+
+export interface Element {
+	id: string;
+	type: ElementType;
+	parentId: string | null;
+	pageId: string;
+	position: Position;
+	size: Size;
+	styles: Partial<ElementStyles>;
+	typography: Partial<TypographyStyle>;
+	spacing: Partial<SpacingStyle>;
+	content?: string;
+	alt?: string;
+	href?: string;
+	src?: string;
+	children: string[]; // Child element IDs
+	zIndex: number;
+}
+
+export interface Page {
+	id: string;
+	name: string;
+	slug: string;
+	width: number;
+	height: number;
+	elements: string[]; // Root element IDs
+}
+
+export interface Component {
+	id: string;
+	name: string;
+	elementIds: string[]; // Element IDs that make up this component
+}
+
+export interface DesignState {
+	pages: Record<string, Page>;
+	elements: Record<string, Element>;
+	components: Record<string, Component>;
+	pageOrder: string[];
+	currentPageId: string | null;
+	selectedElementIds: string[];
+}
+
+// ============================================================================
+// Event Store Types
+// ============================================================================
+
+export interface EventStoreSnapshot {
+	version: number;
+	events: DesignEvent[];
+	lastEventId: string | null;
+	createdAt: number;
+	updatedAt: number;
+}

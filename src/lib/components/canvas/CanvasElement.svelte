@@ -27,8 +27,16 @@
 	let resizeHandle = '';
 	let dragStart = { x: 0, y: 0 };
 	let elementStart = { x: 0, y: 0, width: 0, height: 0 };
+	let pendingPosition = { x: 0, y: 0 };
+	let pendingSize = { width: 0, height: 0 };
 
 	$: isSelected = $selectedElements.some((el) => el.id === element.id);
+
+	// Force re-render when dragging/resizing
+	$: elementStyles = getElementStyles();
+	$: if (isDragging || isResizing) {
+		elementStyles = getElementStyles();
+	}
 
 	function handleMouseDown(e: MouseEvent) {
 		// Check if clicking on a resize handle
@@ -58,17 +66,20 @@
 	}
 
 	function handleMouseMove(e: MouseEvent) {
+		if (!isDragging && !isResizing) return;
+
 		// Account for canvas zoom/scale
 		const deltaX = (e.clientX - dragStart.x) / scale;
 		const deltaY = (e.clientY - dragStart.y) / scale;
 
 		if (isDragging) {
-			// Move element
-			const newX = elementStart.x + deltaX;
-			const newY = elementStart.y + deltaY;
-			moveElement(element.id, { x: newX, y: newY });
+			// Calculate new position but don't dispatch event yet
+			pendingPosition = {
+				x: elementStart.x + deltaX,
+				y: elementStart.y + deltaY
+			};
 		} else if (isResizing) {
-			// Resize element based on handle
+			// Calculate new size based on handle
 			let newWidth = elementStart.width;
 			let newHeight = elementStart.height;
 			let newX = elementStart.x;
@@ -93,14 +104,22 @@
 			newWidth = Math.max(20, newWidth);
 			newHeight = Math.max(20, newHeight);
 
-			resizeElement(element.id, { width: newWidth, height: newHeight });
-			if (newX !== elementStart.x || newY !== elementStart.y) {
-				moveElement(element.id, { x: newX, y: newY });
-			}
+			pendingSize = { width: newWidth, height: newHeight };
+			pendingPosition = { x: newX, y: newY };
 		}
 	}
 
-	function handleMouseUp() {
+	async function handleMouseUp() {
+		// Only dispatch event once on mouseup (not every mousemove)
+		if (isDragging) {
+			await moveElement(element.id, pendingPosition);
+		} else if (isResizing) {
+			await resizeElement(element.id, pendingSize);
+			if (pendingPosition.x !== elementStart.x || pendingPosition.y !== elementStart.y) {
+				await moveElement(element.id, pendingPosition);
+			}
+		}
+
 		isDragging = false;
 		isResizing = false;
 		resizeHandle = '';
@@ -113,12 +132,15 @@
 	function getElementStyles(): string {
 		const styles: string[] = [];
 
-		// Position and size
+		// Position and size - use pending values if dragging/resizing
+		const pos = (isDragging || isResizing) ? pendingPosition : element.position;
+		const size = isResizing ? pendingSize : element.size;
+
 		styles.push(`position: absolute`);
-		styles.push(`left: ${element.position.x}px`);
-		styles.push(`top: ${element.position.y}px`);
-		styles.push(`width: ${element.size.width}px`);
-		styles.push(`height: ${element.size.height}px`);
+		styles.push(`left: ${pos.x}px`);
+		styles.push(`top: ${pos.y}px`);
+		styles.push(`width: ${size.width}px`);
+		styles.push(`height: ${size.height}px`);
 
 		// Element styles
 		if (element.styles.backgroundColor) styles.push(`background-color: ${element.styles.backgroundColor}`);
@@ -159,7 +181,7 @@
 <div
 	class="canvas-element"
 	class:selected={isSelected}
-	style={getElementStyles()}
+	style={elementStyles}
 	on:mousedown={handleMouseDown}
 	role="button"
 	tabindex="0"
@@ -213,6 +235,7 @@
 		cursor: move;
 		user-select: none;
 		box-sizing: border-box;
+		z-index: 10; /* Above baseline grid */
 	}
 
 	.canvas-element.selected {

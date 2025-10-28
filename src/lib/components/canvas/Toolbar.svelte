@@ -9,10 +9,11 @@
 	 * - Interactive (button, link, input)
 	 */
 
-	import { createElement, currentPage } from '$lib/stores/design-store';
+	import { createElement, currentPage, designState } from '$lib/stores/design-store';
 	import type { Element } from '$lib/types/events';
 
 	let selectedTool: string | null = null;
+	let elementCounter = 0; // Counter to offset new elements
 
 	async function createNewElement(elementType: Element['type']) {
 		selectedTool = elementType;
@@ -45,12 +46,16 @@
 		const size = defaultSize[elementType as keyof typeof defaultSize] || { width: 200, height: 100 };
 		const content = defaultContent[elementType as keyof typeof defaultContent] || '';
 
+		// Offset new elements so they don't stack on top of each other
+		const offset = elementCounter * 30; // 30px offset per element
+		elementCounter++;
+
 		try {
 			await createElement({
 				pageId: 'canvas', // Free-form canvas, no page restriction
 				parentId: null,
 				elementType,
-				position: { x: 100, y: 100 }, // Start position on canvas
+				position: { x: 300 + offset, y: 200 + offset }, // Offset position
 				size,
 				content,
 				styles: {

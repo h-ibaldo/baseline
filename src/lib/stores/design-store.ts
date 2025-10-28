@@ -572,6 +572,103 @@ export async function importDesign(json: string): Promise<void> {
 }
 
 // ============================================================================
+// Copy/Paste/Duplicate
+// ============================================================================
+
+// Clipboard for storing copied elements (in-memory, not system clipboard)
+let clipboard: Element[] = [];
+
+/**
+ * Copy selected elements to clipboard
+ */
+export function copyElements(): void {
+	const selected = get(selectedElements);
+	if (selected.length === 0) return;
+
+	// Clone elements (deep copy)
+	clipboard = selected.map((el) => ({ ...el }));
+}
+
+/**
+ * Paste elements from clipboard
+ */
+export async function pasteElements(): Promise<void> {
+	if (clipboard.length === 0) return;
+
+	const state = get(designState);
+	const pageId = state.currentPageId;
+	if (!pageId) return;
+
+	// Clear selection first
+	clearSelection();
+
+	const newElementIds: string[] = [];
+
+	// Paste each element with a small offset
+	for (const element of clipboard) {
+		const newElementId = await createElement({
+			parentId: element.parentId,
+			pageId,
+			elementType: element.type,
+			position: {
+				x: element.position.x + 20, // Offset by 20px
+				y: element.position.y + 20
+			},
+			size: element.size,
+			styles: element.styles,
+			content: element.content
+		});
+
+		newElementIds.push(newElementId);
+
+		// Copy typography and spacing if they exist
+		if (Object.keys(element.typography || {}).length > 0) {
+			await updateElementTypography(newElementId, element.typography);
+		}
+		if (Object.keys(element.spacing || {}).length > 0) {
+			await updateElementSpacing(newElementId, element.spacing);
+		}
+
+		// Copy other properties
+		if (element.alt || element.href || element.src) {
+			await updateElement(newElementId, {
+				alt: element.alt,
+				href: element.href,
+				src: element.src
+			});
+		}
+	}
+
+	// Select the newly pasted elements
+	selectElements(newElementIds);
+}
+
+/**
+ * Duplicate selected elements
+ */
+export async function duplicateElements(): Promise<void> {
+	copyElements();
+	await pasteElements();
+}
+
+/**
+ * Select all elements on current page
+ */
+export function selectAll(): void {
+	const state = get(designState);
+	const pageId = state.currentPageId;
+	if (!pageId) return;
+
+	const page = state.pages[pageId];
+	if (!page) return;
+
+	// Get all root elements on the page
+	const allElementIds = page.elements;
+
+	selectElements(allElementIds);
+}
+
+// ============================================================================
 // Keyboard Shortcuts
 // ============================================================================
 
@@ -583,6 +680,10 @@ export function setupKeyboardShortcuts(): (() => void) | undefined {
 	if (typeof window === 'undefined') return;
 
 	const handleKeyDown = (e: KeyboardEvent) => {
+		// Don't trigger shortcuts if user is typing in an input/textarea
+		const target = e.target as HTMLElement;
+		const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+
 		// Cmd+Z (Mac) or Ctrl+Z (Windows/Linux)
 		if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
 			e.preventDefault();
@@ -598,12 +699,28 @@ export function setupKeyboardShortcuts(): (() => void) | undefined {
 			e.preventDefault();
 			redo();
 		}
+		// Cmd+C (copy)
+		else if ((e.metaKey || e.ctrlKey) && e.key === 'c' && !isTyping) {
+			e.preventDefault();
+			copyElements();
+		}
+		// Cmd+V (paste)
+		else if ((e.metaKey || e.ctrlKey) && e.key === 'v' && !isTyping) {
+			e.preventDefault();
+			pasteElements();
+		}
+		// Cmd+D (duplicate)
+		else if ((e.metaKey || e.ctrlKey) && e.key === 'd' && !isTyping) {
+			e.preventDefault();
+			duplicateElements();
+		}
+		// Cmd+A (select all)
+		else if ((e.metaKey || e.ctrlKey) && e.key === 'a' && !isTyping) {
+			e.preventDefault();
+			selectAll();
+		}
 		// Delete or Backspace - delete selected elements
-		else if (e.key === 'Delete' || e.key === 'Backspace') {
-			// Don't delete if user is typing in an input/textarea
-			const target = e.target as HTMLElement;
-			if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
-
+		else if ((e.key === 'Delete' || e.key === 'Backspace') && !isTyping) {
 			e.preventDefault();
 			const selected = get(selectedElements);
 			if (selected.length > 0) {

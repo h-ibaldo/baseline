@@ -12,6 +12,7 @@
 	import { onMount } from 'svelte';
 	import Canvas from '$lib/components/canvas/Canvas.svelte';
 	import Toolbar from '$lib/components/canvas/Toolbar.svelte';
+	import PropertiesWindow from '$lib/components/canvas/PropertiesWindow.svelte';
 	import { setupKeyboardShortcuts } from '$lib/stores/design-store';
 
 	let cleanupKeyboard: (() => void) | undefined;
@@ -37,6 +38,9 @@
 
 	<!-- Main canvas -->
 	<Canvas />
+
+	<!-- Properties window -->
+	<PropertiesWindow />
 </div>
 
 <style>

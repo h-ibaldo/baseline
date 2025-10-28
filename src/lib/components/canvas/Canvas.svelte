@@ -31,6 +31,7 @@
 	let isDragging = false;
 	let dragStart = { x: 0, y: 0 };
 	let isPanning = false;
+	let selectionOverlay: any = undefined; // Reference to SelectionOverlay
 
 	// Drawing state (for creating new elements)
 	let isDrawing = false;
@@ -320,7 +321,10 @@
 
 			<!-- Render all root elements (no parent) directly on infinite canvas -->
 			{#each Object.values($designState.elements).filter(el => el.parentId === null) as element}
-				<CanvasElement element={element} scale={viewport.scale} />
+				<CanvasElement
+					{element}
+					onStartDrag={selectionOverlay ? (e, el) => selectionOverlay.startDrag(e, el) : undefined}
+				/>
 			{/each}
 
 			<!-- Drawing preview - actual element being drawn -->
@@ -368,7 +372,7 @@
 		</div>
 
 		<!-- Selection Overlay - handles selection UI and interactions -->
-		<SelectionOverlay viewport={viewport} selectedElements={$selectedElements} />
+		<SelectionOverlay bind:this={selectionOverlay} {viewport} selectedElements={$selectedElements} />
 	</div>
 </div>
 
@@ -388,7 +392,7 @@
 
 	.zoom-controls {
 		position: absolute;
-		top: 20px;
+		bottom: 20px;
 		right: 20px;
 		z-index: 100;
 		display: flex;

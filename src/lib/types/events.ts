@@ -17,6 +17,7 @@ export type EventType =
 	| 'MOVE_ELEMENT'
 	| 'RESIZE_ELEMENT'
 	| 'REORDER_ELEMENT'
+	| 'TOGGLE_FRAME'
 	// Style operations
 	| 'UPDATE_STYLES'
 	| 'UPDATE_TYPOGRAPHY'
@@ -132,6 +133,17 @@ export interface UpdateSpacingEvent extends BaseEvent {
 	};
 }
 
+export interface ToggleFrameEvent extends BaseEvent {
+	type: 'TOGGLE_FRAME';
+	payload: {
+		elementId: string;
+		isFrame: boolean;
+		frameName?: string;
+		breakpointWidth?: number;
+		isPublished?: boolean;
+	};
+}
+
 // ============================================================================
 // Page Events
 // ============================================================================
@@ -228,6 +240,7 @@ export type DesignEvent =
 	| UpdateStylesEvent
 	| UpdateTypographyEvent
 	| UpdateSpacingEvent
+	| ToggleFrameEvent
 	| CreatePageEvent
 	| UpdatePageEvent
 	| DeletePageEvent
@@ -338,6 +351,10 @@ export interface Element {
 	src?: string;
 	children: string[]; // Child element IDs
 	zIndex: number;
+	isFrame?: boolean; // Whether this div is a frame (page/breakpoint)
+	frameName?: string; // Frame name (for display)
+	breakpointWidth?: number; // Breakpoint width in pixels
+	isPublished?: boolean; // Whether frame is published
 }
 
 export interface Page {

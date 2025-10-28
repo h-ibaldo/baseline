@@ -21,6 +21,7 @@ import type {
 	UpdateStylesEvent,
 	UpdateTypographyEvent,
 	UpdateSpacingEvent,
+	ToggleFrameEvent,
 	CreatePageEvent,
 	UpdatePageEvent,
 	DeletePageEvent,
@@ -84,6 +85,8 @@ export function reduceEvent(state: DesignState, event: DesignEvent): DesignState
 			return handleUpdateTypography(state, event);
 		case 'UPDATE_SPACING':
 			return handleUpdateSpacing(state, event);
+		case 'TOGGLE_FRAME':
+			return handleToggleFrame(state, event);
 
 		// Page operations
 		case 'CREATE_PAGE':
@@ -379,6 +382,27 @@ function handleUpdateSpacing(state: DesignState, event: UpdateSpacingEvent): Des
 					...element.spacing,
 					...spacing
 				}
+			}
+		}
+	};
+}
+
+function handleToggleFrame(state: DesignState, event: ToggleFrameEvent): DesignState {
+	const { elementId, isFrame, frameName, breakpointWidth, isPublished } = event.payload;
+	const element = state.elements[elementId];
+
+	if (!element) return state;
+
+	return {
+		...state,
+		elements: {
+			...state.elements,
+			[elementId]: {
+				...element,
+				isFrame,
+				frameName: frameName || element.frameName,
+				breakpointWidth: breakpointWidth || element.breakpointWidth || 1440,
+				isPublished: isPublished !== undefined ? isPublished : element.isPublished || false
 			}
 		}
 	};

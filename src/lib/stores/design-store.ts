@@ -449,6 +449,27 @@ export async function updateElementSpacing(
 	});
 }
 
+export async function toggleFrame(
+	elementId: string,
+	isFrame: boolean,
+	frameName?: string,
+	breakpointWidth?: number,
+	isPublished?: boolean
+): Promise<void> {
+	await dispatch({
+		id: uuidv4(),
+		type: 'TOGGLE_FRAME',
+		timestamp: Date.now(),
+		payload: {
+			elementId,
+			isFrame,
+			frameName,
+			breakpointWidth,
+			isPublished
+		}
+	});
+}
+
 // ============================================================================
 // Selection
 // ============================================================================

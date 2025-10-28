@@ -13,11 +13,19 @@
 	import type { Element } from '$lib/types/events';
 
 	export let element: Element;
+	export let onStartDrag: ((e: MouseEvent, element: Element) => void) | undefined = undefined;
 
-	// Allow clicking element to select it
-	function handleClick(e: MouseEvent) {
+	// Handle mousedown - select element and potentially start drag
+	function handleMouseDown(e: MouseEvent) {
 		e.stopPropagation();
+
+		// Select the element immediately
 		selectElement(element.id);
+
+		// If onStartDrag is provided (from SelectionOverlay), call it
+		if (onStartDrag) {
+			onStartDrag(e, element);
+		}
 	}
 
 	// Get display position/size (pending during interaction, or actual)
@@ -78,7 +86,7 @@
 </script>
 
 <!-- Canvas element - absolutely positioned, clickable for selection -->
-<div class="canvas-element" style={elementStyles} on:click={handleClick}>
+<div class="canvas-element" style={elementStyles} on:mousedown={handleMouseDown}>
 	<!-- Render element content based on type -->
 	{#if element.type === 'img'}
 		<img src={element.src || ''} alt={element.alt || ''} style="width: 100%; height: 100%; object-fit: cover;" />

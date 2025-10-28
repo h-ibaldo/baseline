@@ -63,8 +63,8 @@
 		return pendingSize && activeElementId === element.id ? pendingSize : element.size;
 	}
 
-	// Mouse event handlers
-	function handleMouseDown(e: MouseEvent, element: Element, handle?: string) {
+	// Expose handleMouseDown for CanvasElement
+	export function startDrag(e: MouseEvent, element: Element, handle?: string) {
 		e.stopPropagation();
 		e.preventDefault();
 
@@ -93,12 +93,17 @@
 			pendingPosition = { ...pos };
 		}
 
-		// Select the element
+		// Select the element (already selected by CanvasElement, but ensure it)
 		selectElement(element.id);
 
 		// Add global listeners
 		document.addEventListener('mousemove', handleMouseMove);
 		document.addEventListener('mouseup', handleMouseUp);
+	}
+
+	// Mouse event handlers
+	function handleMouseDown(e: MouseEvent, element: Element, handle?: string) {
+		startDrag(e, element, handle);
 	}
 
 	function handleMouseMove(e: MouseEvent) {

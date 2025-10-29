@@ -18,7 +18,7 @@ import {
 	importEvents
 } from './event-store';
 import { reduceEvents, getInitialState } from './event-reducer';
-import { cycleNavigationTools } from './tool-store';
+import { currentTool } from './tool-store';
 
 // ============================================================================
 // Store State
@@ -780,10 +780,35 @@ export function setupKeyboardShortcuts(): (() => void) | undefined {
 				clearSelection();
 			}
 		}
-		// V (cycle through navigation tools: move → hand → scale → move)
+		// V (switch to Move tool)
 		else if (e.key === 'v' && !isTyping) {
 			e.preventDefault();
-			cycleNavigationTools();
+			currentTool.set('move');
+		}
+		// H (switch to Hand tool)
+		else if (e.key === 'h' && !isTyping) {
+			e.preventDefault();
+			currentTool.set('hand');
+		}
+		// S (switch to Scale tool)
+		else if (e.key === 's' && !isTyping) {
+			e.preventDefault();
+			currentTool.set('scale');
+		}
+		// D (switch to Div tool)
+		else if (e.key === 'd' && !isTyping) {
+			e.preventDefault();
+			currentTool.set('div');
+		}
+		// T (switch to Text tool)
+		else if (e.key === 't' && !isTyping) {
+			e.preventDefault();
+			currentTool.set('text');
+		}
+		// I (switch to Media tool - changed from M to avoid conflict with Move)
+		else if (e.key === 'i' && !isTyping) {
+			e.preventDefault();
+			currentTool.set('media');
 		}
 		// Delete or Backspace - delete selected elements
 		else if ((e.key === 'Delete' || e.key === 'Backspace') && !isTyping) {

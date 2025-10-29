@@ -287,7 +287,7 @@
 	}
 
 	function resetZoom() {
-		viewport = { x: 0, y: 0, scale: 1 };
+		viewport = { ...viewport, scale: 1 };
 	}
 </script>
 

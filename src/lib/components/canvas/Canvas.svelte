@@ -169,9 +169,8 @@
 		// Only handle clicks on the canvas background for other tools
 		if (e.target !== e.currentTarget) return;
 
-		// Move tool: clear selection when clicking canvas background
+		// Move tool: SelectionBox handles drag selection
 		if (tool === 'move') {
-			clearSelection();
 			return;
 		}
 
@@ -456,7 +455,9 @@
 		<SelectionOverlay bind:this={selectionOverlay} {viewport} {isPanning} selectedElements={$selectedElements} />
 		
 		<!-- Selection Box - multi-select by dragging -->
-		<SelectionBox {canvasElement} {viewport} />
+		{#if canvasElement}
+			<SelectionBox {canvasElement} {viewport} />
+		{/if}
 	</div>
 </div>
 

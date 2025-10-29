@@ -36,9 +36,10 @@
 
 		// Only start selection if clicking on canvas background (not an element)
 		const target = e.target as HTMLElement;
-		const isCanvasBackground = target === canvasElement || 
-		                          target.classList.contains('canvas-viewport');
-		
+		const isCanvasBackground = target === canvasElement ||
+		                          target.classList.contains('canvas-viewport') ||
+		                          target.classList.contains('canvas');
+
 		if (isCanvasBackground) {
 			isSelecting = true;
 

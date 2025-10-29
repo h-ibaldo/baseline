@@ -225,8 +225,8 @@ LineBasis follows a **phased release strategy** to ship faster, validate archite
   - [x] Zoom controls (in/out, reset, percentage display)
 
 #### 5.2 Frame Management
-- [ ] Add frame button (default: Desktop 1440px)
-- [ ] Frame properties: name, breakpoint width
+- [ ] Add frame checkbox to div properties window
+- [ ] Frame properties outside the properties window: name, breakpoint width
 - [ ] Move frames on canvas (drag frame header)
 - [ ] Resize frames (drag frame edges)
 - [ ] Delete frame (with confirmation)

@@ -120,9 +120,28 @@
 	}
 
 	function handleKeyDown(e: KeyboardEvent) {
+		// Space key for panning
 		if (e.code === 'Space' && !isPanning) {
 			e.preventDefault();
 			isPanning = true;
+			return;
+		}
+		
+		// Zoom shortcuts: Cmd/Ctrl + Plus/Minus/0
+		if (e.metaKey || e.ctrlKey) {
+			if (e.code === 'Equal' || e.code === 'NumpadAdd') {
+				// Cmd/Ctrl + (or Cmd/Ctrl =)
+				e.preventDefault();
+				zoomIn();
+			} else if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
+				// Cmd/Ctrl -
+				e.preventDefault();
+				zoomOut();
+			} else if (e.code === 'Digit0' || e.code === 'Numpad0') {
+				// Cmd/Ctrl 0
+				e.preventDefault();
+				resetZoom();
+			}
 		}
 	}
 
@@ -273,16 +292,40 @@
 
 	// Zoom controls
 	function zoomIn() {
+		const newScale = Math.min(MAX_ZOOM, viewport.scale + ZOOM_STEP);
+		
+		// Calculate center of viewport
+		const rect = canvasElement.getBoundingClientRect();
+		const centerX = rect.width / 2;
+		const centerY = rect.height / 2;
+		
+		// Calculate scale ratio
+		const scaleRatio = newScale / viewport.scale;
+		
+		// Adjust position to keep center point fixed
 		viewport = {
-			...viewport,
-			scale: Math.min(MAX_ZOOM, viewport.scale + ZOOM_STEP)
+			x: centerX - (centerX - viewport.x) * scaleRatio,
+			y: centerY - (centerY - viewport.y) * scaleRatio,
+			scale: newScale
 		};
 	}
 
 	function zoomOut() {
+		const newScale = Math.max(MIN_ZOOM, viewport.scale - ZOOM_STEP);
+		
+		// Calculate center of viewport
+		const rect = canvasElement.getBoundingClientRect();
+		const centerX = rect.width / 2;
+		const centerY = rect.height / 2;
+		
+		// Calculate scale ratio
+		const scaleRatio = newScale / viewport.scale;
+		
+		// Adjust position to keep center point fixed
 		viewport = {
-			...viewport,
-			scale: Math.max(MIN_ZOOM, viewport.scale - ZOOM_STEP)
+			x: centerX - (centerX - viewport.x) * scaleRatio,
+			y: centerY - (centerY - viewport.y) * scaleRatio,
+			scale: newScale
 		};
 	}
 

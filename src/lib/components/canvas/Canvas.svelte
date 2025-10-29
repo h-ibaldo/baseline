@@ -17,6 +17,7 @@
 		currentPage,
 		initialize,
 		createElement,
+		updateElement,
 		selectElement,
 		clearSelection,
 		selectedElements
@@ -236,6 +237,14 @@
 				return;
 			}
 
+			// Placeholder SVG for media elements
+			const placeholderSVG = 'data:image/svg+xml,' + encodeURIComponent(
+				'<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">' +
+				'<rect width="200" height="200" fill="#f5f5f5"/>' +
+				'<text x="100" y="100" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="14" fill="#999">Select Image</text>' +
+				'</svg>'
+			);
+
 			// If dragged less than MIN_SIZE, create default-sized element
 			if (drawPreview.width < MIN_SIZE || drawPreview.height < MIN_SIZE) {
 				// Click: create default size centered at click position
@@ -263,6 +272,14 @@
 						color: '#000000'
 					}
 				});
+
+				// Add placeholder image for media elements
+				if (tool === 'media') {
+					await updateElement(newElementId, {
+						src: placeholderSVG,
+						alt: 'Click to select image'
+					});
+				}
 			} else {
 				// Drag: create element with drawn size
 				newElementId = await createElement({
@@ -277,6 +294,14 @@
 						color: '#000000'
 					}
 				});
+
+				// Add placeholder image for media elements
+				if (tool === 'media') {
+					await updateElement(newElementId, {
+						src: placeholderSVG,
+						alt: 'Click to select image'
+					});
+				}
 			}
 
 			// Automatically select the newly created element

@@ -11,6 +11,7 @@
 	import { selectedElements } from '$lib/stores/design-store';
 	import FloatingWindow from '$lib/components/ui/FloatingWindow.svelte';
 	import DivProperties from './properties/DivProperties.svelte';
+	import MediaProperties from './properties/MediaProperties.svelte';
 
 	$: selectedElement = $selectedElements.length === 1 ? $selectedElements[0] : null;
 	$: elementType = selectedElement?.type;
@@ -31,10 +32,7 @@
 				<p class="hint">Coming soon</p>
 			</div>
 		{:else if elementType === 'img'}
-			<div class="coming-soon">
-				<p>Media Properties</p>
-				<p class="hint">Coming soon</p>
-			</div>
+			<MediaProperties element={selectedElement} />
 		{:else}
 			<div class="no-selection">
 				<p>Unknown element type: {elementType}</p>

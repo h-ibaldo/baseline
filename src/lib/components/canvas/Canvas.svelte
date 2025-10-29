@@ -287,7 +287,20 @@
 	}
 
 	function resetZoom() {
-		viewport = { ...viewport, scale: 1 };
+		// Calculate center of viewport
+		const rect = canvasElement.getBoundingClientRect();
+		const centerX = rect.width / 2;
+		const centerY = rect.height / 2;
+		
+		// Calculate scale ratio
+		const scaleRatio = 1 / viewport.scale;
+		
+		// Adjust position to keep center point fixed
+		viewport = {
+			x: centerX - (centerX - viewport.x) * scaleRatio,
+			y: centerY - (centerY - viewport.y) * scaleRatio,
+			scale: 1
+		};
 	}
 </script>
 

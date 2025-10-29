@@ -47,12 +47,16 @@
 
 	// Get display position/size (pending during interaction, or actual)
 	$: displayPosition =
-		$interactionState.activeElementId === element.id && $interactionState.pendingPosition
+		$interactionState.groupTransforms.has(element.id)
+			? $interactionState.groupTransforms.get(element.id)!.position
+			: $interactionState.activeElementId === element.id && $interactionState.pendingPosition
 			? $interactionState.pendingPosition
 			: element.position;
 
 	$: displaySize =
-		$interactionState.activeElementId === element.id && $interactionState.pendingSize
+		$interactionState.groupTransforms.has(element.id)
+			? $interactionState.groupTransforms.get(element.id)!.size
+			: $interactionState.activeElementId === element.id && $interactionState.pendingSize
 			? $interactionState.pendingSize
 			: element.size;
 
@@ -115,7 +119,7 @@
 </script>
 
 <!-- Canvas element - absolutely positioned, clickable for selection -->
-<div class="canvas-element" style={elementStyles} on:mousedown={handleMouseDown} role="button" tabindex="0">
+<div class="canvas-element" data-element-id={element.id} style={elementStyles} on:mousedown={handleMouseDown} role="button" tabindex="0">
 	<!-- Render element content based on type -->
 	{#if element.type === 'img'}
 		<img src={element.src || ''} alt={element.alt || ''} style={imageStyles} />

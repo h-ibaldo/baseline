@@ -14,9 +14,9 @@
 	export let pendingSize: { width: number; height: number } | null;
 	export let isPanning: boolean = false;
 	export let onMouseDown: (e: MouseEvent, handle?: string) => void;
-	
+
 	// Determine cursor based on tool and panning state
-	$: dragCursor = $currentTool === 'hand' || isPanning ? 'grab' : 'move';
+	$: dragCursor = $currentTool === 'hand' || isPanning ? 'grab' : 'default';
 
 	const HANDLE_SIZE = 8;
 	const BORDER_WIDTH = 2;

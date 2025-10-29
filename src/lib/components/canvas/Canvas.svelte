@@ -163,8 +163,9 @@
 		// Only handle clicks on the canvas background for other tools
 		if (e.target !== e.currentTarget) return;
 
-		// Move tool: SelectionBox handles drag selection
+		// Move tool: Clear selection when clicking empty canvas, SelectionBox handles drag selection
 		if (tool === 'move') {
+			clearSelection();
 			return;
 		}
 

@@ -12,7 +12,7 @@
 	import { onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
 	import type { Element } from '$lib/types/events';
-	import { moveElement, resizeElement, selectElement } from '$lib/stores/design-store';
+	import { moveElement, resizeElement, selectElement, selectElements, clearSelection } from '$lib/stores/design-store';
 	import { interactionState } from '$lib/stores/interaction-store';
 	import { currentTool } from '$lib/stores/tool-store';
 	import SelectionUI from './SelectionUI.svelte';
@@ -26,10 +26,12 @@
 	let activeElementId: string | null = null;
 	let interactionMode: 'idle' | 'dragging' | 'resizing' = 'idle';
 	let resizeHandle: string | null = null;
+	let isGroupInteraction = false; // Track if interacting with multiple elements
 
 	// Pending transform during interaction (for live preview)
 	let pendingPosition: { x: number; y: number } | null = null;
 	let pendingSize: { width: number; height: number } | null = null;
+	let groupPendingTransforms: Map<string, { position: { x: number; y: number }; size: { width: number; height: number } }> = new Map();
 
 	// Broadcast state to store for CanvasElement to consume
 	$: {
@@ -37,48 +39,197 @@
 			activeElementId,
 			mode: interactionMode,
 			pendingPosition,
-			pendingSize
+			pendingSize,
+			groupTransforms: groupPendingTransforms
 		});
 	}
 
 	// Drag start tracking
 	let dragStartScreen = { x: 0, y: 0 };
 	let elementStartCanvas = { x: 0, y: 0, width: 0, height: 0 };
+	let groupStartElements: Array<{ id: string; x: number; y: number; width: number; height: number }> = [];
 
 	// Constants
 	const MOVEMENT_THRESHOLD = 2; // px
 
-	// Coordinate conversion helper
-	function screenToCanvas(screenX: number, screenY: number) {
-		return {
-			x: (screenX - viewport.x) / viewport.scale,
-			y: (screenY - viewport.y) / viewport.scale
-		};
+	// Calculate bounding box for multiple elements
+	function getGroupBounds(elements: Element[]): { x: number; y: number; width: number; height: number } {
+		if (elements.length === 0) return { x: 0, y: 0, width: 0, height: 0 };
+
+		let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+		for (const el of elements) {
+			const pos = getDisplayPosition(el);
+			const size = getDisplaySize(el);
+			minX = Math.min(minX, pos.x);
+			minY = Math.min(minY, pos.y);
+			maxX = Math.max(maxX, pos.x + size.width);
+			maxY = Math.max(maxY, pos.y + size.height);
+		}
+
+		return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
 	}
+
+	// Reactive: compute group bounds (depends on groupPendingTransforms for live updates)
+	$: groupBounds = selectedElements.length > 1 && groupPendingTransforms ? getGroupBounds(selectedElements) : null;
 
 	// Helper: Get display position (pending or actual)
 	function getDisplayPosition(element: Element): { x: number; y: number } {
+		if (isGroupInteraction && groupPendingTransforms.has(element.id)) {
+			return groupPendingTransforms.get(element.id)!.position;
+		}
 		return pendingPosition && activeElementId === element.id ? pendingPosition : element.position;
 	}
 
 	// Helper: Get display size (pending or actual)
 	function getDisplaySize(element: Element): { width: number; height: number } {
+		if (isGroupInteraction && groupPendingTransforms.has(element.id)) {
+			return groupPendingTransforms.get(element.id)!.size;
+		}
 		return pendingSize && activeElementId === element.id ? pendingSize : element.size;
+	}
+
+	// Start group interaction (for multi-selection)
+	function startGroupInteraction(e: MouseEvent, handle?: string) {
+		const tool = get(currentTool);
+		if (tool === 'hand' || isPanning) return;
+
+		// If no handle (just clicking drag area), check if clicking on an actual element
+		if (!handle) {
+			// Check if we actually moved before considering this a drag
+			// If it's just a click, we want to handle element/canvas selection differently
+			const startX = e.clientX;
+			const startY = e.clientY;
+			let hasMoved = false;
+
+			const checkMove = (moveEvent: MouseEvent) => {
+				const deltaX = Math.abs(moveEvent.clientX - startX);
+				const deltaY = Math.abs(moveEvent.clientY - startY);
+				if (deltaX > 3 || deltaY > 3) {
+					hasMoved = true;
+					startDragging();
+				}
+			};
+
+			const handleClick = (upEvent: MouseEvent) => {
+				document.removeEventListener('mousemove', checkMove);
+				document.removeEventListener('mouseup', handleClick);
+
+				if (!hasMoved) {
+					// It was a click, not a drag - check what's underneath
+					const allSelectionElements = document.querySelectorAll('.selection-border, .drag-area, .resize-handle');
+					allSelectionElements.forEach(el => (el as HTMLElement).style.pointerEvents = 'none');
+
+					let elementBelow = document.elementFromPoint(upEvent.clientX, upEvent.clientY);
+
+					allSelectionElements.forEach(el => (el as HTMLElement).style.pointerEvents = '');
+
+					// Find the actual canvas-element wrapper (might be a child element like img)
+					let canvasElement: HTMLElement | null = null;
+					if (elementBelow) {
+						// Check if it's a canvas-element or find the closest one
+						if (elementBelow.classList.contains('canvas-element')) {
+							canvasElement = elementBelow as HTMLElement;
+						} else {
+							canvasElement = elementBelow.closest('.canvas-element') as HTMLElement;
+						}
+					}
+
+					// If we found a canvas element, select it directly (without triggering drag)
+					if (canvasElement) {
+						const elementId = canvasElement.getAttribute('data-element-id');
+						if (elementId) {
+							selectElement(elementId);
+							return;
+						}
+					}
+
+					// If clicking empty space, clear selection
+					clearSelection();
+				}
+			};
+
+			const startDragging = () => {
+				document.removeEventListener('mousemove', checkMove);
+				document.removeEventListener('mouseup', handleClick);
+
+				e.stopPropagation();
+				e.preventDefault();
+
+				isGroupInteraction = true;
+				dragStartScreen = { x: startX, y: startY };
+
+				// Store initial bounds for all elements
+				groupStartElements = selectedElements.map(el => ({
+					id: el.id,
+					x: el.position.x,
+					y: el.position.y,
+					width: el.size.width,
+					height: el.size.height
+				}));
+
+				// Store group bounds
+				const bounds = getGroupBounds(selectedElements);
+				elementStartCanvas = bounds;
+
+				interactionMode = 'dragging';
+				pendingPosition = { x: bounds.x, y: bounds.y };
+
+				document.addEventListener('mousemove', handleMouseMove);
+				document.addEventListener('mouseup', handleMouseUp);
+			};
+
+			e.stopPropagation();
+			e.preventDefault();
+
+			document.addEventListener('mousemove', checkMove);
+			document.addEventListener('mouseup', handleClick);
+			return;
+		}
+
+		// Handle is provided (resize)
+		e.stopPropagation();
+		e.preventDefault();
+
+		isGroupInteraction = true;
+		dragStartScreen = { x: e.clientX, y: e.clientY };
+
+		// Store initial bounds for all elements
+		groupStartElements = selectedElements.map(el => ({
+			id: el.id,
+			x: el.position.x,
+			y: el.position.y,
+			width: el.size.width,
+			height: el.size.height
+		}));
+
+		// Store group bounds
+		const bounds = getGroupBounds(selectedElements);
+		elementStartCanvas = bounds;
+
+		interactionMode = 'resizing';
+		resizeHandle = handle;
+		pendingSize = { width: bounds.width, height: bounds.height };
+		pendingPosition = { x: bounds.x, y: bounds.y };
+
+		document.addEventListener('mousemove', handleMouseMove);
+		document.addEventListener('mouseup', handleMouseUp);
 	}
 
 	// Expose handleMouseDown for CanvasElement
 	export function startDrag(e: MouseEvent, element: Element, handle?: string) {
 		const tool = get(currentTool);
-		
+
 		// Don't handle if hand tool or space panning is active - let canvas handle it
 		if (tool === 'hand' || isPanning) {
 			return;
 		}
-		
+
 		e.stopPropagation();
 		e.preventDefault();
 
 		activeElementId = element.id;
+		isGroupInteraction = false;
 		dragStartScreen = { x: e.clientX, y: e.clientY };
 
 		const pos = getDisplayPosition(element);
@@ -117,7 +268,8 @@
 	}
 
 	function handleMouseMove(e: MouseEvent) {
-		if (interactionMode === 'idle' || !activeElementId) return;
+		if (interactionMode === 'idle') return;
+		if (!isGroupInteraction && !activeElementId) return;
 
 		const deltaScreen = {
 			x: e.clientX - dragStartScreen.x,
@@ -131,11 +283,27 @@
 		};
 
 		if (interactionMode === 'dragging') {
-			// Update pending position
+			// Update pending position for bounding box
 			pendingPosition = {
 				x: elementStartCanvas.x + deltaCanvas.x,
 				y: elementStartCanvas.y + deltaCanvas.y
 			};
+
+			// Update pending transforms for all group elements
+			if (isGroupInteraction) {
+				const deltaX = deltaCanvas.x;
+				const deltaY = deltaCanvas.y;
+
+				groupPendingTransforms = new Map(
+					groupStartElements.map(el => [
+						el.id,
+						{
+							position: { x: el.x + deltaX, y: el.y + deltaY },
+							size: { width: el.width, height: el.height }
+						}
+					])
+				);
+			}
 		} else if (interactionMode === 'resizing' && resizeHandle) {
 			// Calculate new size based on handle
 			let newWidth = elementStartCanvas.width;
@@ -170,56 +338,124 @@
 
 			pendingSize = { width: newWidth, height: newHeight };
 			pendingPosition = { x: newX, y: newY };
+
+			// Update pending transforms for all group elements during resize
+			if (isGroupInteraction) {
+				const scaleX = newWidth / elementStartCanvas.width;
+				const scaleY = newHeight / elementStartCanvas.height;
+				const deltaX = newX - elementStartCanvas.x;
+				const deltaY = newY - elementStartCanvas.y;
+
+				groupPendingTransforms = new Map(
+					groupStartElements.map(el => {
+						const relX = el.x - elementStartCanvas.x;
+						const relY = el.y - elementStartCanvas.y;
+						const newElWidth = el.width * scaleX;
+						const newElHeight = el.height * scaleY;
+						const newElX = elementStartCanvas.x + deltaX + relX * scaleX;
+						const newElY = elementStartCanvas.y + deltaY + relY * scaleY;
+
+						return [
+							el.id,
+							{
+								position: { x: newElX, y: newElY },
+								size: { width: newElWidth, height: newElHeight }
+							}
+						];
+					})
+				);
+			}
 		}
 	}
 
 	async function handleMouseUp() {
-		if (interactionMode === 'idle' || !activeElementId) return;
+		if (interactionMode === 'idle') return;
+		if (!isGroupInteraction && !activeElementId) return;
 
 		// Check if actually moved beyond threshold
-		const movedX = pendingPosition
-			? Math.abs(pendingPosition.x - elementStartCanvas.x)
-			: 0;
-		const movedY = pendingPosition
-			? Math.abs(pendingPosition.y - elementStartCanvas.y)
-			: 0;
-		const sizeChangedW = pendingSize
-			? Math.abs(pendingSize.width - elementStartCanvas.width)
-			: 0;
-		const sizeChangedH = pendingSize
-			? Math.abs(pendingSize.height - elementStartCanvas.height)
-			: 0;
+		const movedX = pendingPosition ? Math.abs(pendingPosition.x - elementStartCanvas.x) : 0;
+		const movedY = pendingPosition ? Math.abs(pendingPosition.y - elementStartCanvas.y) : 0;
+		const sizeChangedW = pendingSize ? Math.abs(pendingSize.width - elementStartCanvas.width) : 0;
+		const sizeChangedH = pendingSize ? Math.abs(pendingSize.height - elementStartCanvas.height) : 0;
 
-		if (interactionMode === 'dragging') {
-			if (movedX > MOVEMENT_THRESHOLD || movedY > MOVEMENT_THRESHOLD) {
-				if (pendingPosition) {
-					await moveElement(activeElementId, pendingPosition);
+		if (isGroupInteraction) {
+			// Handle group interaction
+			if (interactionMode === 'dragging' && pendingPosition) {
+				if (movedX > MOVEMENT_THRESHOLD || movedY > MOVEMENT_THRESHOLD) {
+					const deltaX = pendingPosition.x - elementStartCanvas.x;
+					const deltaY = pendingPosition.y - elementStartCanvas.y;
+
+					// Move all elements by the same delta
+					await Promise.all(
+						groupStartElements.map(el =>
+							moveElement(el.id, { x: el.x + deltaX, y: el.y + deltaY })
+						)
+					);
 				}
-			}
-		} else if (interactionMode === 'resizing') {
-			const sizeChanged = sizeChangedW > MOVEMENT_THRESHOLD || sizeChangedH > MOVEMENT_THRESHOLD;
-			const positionChanged = movedX > MOVEMENT_THRESHOLD || movedY > MOVEMENT_THRESHOLD;
+			} else if (interactionMode === 'resizing' && pendingSize && pendingPosition) {
+				const sizeChanged = sizeChangedW > MOVEMENT_THRESHOLD || sizeChangedH > MOVEMENT_THRESHOLD;
 
-			if (sizeChanged || positionChanged) {
-				if (pendingSize) {
-					await resizeElement(
-						activeElementId,
-						pendingSize,
-						positionChanged && pendingPosition ? pendingPosition : undefined
+				if (sizeChanged) {
+					// Calculate scale ratios
+					const scaleX = pendingSize.width / elementStartCanvas.width;
+					const scaleY = pendingSize.height / elementStartCanvas.height;
+					const deltaX = pendingPosition.x - elementStartCanvas.x;
+					const deltaY = pendingPosition.y - elementStartCanvas.y;
+
+					// Resize and reposition all elements proportionally
+					await Promise.all(
+						groupStartElements.map(el => {
+							const relX = el.x - elementStartCanvas.x;
+							const relY = el.y - elementStartCanvas.y;
+							const newWidth = el.width * scaleX;
+							const newHeight = el.height * scaleY;
+							const newX = elementStartCanvas.x + deltaX + relX * scaleX;
+							const newY = elementStartCanvas.y + deltaY + relY * scaleY;
+
+							return resizeElement(el.id, { width: newWidth, height: newHeight }, { x: newX, y: newY });
+						})
 					);
 				}
 			}
-		}
 
-		// Keep element selected after interaction
-		selectElement(activeElementId);
+			// Keep group selected after interaction
+			selectElements(groupStartElements.map(el => el.id));
+		} else if (activeElementId) {
+			// Handle single element interaction
+			if (interactionMode === 'dragging') {
+				if (movedX > MOVEMENT_THRESHOLD || movedY > MOVEMENT_THRESHOLD) {
+					if (pendingPosition) {
+						await moveElement(activeElementId, pendingPosition);
+					}
+				}
+			} else if (interactionMode === 'resizing') {
+				const sizeChanged = sizeChangedW > MOVEMENT_THRESHOLD || sizeChangedH > MOVEMENT_THRESHOLD;
+				const positionChanged = movedX > MOVEMENT_THRESHOLD || movedY > MOVEMENT_THRESHOLD;
+
+				if (sizeChanged || positionChanged) {
+					if (pendingSize) {
+						await resizeElement(
+							activeElementId,
+							pendingSize,
+							positionChanged && pendingPosition ? pendingPosition : undefined
+						);
+					}
+				}
+			}
+
+			// Keep element selected after interaction
+			selectElement(activeElementId);
+		}
 
 		// Reset state
 		interactionMode = 'idle';
 		activeElementId = null;
+		isGroupInteraction = false;
 		resizeHandle = null;
 		pendingPosition = null;
 		pendingSize = null;
+		groupStartElements = [];
+		groupPendingTransforms = new Map();
 
 		document.removeEventListener('mousemove', handleMouseMove);
 		document.removeEventListener('mouseup', handleMouseUp);
@@ -232,14 +468,37 @@
 	});
 </script>
 
-<!-- Render selection UI for each selected element -->
-{#each selectedElements as element (element.id)}
+<!-- Render selection UI -->
+{#if selectedElements.length === 1}
+	<!-- Single element selection -->
 	<SelectionUI
-		{element}
+		element={selectedElements[0]}
 		{viewport}
 		{isPanning}
-		pendingPosition={activeElementId === element.id ? pendingPosition : null}
-		pendingSize={activeElementId === element.id ? pendingSize : null}
-		onMouseDown={(e, handle) => handleMouseDown(e, element, handle)}
+		pendingPosition={activeElementId === selectedElements[0].id ? pendingPosition : null}
+		pendingSize={activeElementId === selectedElements[0].id ? pendingSize : null}
+		onMouseDown={(e, handle) => handleMouseDown(e, selectedElements[0], handle)}
 	/>
-{/each}
+{:else if selectedElements.length > 1 && groupBounds}
+	<!-- Multi-element selection - single bounding box -->
+	<SelectionUI
+		element={{
+			id: 'group',
+			type: 'div',
+			parentId: null,
+			frameId: '',
+			position: isGroupInteraction && pendingPosition ? pendingPosition : { x: groupBounds.x, y: groupBounds.y },
+			size: isGroupInteraction && pendingSize ? pendingSize : { width: groupBounds.width, height: groupBounds.height },
+			styles: {},
+			typography: {},
+			spacing: {},
+			children: [],
+			zIndex: 0
+		}}
+		{viewport}
+		{isPanning}
+		pendingPosition={null}
+		pendingSize={null}
+		onMouseDown={(e, handle) => startGroupInteraction(e, handle)}
+	/>
+{/if}

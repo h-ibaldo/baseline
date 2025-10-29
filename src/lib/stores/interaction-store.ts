@@ -12,13 +12,15 @@ export interface InteractionState {
 	mode: 'idle' | 'dragging' | 'resizing';
 	pendingPosition: { x: number; y: number } | null;
 	pendingSize: { width: number; height: number } | null;
+	groupTransforms: Map<string, { position: { x: number; y: number }; size: { width: number; height: number } }>;
 }
 
 const initialState: InteractionState = {
 	activeElementId: null,
 	mode: 'idle',
 	pendingPosition: null,
-	pendingSize: null
+	pendingSize: null,
+	groupTransforms: new Map()
 };
 
 export const interactionState = writable<InteractionState>(initialState);

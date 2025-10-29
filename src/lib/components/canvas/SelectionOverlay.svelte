@@ -305,9 +305,10 @@
 				);
 			}
 		} else if (interactionMode === 'resizing' && resizeHandle) {
-			// Check if scale tool is active - if so, maintain aspect ratio
+			// Check if scale tool is active OR shift key is held - if so, maintain aspect ratio
 			const tool = get(currentTool);
-			const maintainAspectRatio = tool === 'scale';
+			const maintainAspectRatio = tool === 'scale' || e.shiftKey;
+			const resizeFromCenter = e.altKey; // Option/Alt key resizes from center
 
 			// Calculate new size based on handle
 			let newWidth = elementStartCanvas.width;
@@ -342,32 +343,37 @@
 				newWidth = elementStartCanvas.width * scaleFactor;
 				newHeight = elementStartCanvas.height * scaleFactor;
 
-				// Adjust position based on handle
-				// For edge handles (N, S, E, W), keep centered and opposite edge fixed
-				// For corner handles, keep the opposite corner fixed
-				if (resizeHandle === 'n' || resizeHandle === 's') {
-					// North or South: keep horizontally centered
+				// Adjust position based on handle and modifiers
+				if (resizeFromCenter) {
+					// Alt/Option: resize from center
 					newX = elementStartCanvas.x + (elementStartCanvas.width - newWidth) / 2;
-					if (resizeHandle === 'n') {
-						// North: keep bottom (S) edge fixed
-						newY = elementStartCanvas.y + (elementStartCanvas.height - newHeight);
-					}
-					// South: keep top (N) edge fixed - newY stays as elementStartCanvas.y
-				} else if (resizeHandle === 'e' || resizeHandle === 'w') {
-					// East or West: keep vertically centered
 					newY = elementStartCanvas.y + (elementStartCanvas.height - newHeight) / 2;
-					if (resizeHandle === 'w') {
-						// West: keep right (E) edge fixed
-						newX = elementStartCanvas.x + (elementStartCanvas.width - newWidth);
-					}
-					// East: keep left (W) edge fixed - newX stays as elementStartCanvas.x
 				} else {
-					// Corner handles: keep opposite corner fixed
-					if (resizeHandle.includes('w')) {
-						newX = elementStartCanvas.x + (elementStartCanvas.width - newWidth);
-					}
-					if (resizeHandle.includes('n')) {
-						newY = elementStartCanvas.y + (elementStartCanvas.height - newHeight);
+					// Normal resize: keep opposite edge/corner fixed
+					if (resizeHandle === 'n' || resizeHandle === 's') {
+						// North or South: keep horizontally centered
+						newX = elementStartCanvas.x + (elementStartCanvas.width - newWidth) / 2;
+						if (resizeHandle === 'n') {
+							// North: keep bottom (S) edge fixed
+							newY = elementStartCanvas.y + (elementStartCanvas.height - newHeight);
+						}
+						// South: keep top (N) edge fixed - newY stays as elementStartCanvas.y
+					} else if (resizeHandle === 'e' || resizeHandle === 'w') {
+						// East or West: keep vertically centered
+						newY = elementStartCanvas.y + (elementStartCanvas.height - newHeight) / 2;
+						if (resizeHandle === 'w') {
+							// West: keep right (E) edge fixed
+							newX = elementStartCanvas.x + (elementStartCanvas.width - newWidth);
+						}
+						// East: keep left (W) edge fixed - newX stays as elementStartCanvas.x
+					} else {
+						// Corner handles: keep opposite corner fixed
+						if (resizeHandle.includes('w')) {
+							newX = elementStartCanvas.x + (elementStartCanvas.width - newWidth);
+						}
+						if (resizeHandle.includes('n')) {
+							newY = elementStartCanvas.y + (elementStartCanvas.height - newHeight);
+						}
 					}
 				}
 
@@ -381,20 +387,42 @@
 					newHeight = Math.abs(newHeight);
 				}
 			} else {
-				// Free resize (move tool)
-				if (resizeHandle.includes('e')) {
-					newWidth = elementStartCanvas.width + deltaCanvas.x;
-				}
-				if (resizeHandle.includes('w')) {
-					newWidth = elementStartCanvas.width - deltaCanvas.x;
-					newX = elementStartCanvas.x + deltaCanvas.x;
-				}
-				if (resizeHandle.includes('s')) {
-					newHeight = elementStartCanvas.height + deltaCanvas.y;
-				}
-				if (resizeHandle.includes('n')) {
-					newHeight = elementStartCanvas.height - deltaCanvas.y;
-					newY = elementStartCanvas.y + deltaCanvas.y;
+				// Free resize (move tool without aspect ratio constraint)
+				if (resizeFromCenter) {
+					// Alt/Option: resize from center
+					// Double the delta since we're expanding from center
+					if (resizeHandle.includes('e')) {
+						newWidth = elementStartCanvas.width + deltaCanvas.x * 2;
+						newX = elementStartCanvas.x - deltaCanvas.x;
+					}
+					if (resizeHandle.includes('w')) {
+						newWidth = elementStartCanvas.width - deltaCanvas.x * 2;
+						newX = elementStartCanvas.x + deltaCanvas.x;
+					}
+					if (resizeHandle.includes('s')) {
+						newHeight = elementStartCanvas.height + deltaCanvas.y * 2;
+						newY = elementStartCanvas.y - deltaCanvas.y;
+					}
+					if (resizeHandle.includes('n')) {
+						newHeight = elementStartCanvas.height - deltaCanvas.y * 2;
+						newY = elementStartCanvas.y + deltaCanvas.y;
+					}
+				} else {
+					// Normal free resize
+					if (resizeHandle.includes('e')) {
+						newWidth = elementStartCanvas.width + deltaCanvas.x;
+					}
+					if (resizeHandle.includes('w')) {
+						newWidth = elementStartCanvas.width - deltaCanvas.x;
+						newX = elementStartCanvas.x + deltaCanvas.x;
+					}
+					if (resizeHandle.includes('s')) {
+						newHeight = elementStartCanvas.height + deltaCanvas.y;
+					}
+					if (resizeHandle.includes('n')) {
+						newHeight = elementStartCanvas.height - deltaCanvas.y;
+						newY = elementStartCanvas.y + deltaCanvas.y;
+					}
 				}
 
 				// Allow negative dimensions (flip element when dragging past opposite edge)

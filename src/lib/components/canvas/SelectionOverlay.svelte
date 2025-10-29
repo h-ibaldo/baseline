@@ -10,14 +10,17 @@
 	 */
 
 	import { onDestroy } from 'svelte';
+	import { get } from 'svelte/store';
 	import type { Element } from '$lib/types/events';
 	import { moveElement, resizeElement, selectElement } from '$lib/stores/design-store';
 	import { interactionState } from '$lib/stores/interaction-store';
+	import { currentTool } from '$lib/stores/tool-store';
 	import SelectionUI from './SelectionUI.svelte';
 
 	// Props
 	export let viewport: { x: number; y: number; scale: number };
 	export let selectedElements: Element[];
+	export let isPanning: boolean = false;
 
 	// Local interaction state
 	let activeElementId: string | null = null;
@@ -65,6 +68,13 @@
 
 	// Expose handleMouseDown for CanvasElement
 	export function startDrag(e: MouseEvent, element: Element, handle?: string) {
+		const tool = get(currentTool);
+		
+		// Don't handle if hand tool or space panning is active - let canvas handle it
+		if (tool === 'hand' || isPanning) {
+			return;
+		}
+		
 		e.stopPropagation();
 		e.preventDefault();
 
@@ -227,6 +237,7 @@
 	<SelectionUI
 		{element}
 		{viewport}
+		{isPanning}
 		pendingPosition={activeElementId === element.id ? pendingPosition : null}
 		pendingSize={activeElementId === element.id ? pendingSize : null}
 		onMouseDown={(e, handle) => handleMouseDown(e, element, handle)}

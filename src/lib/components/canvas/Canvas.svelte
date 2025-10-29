@@ -25,6 +25,7 @@
 	import CanvasElement from './CanvasElement.svelte';
 	import BaselineGrid from './BaselineGrid.svelte';
 	import SelectionOverlay from './SelectionOverlay.svelte';
+	import SelectionBox from './SelectionBox.svelte';
 
 	let canvasElement: HTMLDivElement;
 	let viewport = { x: 0, y: 0, scale: 1 };
@@ -32,6 +33,19 @@
 	let dragStart = { x: 0, y: 0 };
 	let isPanning = false;
 	let selectionOverlay: any = undefined; // Reference to SelectionOverlay
+	
+	// Update canvas cursor based on tool and state
+	$: {
+		if (canvasElement) {
+			if (isDragging && ($currentTool === 'hand' || isPanning)) {
+				canvasElement.style.cursor = 'grabbing';
+			} else if ($currentTool === 'hand' || isPanning) {
+				canvasElement.style.cursor = 'grab';
+			} else {
+				canvasElement.style.cursor = 'default';
+			}
+		}
+	}
 
 	// Drawing state (for creating new elements)
 	let isDrawing = false;
@@ -109,14 +123,12 @@
 		if (e.code === 'Space' && !isPanning) {
 			e.preventDefault();
 			isPanning = true;
-			canvasElement.style.cursor = 'grab';
 		}
 	}
 
 	function handleKeyUp(e: KeyboardEvent) {
 		if (e.code === 'Space') {
 			isPanning = false;
-			canvasElement.style.cursor = 'default';
 			if (isDragging) {
 				isDragging = false;
 			}
@@ -124,19 +136,18 @@
 	}
 
 	function handleMouseDown(e: MouseEvent) {
-		// Only handle clicks on the canvas background (not on elements)
-		if (e.target !== e.currentTarget) return;
-
 		const tool = $currentTool;
 
-		// Hand tool or Space key = panning (check this FIRST, before move tool)
+		// Hand tool or Space key = panning (works even over elements)
 		if (tool === 'hand' || isPanning) {
 			isDragging = true;
 			dragStart = { x: e.clientX - viewport.x, y: e.clientY - viewport.y };
-			canvasElement.style.cursor = 'grabbing';
 			e.preventDefault();
 			return;
 		}
+
+		// Only handle clicks on the canvas background for other tools
+		if (e.target !== e.currentTarget) return;
 
 		// Move tool: clear selection when clicking canvas background
 		if (tool === 'move') {
@@ -190,7 +201,6 @@
 		// Finish panning
 		if (isDragging && !isDrawing) {
 			isDragging = false;
-			canvasElement.style.cursor = isPanning ? 'grab' : 'default';
 			return;
 		}
 
@@ -307,13 +317,12 @@
 			class="canvas-viewport"
 			style="transform: translate({viewport.x}px, {viewport.y}px) scale({viewport.scale});"
 		>
-			<!-- Baseline grid overlay across entire infinite canvas -->
-			<BaselineGrid />
-
 			<!-- Render all root elements (no parent) directly on infinite canvas -->
 			{#each Object.values($designState.elements).filter(el => el.parentId === null) as element}
 				<CanvasElement
 					{element}
+					{isPanning}
+					{isDragging}
 					onStartDrag={selectionOverlay ? (e, el) => selectionOverlay.startDrag(e, el) : undefined}
 				/>
 			{/each}
@@ -352,6 +361,9 @@
 						height: {frame.height}px;
 					"
 				>
+					<!-- Baseline grid per frame -->
+					<BaselineGrid />
+					
 					<div class="frame-artboard-label">
 						{frame.name} ({frame.breakpointWidth}px)
 					</div>
@@ -360,7 +372,10 @@
 		</div>
 
 		<!-- Selection Overlay - handles selection UI and interactions -->
-		<SelectionOverlay bind:this={selectionOverlay} {viewport} selectedElements={$selectedElements} />
+		<SelectionOverlay bind:this={selectionOverlay} {viewport} {isPanning} selectedElements={$selectedElements} />
+		
+		<!-- Selection Box - multi-select by dragging -->
+		<SelectionBox {canvasElement} {viewport} />
 	</div>
 </div>
 

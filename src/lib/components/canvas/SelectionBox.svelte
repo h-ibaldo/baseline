@@ -7,9 +7,12 @@
 	 */
 
 	import { onMount, onDestroy } from 'svelte';
+	import { get } from 'svelte/store';
 	import { designState, selectElements, clearSelection } from '$lib/stores/design-store';
+	import { currentTool } from '$lib/stores/tool-store';
 
 	export let canvasElement: HTMLElement;
+	export let viewport: { x: number; y: number; scale: number };
 
 	let isSelecting = false;
 	let selectionStart = { x: 0, y: 0 };
@@ -27,9 +30,16 @@
 	});
 
 	function handleMouseDown(e: MouseEvent) {
+		// Only work with move tool
+		const tool = get(currentTool);
+		if (tool !== 'move') return;
+
 		// Only start selection if clicking on canvas background (not an element)
 		const target = e.target as HTMLElement;
-		if (target.classList.contains('canvas') || target.classList.contains('page')) {
+		const isCanvasBackground = target === canvasElement || 
+		                          target.classList.contains('canvas-viewport');
+		
+		if (isCanvasBackground) {
 			isSelecting = true;
 
 			const rect = canvasElement.getBoundingClientRect();
@@ -55,12 +65,20 @@
 			y: e.clientY - rect.top
 		};
 
-		// Calculate box dimensions
-		box = {
+		// Calculate box dimensions in screen space
+		const screenBox = {
 			x: Math.min(selectionStart.x, selectionEnd.x),
 			y: Math.min(selectionStart.y, selectionEnd.y),
 			width: Math.abs(selectionEnd.x - selectionStart.x),
 			height: Math.abs(selectionEnd.y - selectionStart.y)
+		};
+
+		// Convert to canvas space for element intersection checking
+		box = {
+			x: (screenBox.x - viewport.x) / viewport.scale,
+			y: (screenBox.y - viewport.y) / viewport.scale,
+			width: screenBox.width / viewport.scale,
+			height: screenBox.height / viewport.scale
 		};
 	}
 
@@ -109,10 +127,10 @@
 		class="selection-box"
 		style="
 			position: absolute;
-			left: {box.x}px;
-			top: {box.y}px;
-			width: {box.width}px;
-			height: {box.height}px;
+			left: {box.x * viewport.scale + viewport.x}px;
+			top: {box.y * viewport.scale + viewport.y}px;
+			width: {box.width * viewport.scale}px;
+			height: {box.height * viewport.scale}px;
 			border: 2px dashed #3b82f6;
 			background: rgba(59, 130, 246, 0.1);
 			pointer-events: none;

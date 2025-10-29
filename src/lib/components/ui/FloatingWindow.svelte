@@ -45,6 +45,9 @@
 	});
 
 	function handleMouseDown(e: MouseEvent) {
+		// Stop propagation to prevent canvas from handling clicks
+		e.stopPropagation();
+		
 		if ((e.target as HTMLElement).closest('.window-header')) {
 			isDragging = true;
 			dragStartX = e.clientX;

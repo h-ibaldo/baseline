@@ -10,13 +10,30 @@
 
 	import { designState, selectElement } from '$lib/stores/design-store';
 	import { interactionState } from '$lib/stores/interaction-store';
+	import { currentTool } from '$lib/stores/tool-store';
+	import { get } from 'svelte/store';
 	import type { Element } from '$lib/types/events';
 
 	export let element: Element;
 	export let onStartDrag: ((e: MouseEvent, element: Element) => void) | undefined = undefined;
+	export let isPanning: boolean = false;
+	export let isDragging: boolean = false;
+
+	// Determine cursor based on tool, panning state, and dragging state
+	$: elementCursor = 
+		isDragging && ($currentTool === 'hand' || isPanning) ? 'grabbing' :
+		$currentTool === 'hand' || isPanning ? 'grab' : 
+		'default';
 
 	// Handle mousedown - select element and potentially start drag
 	function handleMouseDown(e: MouseEvent) {
+		const tool = get(currentTool);
+		
+		// Don't stop propagation if hand tool or space panning is active - let canvas handle it
+		if (tool === 'hand' || isPanning) {
+			return;
+		}
+		
 		e.stopPropagation();
 
 		// Select the element immediately
@@ -49,6 +66,7 @@
 		styles.push(`top: ${displayPosition.y}px`);
 		styles.push(`width: ${displaySize.width}px`);
 		styles.push(`height: ${displaySize.height}px`);
+		styles.push(`cursor: ${elementCursor}`);
 
 		// Element styles
 		if (element.styles.backgroundColor) styles.push(`background-color: ${element.styles.backgroundColor}`);
@@ -86,7 +104,7 @@
 </script>
 
 <!-- Canvas element - absolutely positioned, clickable for selection -->
-<div class="canvas-element" style={elementStyles} on:mousedown={handleMouseDown}>
+<div class="canvas-element" style={elementStyles} on:mousedown={handleMouseDown} role="button" tabindex="0">
 	<!-- Render element content based on type -->
 	{#if element.type === 'img'}
 		<img src={element.src || ''} alt={element.alt || ''} style="width: 100%; height: 100%; object-fit: cover;" />
@@ -106,7 +124,7 @@
 	<!-- Render children recursively -->
 	{#each element.children as childId}
 		{#if $designState.elements[childId]}
-			<svelte:self element={$designState.elements[childId]} {scale} />
+			<svelte:self element={$designState.elements[childId]} {isPanning} {isDragging} {onStartDrag} />
 		{/if}
 	{/each}
 </div>
@@ -117,6 +135,5 @@
 		user-select: none;
 		box-sizing: border-box;
 		pointer-events: auto; /* Allow clicks for selection */
-		cursor: default;
 	}
 </style>

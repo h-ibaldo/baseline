@@ -5,13 +5,18 @@
 	 * This component is reactive to viewport and pending transforms
 	 */
 
+	import { currentTool } from '$lib/stores/tool-store';
 	import type { Element } from '$lib/types/events';
 
 	export let element: Element;
 	export let viewport: { x: number; y: number; scale: number };
 	export let pendingPosition: { x: number; y: number } | null;
 	export let pendingSize: { width: number; height: number } | null;
+	export let isPanning: boolean = false;
 	export let onMouseDown: (e: MouseEvent, handle?: string) => void;
+	
+	// Determine cursor based on tool and panning state
+	$: dragCursor = $currentTool === 'hand' || isPanning ? 'grab' : 'move';
 
 	const HANDLE_SIZE = 8;
 	const BORDER_WIDTH = 2;
@@ -60,7 +65,7 @@
 		top: {screenTopLeft.y}px;
 		width: {screenWidth}px;
 		height: {screenHeight}px;
-		cursor: move;
+		cursor: {dragCursor};
 	"
 	on:mousedown={(e) => onMouseDown(e)}
 	role="button"

@@ -20,28 +20,35 @@
 	export let isDragging: boolean = false;
 
 	// Determine cursor based on tool, panning state, and dragging state
-	$: elementCursor = 
+	$: elementCursor =
 		isDragging && ($currentTool === 'hand' || isPanning) ? 'grabbing' :
-		$currentTool === 'hand' || isPanning ? 'grab' : 
+		$currentTool === 'hand' || isPanning ? 'grab' :
+		$currentTool === 'scale' ? 'crosshair' :
 		'default';
 
 	// Handle mousedown - select element and potentially start drag
 	function handleMouseDown(e: MouseEvent) {
 		const tool = get(currentTool);
-		
+
 		// Don't stop propagation if hand tool or space panning is active - let canvas handle it
 		if (tool === 'hand' || isPanning) {
 			return;
 		}
-		
+
 		e.stopPropagation();
 
 		// Select the element immediately
 		selectElement(element.id);
 
+		// If scale tool, start scaling from any click (not just handles)
 		// If onStartDrag is provided (from SelectionOverlay), call it
 		if (onStartDrag) {
-			onStartDrag(e, element);
+			// For scale tool, pass 'se' handle to trigger resize mode with aspect ratio lock
+			if (tool === 'scale') {
+				onStartDrag(e, element, 'se');
+			} else {
+				onStartDrag(e, element);
+			}
 		}
 	}
 

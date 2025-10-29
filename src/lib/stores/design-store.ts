@@ -18,6 +18,7 @@ import {
 	importEvents
 } from './event-store';
 import { reduceEvents, getInitialState } from './event-reducer';
+import { cycleNavigationTools } from './tool-store';
 
 // ============================================================================
 // Store State
@@ -707,17 +708,10 @@ export function selectAll(): void {
 	const pageId = state.currentPageId;
 	if (!pageId) return;
 
-	const page = state.pages[pageId];
-	if (!page) return;
-
-	// Get all root elements from all frames in this page
-	const allElementIds: string[] = [];
-	page.frames.forEach((frameId) => {
-		const frame = state.frames[frameId];
-		if (frame) {
-			allElementIds.push(...frame.elements);
-		}
-	});
+	// Get all elements that belong to the current page (root elements with no parent)
+	const allElementIds: string[] = Object.values(state.elements)
+		.filter(el => el.parentId === null)
+		.map(el => el.id);
 
 	selectElements(allElementIds);
 }
@@ -777,6 +771,19 @@ export function setupKeyboardShortcuts(): (() => void) | undefined {
 		else if ((e.metaKey || e.ctrlKey) && e.key === 'a' && !isTyping) {
 			e.preventDefault();
 			selectAll();
+		}
+		// ESC (deselect all)
+		else if (e.key === 'Escape' && !isTyping) {
+			e.preventDefault();
+			const selected = get(selectedElements);
+			if (selected.length > 0) {
+				clearSelection();
+			}
+		}
+		// V (cycle through navigation tools: move → hand → scale → move)
+		else if (e.key === 'v' && !isTyping) {
+			e.preventDefault();
+			cycleNavigationTools();
 		}
 		// Delete or Backspace - delete selected elements
 		else if ((e.key === 'Delete' || e.key === 'Backspace') && !isTyping) {

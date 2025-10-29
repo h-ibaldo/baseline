@@ -39,7 +39,8 @@
 	$: if (canvasElement) {
 		canvasElement.style.cursor =
 			isDragging && ($currentTool === 'hand' || isPanning) ? 'grabbing' :
-			$currentTool === 'hand' || isPanning ? 'grab' : 'default';
+			$currentTool === 'hand' || isPanning ? 'grab' :
+			$currentTool === 'scale' ? 'crosshair' : 'default';
 	}
 
 	// Drawing state (for creating new elements)
@@ -165,6 +166,12 @@
 
 		// Move tool: Clear selection when clicking empty canvas, SelectionBox handles drag selection
 		if (tool === 'move') {
+			clearSelection();
+			return;
+		}
+
+		// Scale tool: Clear selection when clicking empty canvas
+		if (tool === 'scale') {
 			clearSelection();
 			return;
 		}
@@ -349,18 +356,18 @@
 	}
 
 	function resetZoom() {
-		// Calculate center of viewport
-		const rect = canvasElement.getBoundingClientRect();
-		const centerX = rect.width / 2;
-		const centerY = rect.height / 2;
-		
-		// Calculate scale ratio
-		const scaleRatio = 1 / viewport.scale;
-		
-		// Adjust position to keep center point fixed
+		// Calculate the current center point in canvas coordinates
+		const screenCenterX = canvasElement.clientWidth / 2;
+		const screenCenterY = canvasElement.clientHeight / 2;
+
+		// Convert screen center to canvas coordinates before zoom reset
+		const canvasCenterX = (screenCenterX - viewport.x) / viewport.scale;
+		const canvasCenterY = (screenCenterY - viewport.y) / viewport.scale;
+
+		// Reset scale to 1 and adjust pan to keep the same point centered
 		viewport = {
-			x: centerX - (centerX - viewport.x) * scaleRatio,
-			y: centerY - (centerY - viewport.y) * scaleRatio,
+			x: screenCenterX - canvasCenterX,
+			y: screenCenterY - canvasCenterY,
 			scale: 1
 		};
 	}

@@ -305,35 +305,107 @@
 				);
 			}
 		} else if (interactionMode === 'resizing' && resizeHandle) {
+			// Check if scale tool is active - if so, maintain aspect ratio
+			const tool = get(currentTool);
+			const maintainAspectRatio = tool === 'scale';
+
 			// Calculate new size based on handle
 			let newWidth = elementStartCanvas.width;
 			let newHeight = elementStartCanvas.height;
 			let newX = elementStartCanvas.x;
 			let newY = elementStartCanvas.y;
 
-			if (resizeHandle.includes('e')) {
-				newWidth = elementStartCanvas.width + deltaCanvas.x;
-			}
-			if (resizeHandle.includes('w')) {
-				newWidth = elementStartCanvas.width - deltaCanvas.x;
-				newX = elementStartCanvas.x + deltaCanvas.x;
-			}
-			if (resizeHandle.includes('s')) {
-				newHeight = elementStartCanvas.height + deltaCanvas.y;
-			}
-			if (resizeHandle.includes('n')) {
-				newHeight = elementStartCanvas.height - deltaCanvas.y;
-				newY = elementStartCanvas.y + deltaCanvas.y;
-			}
+			if (maintainAspectRatio) {
+				// For scale tool, calculate scale factor based on handle
+				let scaleFactor = 1;
 
-			// Allow negative dimensions (flip element when dragging past opposite edge)
-			if (newWidth < 0) {
-				newX = newX + newWidth;
-				newWidth = Math.abs(newWidth);
-			}
-			if (newHeight < 0) {
-				newY = newY + newHeight;
-				newHeight = Math.abs(newHeight);
+				// Check if it's a corner handle or edge handle
+				const isCornerHandle = resizeHandle.length === 2;
+
+				if (resizeHandle.includes('e') || resizeHandle.includes('w')) {
+					const widthDelta = resizeHandle.includes('e') ? deltaCanvas.x : -deltaCanvas.x;
+					scaleFactor = (elementStartCanvas.width + widthDelta) / elementStartCanvas.width;
+				}
+				if (resizeHandle.includes('s') || resizeHandle.includes('n')) {
+					const heightDelta = resizeHandle.includes('s') ? deltaCanvas.y : -deltaCanvas.y;
+					const heightScaleFactor = (elementStartCanvas.height + heightDelta) / elementStartCanvas.height;
+
+					// For corner handles, use the larger scale factor
+					// For edge handles (n, s only), just use the height scale factor
+					if (isCornerHandle) {
+						scaleFactor = Math.abs(heightScaleFactor) > Math.abs(scaleFactor) ? heightScaleFactor : scaleFactor;
+					} else {
+						scaleFactor = heightScaleFactor;
+					}
+				}
+
+				newWidth = elementStartCanvas.width * scaleFactor;
+				newHeight = elementStartCanvas.height * scaleFactor;
+
+				// Adjust position based on handle
+				// For edge handles (N, S, E, W), keep centered and opposite edge fixed
+				// For corner handles, keep the opposite corner fixed
+				if (resizeHandle === 'n' || resizeHandle === 's') {
+					// North or South: keep horizontally centered
+					newX = elementStartCanvas.x + (elementStartCanvas.width - newWidth) / 2;
+					if (resizeHandle === 'n') {
+						// North: keep bottom (S) edge fixed
+						newY = elementStartCanvas.y + (elementStartCanvas.height - newHeight);
+					}
+					// South: keep top (N) edge fixed - newY stays as elementStartCanvas.y
+				} else if (resizeHandle === 'e' || resizeHandle === 'w') {
+					// East or West: keep vertically centered
+					newY = elementStartCanvas.y + (elementStartCanvas.height - newHeight) / 2;
+					if (resizeHandle === 'w') {
+						// West: keep right (E) edge fixed
+						newX = elementStartCanvas.x + (elementStartCanvas.width - newWidth);
+					}
+					// East: keep left (W) edge fixed - newX stays as elementStartCanvas.x
+				} else {
+					// Corner handles: keep opposite corner fixed
+					if (resizeHandle.includes('w')) {
+						newX = elementStartCanvas.x + (elementStartCanvas.width - newWidth);
+					}
+					if (resizeHandle.includes('n')) {
+						newY = elementStartCanvas.y + (elementStartCanvas.height - newHeight);
+					}
+				}
+
+				// Allow negative dimensions (flip element when dragging past opposite edge)
+				if (newWidth < 0) {
+					newX = newX + newWidth;
+					newWidth = Math.abs(newWidth);
+				}
+				if (newHeight < 0) {
+					newY = newY + newHeight;
+					newHeight = Math.abs(newHeight);
+				}
+			} else {
+				// Free resize (move tool)
+				if (resizeHandle.includes('e')) {
+					newWidth = elementStartCanvas.width + deltaCanvas.x;
+				}
+				if (resizeHandle.includes('w')) {
+					newWidth = elementStartCanvas.width - deltaCanvas.x;
+					newX = elementStartCanvas.x + deltaCanvas.x;
+				}
+				if (resizeHandle.includes('s')) {
+					newHeight = elementStartCanvas.height + deltaCanvas.y;
+				}
+				if (resizeHandle.includes('n')) {
+					newHeight = elementStartCanvas.height - deltaCanvas.y;
+					newY = elementStartCanvas.y + deltaCanvas.y;
+				}
+
+				// Allow negative dimensions (flip element when dragging past opposite edge)
+				if (newWidth < 0) {
+					newX = newX + newWidth;
+					newWidth = Math.abs(newWidth);
+				}
+				if (newHeight < 0) {
+					newY = newY + newHeight;
+					newHeight = Math.abs(newHeight);
+				}
 			}
 
 			pendingSize = { width: newWidth, height: newHeight };

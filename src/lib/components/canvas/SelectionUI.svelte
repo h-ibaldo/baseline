@@ -16,7 +16,7 @@
 	export let onMouseDown: (e: MouseEvent, handle?: string) => void;
 
 	// Determine cursor based on tool and panning state
-	$: dragCursor = $currentTool === 'hand' || isPanning ? 'grab' : 'default';
+	$: dragCursor = $currentTool === 'hand' || isPanning ? 'grab' : $currentTool === 'scale' ? 'crosshair' : 'default';
 
 	const HANDLE_SIZE = 8;
 	const BORDER_WIDTH = 2;

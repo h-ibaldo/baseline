@@ -11,14 +11,8 @@
 	import { currentTool, type Tool } from '$lib/stores/tool-store';
 	import { undo, redo } from '$lib/stores/design-store';
 
-	// Local variable bound to the store
-	let selectedTool: Tool = $currentTool;
-
-	// Update store when local value changes
-	$: currentTool.set(selectedTool);
-
 	function selectTool(tool: Tool) {
-		selectedTool = tool;
+		currentTool.set(tool);
 	}
 
 	function handleUndo() {
@@ -35,7 +29,7 @@
 	<!-- Left Section: Tools -->
 	<div class="toolbar-left">
 		<!-- Tool Selector Dropdown -->
-		<select bind:value={selectedTool} class="tool-selector">
+		<select bind:value={$currentTool} class="tool-selector">
 			<option value="move">Move</option>
 			<option value="hand">Hand</option>
 			<option value="scale">Scale</option>
@@ -45,7 +39,7 @@
 		<button
 			on:click={() => selectTool('div')}
 			class="tool-btn"
-			class:active={selectedTool === 'div'}
+			class:active={$currentTool === 'div'}
 			title="Div (Container)"
 		>
 			Div
@@ -53,7 +47,7 @@
 		<button
 			on:click={() => selectTool('text')}
 			class="tool-btn"
-			class:active={selectedTool === 'text'}
+			class:active={$currentTool === 'text'}
 			title="Text"
 		>
 			Text
@@ -61,7 +55,7 @@
 		<button
 			on:click={() => selectTool('media')}
 			class="tool-btn"
-			class:active={selectedTool === 'media'}
+			class:active={$currentTool === 'media'}
 			title="Media (Image/Video)"
 		>
 			Media

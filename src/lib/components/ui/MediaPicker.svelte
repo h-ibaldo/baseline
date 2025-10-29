@@ -141,8 +141,11 @@
 </script>
 
 {#if isOpen}
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div class="media-picker-overlay" on:click={handleClose} role="presentation">
-		<div class="media-picker-panel" on:click|stopPropagation role="dialog" aria-label="Media picker">
+		<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+		<div class="media-picker-panel" on:click|stopPropagation role="dialog" aria-label="Media picker" tabindex="-1">
 			{#if showPreview && selectedMedia}
 				<!-- Preview section -->
 				<div class="preview-section">
@@ -198,7 +201,7 @@
 						<p class="empty-message">No images in library</p>
 					{:else}
 						<div class="media-grid">
-							{#each media as item}
+							{#each media as item (item.id)}
 								<button
 									class="media-item"
 									on:click={() => handleSelectMedia(item)}

@@ -34,18 +34,12 @@
 	let dragStart = { x: 0, y: 0 };
 	let isPanning = false;
 	let selectionOverlay: any = undefined; // Reference to SelectionOverlay
-	
+
 	// Update canvas cursor based on tool and state
-	$: {
-		if (canvasElement) {
-			if (isDragging && ($currentTool === 'hand' || isPanning)) {
-				canvasElement.style.cursor = 'grabbing';
-			} else if ($currentTool === 'hand' || isPanning) {
-				canvasElement.style.cursor = 'grab';
-			} else {
-				canvasElement.style.cursor = 'default';
-			}
-		}
+	$: if (canvasElement) {
+		canvasElement.style.cursor =
+			isDragging && ($currentTool === 'hand' || isPanning) ? 'grabbing' :
+			$currentTool === 'hand' || isPanning ? 'grab' : 'default';
 	}
 
 	// Drawing state (for creating new elements)
@@ -398,7 +392,7 @@
 			style="transform: translate({viewport.x}px, {viewport.y}px) scale({viewport.scale});"
 		>
 			<!-- Render all root elements (no parent) directly on infinite canvas -->
-			{#each Object.values($designState.elements).filter(el => el.parentId === null) as element}
+			{#each Object.values($designState.elements).filter(el => el.parentId === null) as element (element.id)}
 				<CanvasElement
 					{element}
 					{isPanning}
@@ -430,7 +424,7 @@
 			{/if}
 
 			<!-- Render frames as visual artboards (breakpoints) -->
-			{#each Object.values($designState.frames) as frame}
+			{#each Object.values($designState.frames) as frame (frame.id)}
 				<div
 					class="frame-artboard"
 					style="

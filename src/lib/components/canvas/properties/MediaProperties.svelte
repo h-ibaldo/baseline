@@ -20,8 +20,8 @@
 	$: src = element.src || '';
 	$: alt = element.alt || '';
 
-	// Object fit - stored in styles but not in TypeScript interface yet
-	$: objectFit = (element.styles as any)?.objectFit || 'cover';
+	// Object fit - properly typed in ElementStyles interface
+	$: objectFit = element.styles?.objectFit || 'cover';
 
 	function openPicker() {
 		isPickerOpen = true;
@@ -45,7 +45,8 @@
 
 	async function updateObjectFit(e: Event) {
 		const select = e.target as HTMLSelectElement;
-		await updateElementStyles(element.id, { objectFit: select.value } as any);
+		const value = select.value as 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
+		await updateElementStyles(element.id, { objectFit: value });
 	}
 </script>
 

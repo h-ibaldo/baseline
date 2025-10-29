@@ -364,6 +364,8 @@ export interface ElementStyles {
 	transform: string;
 	// Overflow
 	overflow: 'visible' | 'hidden' | 'scroll' | 'auto';
+    // Object fit (for img/video elements)
+	objectFit: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
 }
 
 export interface TypographyStyle {

@@ -101,13 +101,24 @@
 
 		return styles.join('; ');
 	})();
+
+	// Generate image-specific styles (objectFit applies to img, not parent div)
+	$: imageStyles = (() => {
+		const styles = ['width: 100%', 'height: 100%'];
+		if (element.styles?.objectFit) {
+			styles.push(`object-fit: ${element.styles.objectFit}`);
+		} else {
+			styles.push('object-fit: cover'); // Default
+		}
+		return styles.join('; ');
+	})();
 </script>
 
 <!-- Canvas element - absolutely positioned, clickable for selection -->
 <div class="canvas-element" style={elementStyles} on:mousedown={handleMouseDown} role="button" tabindex="0">
 	<!-- Render element content based on type -->
 	{#if element.type === 'img'}
-		<img src={element.src || ''} alt={element.alt || ''} style="width: 100%; height: 100%; object-fit: cover;" />
+		<img src={element.src || ''} alt={element.alt || ''} style={imageStyles} />
 	{:else if element.type === 'a'}
 		<a href={element.href || '#'}>{element.content || 'Link'}</a>
 	{:else if element.type === 'button'}

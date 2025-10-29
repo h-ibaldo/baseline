@@ -12,7 +12,7 @@
 	import { onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
 	import type { Element } from '$lib/types/events';
-	import { moveElement, resizeElement, selectElement, selectElements, clearSelection } from '$lib/stores/design-store';
+	import { moveElement, resizeElement, selectElement, selectElements, clearSelection, addToSelection, removeFromSelection } from '$lib/stores/design-store';
 	import { interactionState } from '$lib/stores/interaction-store';
 	import { currentTool } from '$lib/stores/tool-store';
 	import SelectionUI from './SelectionUI.svelte';
@@ -135,17 +135,30 @@
 						}
 					}
 
-					// If we found a canvas element, select it directly (without triggering drag)
+					// If we found a canvas element, handle selection based on Shift key
 					if (canvasElement) {
 						const elementId = canvasElement.getAttribute('data-element-id');
 						if (elementId) {
-							selectElement(elementId);
+							if (upEvent.shiftKey) {
+								// Shift+click: toggle element in selection
+								const currentSelection = selectedElements.map(el => el.id);
+								if (currentSelection.includes(elementId)) {
+									removeFromSelection(elementId);
+								} else {
+									addToSelection(elementId);
+								}
+							} else {
+								// Normal click: select only this element
+								selectElement(elementId);
+							}
 							return;
 						}
 					}
 
-					// If clicking empty space, clear selection
-					clearSelection();
+					// If clicking empty space, clear selection (unless Shift is held)
+					if (!upEvent.shiftKey) {
+						clearSelection();
+					}
 				}
 			};
 

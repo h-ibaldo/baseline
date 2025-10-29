@@ -8,7 +8,7 @@
 	 * - NO selection or interaction logic (handled by SelectionOverlay)
 	 */
 
-	import { designState, selectElement } from '$lib/stores/design-store';
+	import { designState, selectElement, selectedElements, addToSelection, removeFromSelection } from '$lib/stores/design-store';
 	import { interactionState } from '$lib/stores/interaction-store';
 	import { currentTool } from '$lib/stores/tool-store';
 	import { get } from 'svelte/store';
@@ -37,7 +37,20 @@
 
 		e.stopPropagation();
 
-		// Select the element immediately
+		// Handle selection based on Shift key
+		if (e.shiftKey) {
+			// Shift+click: toggle element in selection
+			const currentSelection = get(selectedElements).map(el => el.id);
+			if (currentSelection.includes(element.id)) {
+				removeFromSelection(element.id);
+			} else {
+				addToSelection(element.id);
+			}
+			// Don't start drag when Shift is held - just modify selection
+			return;
+		}
+
+		// Normal click: select only this element
 		selectElement(element.id);
 
 		// If scale tool, start scaling from any click (not just handles)
